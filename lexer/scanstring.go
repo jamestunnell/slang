@@ -3,7 +3,7 @@ package lexer
 import (
 	"strings"
 
-	"github.com/jamestunnell/go-synth/slang"
+	"github.com/jamestunnell/slang"
 )
 
 func ScanString(input string) []*slang.Token {

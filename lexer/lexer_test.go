@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jamestunnell/go-synth/slang"
-	"github.com/jamestunnell/go-synth/slang/lexer"
-	"github.com/jamestunnell/go-synth/slang/tokens"
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 func TestLexer_IndentWithDigits(t *testing.T) {

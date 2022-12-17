@@ -1,6 +1,6 @@
 package tokens
 
-import "github.com/jamestunnell/go-synth/slang"
+import "github.com/jamestunnell/slang"
 
 type SlashEqual struct{}
 

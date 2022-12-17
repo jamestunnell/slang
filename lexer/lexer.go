@@ -6,8 +6,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/jamestunnell/go-synth/slang"
-	"github.com/jamestunnell/go-synth/slang/tokens"
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Lexer struct {
