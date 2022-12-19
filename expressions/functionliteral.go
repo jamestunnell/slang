@@ -3,7 +3,9 @@ package expressions
 import (
 	"golang.org/x/exp/slices"
 
+	"github.com/akrennmair/slice"
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/objects"
 )
 
 type FunctionLiteral struct {
@@ -39,8 +41,10 @@ func indentifiersEqual(a, b *Identifier) bool {
 }
 
 func (expr *FunctionLiteral) Eval(env *slang.Environment) (slang.Object, error) {
-	return expr.Body.Eval(env)
-	// newEnv := slang.NewEnvironment(env)
+	params := slice.Map(expr.Params, func(ident *Identifier) string {
+		return ident.Name
+	})
+	f := objects.NewFunction(params, expr.Body, env)
 
-	// return objects.NewFloat(expr.Value), nil
+	return f, nil
 }
