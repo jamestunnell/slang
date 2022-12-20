@@ -21,4 +21,5 @@ const (
 	MethodGEQ = "geq"
 
 	MethodCALL = "call"
+	MethodSIZE = "size"
 )

@@ -54,9 +54,11 @@ func (obj *Function) call(args []slang.Object) (slang.Object, error) {
 		return NULL(), err
 	}
 
+	newEnv := slang.NewEnvironment(obj.Env)
+
 	for i, param := range obj.Params {
-		obj.Env.Set(param, args[i])
+		newEnv.Set(param, args[i])
 	}
 
-	return obj.Body.Eval(obj.Env)
+	return obj.Body.Eval(newEnv)
 }

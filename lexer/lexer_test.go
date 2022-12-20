@@ -19,6 +19,22 @@ func tok(info slang.TokenInfo, line, col int) *slang.Token {
 	return slang.NewToken(info, slang.NewLoc(line, col))
 }
 
+func TestLexer_StringPlusString(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.STRING("abc"), 1, 1),
+		tok(tokens.PLUS(), 1, 7),
+		tok(tokens.STRING("xyz"), 1, 9),
+	}
+
+	testLexer(t, `"abc" + "xyz"`, expected...)
+
+	expected = []*slang.Token{
+		tok(tokens.STRING("foo bar"), 1, 1),
+	}
+
+	testLexer(t, `"foo bar"`, expected...)
+}
+
 func TestLexer_AssignInt(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.IDENT("x"), 1, 4),

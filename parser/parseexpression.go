@@ -184,6 +184,10 @@ func (p *Parser) parseInteger() slang.Expression {
 	return expressions.NewInteger(i)
 }
 
+func (p *Parser) parseString() slang.Expression {
+	return expressions.NewString(p.curToken.Info.Value())
+}
+
 func (p *Parser) parseFloat() slang.Expression {
 	str := p.curToken.Info.Value()
 
@@ -283,47 +287,3 @@ func (p *Parser) parseInfixExpr(left slang.Expression, fn newInfixExprFn) slang.
 
 	return fn(left, right)
 }
-
-// 	switch p.curToken.Info.Type() {
-// 	case slang.TokenFUNC:
-// 		return p.parseAnonymousFunc()
-// 	case slang.TokenIDENT, slang.TokenINT, slang.TokenFLOAT:
-// 		var val slang.Expression
-// 		var err error
-
-// 		switch p.curToken.Info.Type() {
-// 		case slang.TokenIDENT:
-// 			val = expressions.NewIdentifier(p.curToken.Info.Value())
-// 		case slang.TokenINT:
-// 			val, err = p.parseInteger(p.curToken.Info.Value())
-// 		case slang.TokenFLOAT:
-// 			val, err = p.parseFloat(p.curToken.Info.Value())
-// 		}
-
-// 		if err != nil {
-// 			return nil, NewParseError(err, p.curToken, p.currentContext())
-// 		}
-
-// 		if operator, opPrec, success := AsBinaryOperator(p.peekToken.Info.Type()); success {
-// 			p.nextToken()
-
-// 			p.nextToken()
-
-// 			right, pErr := p.parseExpression(opPrec)
-// 			if err != nil {
-// 				return nil, pErr
-// 			}
-
-// 			return operator.MakeExpression(val, right), nil
-// 		}
-
-// 		return val, nil
-
-// 		// case slang.TokenLPAREN:
-// 		// 	return p.parseGroupedExpr()
-// 	}
-
-// 	err := errBadExpressionStart
-
-// 	return nil, NewParseError(err, p.curToken, p.currentContext())
-// }

@@ -55,6 +55,8 @@ func (l *Lexer) NextToken() *slang.Token {
 		tokInfo = l.readSymbol()
 	case 0:
 		tokInfo = tokens.EOF()
+	case '"':
+		tokInfo = l.readString()
 	default:
 		if isLetterOrUnderscore(l.ch) {
 			tokInfo = l.readIdentOrKeyword()
@@ -217,6 +219,20 @@ func (l *Lexer) readSlash() slang.TokenInfo {
 
 	l.unreadRune()
 	return tokens.SLASH()
+}
+
+func (l *Lexer) readString() slang.TokenInfo {
+	l.readRune()
+
+	runes := []rune{}
+
+	for l.ch != 0 && l.ch != '"' {
+		runes = append(runes, l.ch)
+
+		l.readRune()
+	}
+
+	return tokens.STRING(string(runes))
 }
 
 func (l *Lexer) readIdentOrKeyword() slang.TokenInfo {

@@ -28,6 +28,7 @@ const (
 	ExprNOT
 	ExprNOTEQUAL
 	ExprSUBTRACT
+	ExprSTRING
 )
 
 func (st ExprType) String() string {
@@ -72,6 +73,8 @@ func (st ExprType) String() string {
 		str = "NOTEQUAL"
 	case ExprSUBTRACT:
 		str = "SUBTRACT"
+	case ExprSTRING:
+		str = "STRING"
 	}
 
 	return str

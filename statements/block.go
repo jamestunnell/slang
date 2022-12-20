@@ -37,16 +37,20 @@ func (b *Block) Equal(other slang.Statement) bool {
 }
 
 func (st *Block) Eval(env *slang.Environment) (slang.Object, error) {
+	lastResult := slang.Object(objects.NULL())
+
 	for _, s := range st.Statements {
 		obj, err := s.Eval(env)
 		if err != nil {
 			return objects.NULL(), err
 		}
 
+		lastResult = obj
+
 		if s.Type() == slang.StatementRETURN {
-			return obj, nil
+			break
 		}
 	}
 
-	return objects.NULL(), nil
+	return lastResult, nil
 }

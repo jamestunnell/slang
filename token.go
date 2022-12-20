@@ -70,6 +70,7 @@ const (
 	TokenSLASHEQUAL
 	TokenSTAR
 	TokenSTAREQUAL
+	TokenSTRING
 	TokenTRUE
 )
 
@@ -149,6 +150,8 @@ func (tt TokenType) String() string {
 		str = "STAR"
 	case TokenSTAREQUAL:
 		str = "STAREQUAL"
+	case TokenSTRING:
+		str = "STRING"
 	case TokenTRUE:
 		str = "TRUE"
 	}
