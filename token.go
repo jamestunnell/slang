@@ -51,6 +51,7 @@ const (
 	TokenILLEGAL
 	TokenINT
 	TokenLBRACE
+	TokenLBRACKET
 	TokenLESS
 	TokenLESSEQUAL
 	TokenLINE
@@ -63,6 +64,7 @@ const (
 	TokenPLUSEQUAL
 	TokenPLUSPLUS
 	TokenRBRACE
+	TokenRBRACKET
 	TokenRETURN
 	TokenRPAREN
 	TokenSEMICOLON
@@ -112,6 +114,8 @@ func (tt TokenType) String() string {
 		str = "INT"
 	case TokenLBRACE:
 		str = "LBRACE"
+	case TokenLBRACKET:
+		str = "LBRACKET"
 	case TokenLESS:
 		str = "LESS"
 	case TokenLESSEQUAL:
@@ -136,6 +140,8 @@ func (tt TokenType) String() string {
 		str = "PLUSPLUS"
 	case TokenRBRACE:
 		str = "RBRACE"
+	case TokenRBRACKET:
+		str = "RBRACKET"
 	case TokenRETURN:
 		str = "RETURN"
 	case TokenRPAREN:

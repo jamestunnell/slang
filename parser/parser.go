@@ -50,6 +50,7 @@ func New(l slang.Lexer) *Parser {
 	p.registerPrefix(slang.TokenMINUS, p.parseNegative)
 	p.registerPrefix(slang.TokenBANG, p.parseNot)
 	p.registerPrefix(slang.TokenLPAREN, p.parseGroupedExpression)
+	p.registerPrefix(slang.TokenLBRACKET, p.parseArray)
 	p.registerPrefix(slang.TokenIF, p.parseIfExpression)
 	p.registerPrefix(slang.TokenFUNC, p.parseFuncLiteral)
 

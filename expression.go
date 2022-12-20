@@ -10,6 +10,7 @@ type Expression interface {
 
 const (
 	ExprADD ExprType = iota
+	ExprARRAY
 	ExprBOOL
 	ExprCALL
 	ExprDIVIDE
@@ -37,6 +38,8 @@ func (st ExprType) String() string {
 	switch st {
 	case ExprADD:
 		str = "ADD"
+	case ExprARRAY:
+		str = "ARRAY"
 	case ExprBOOL:
 		str = "BOOL"
 	case ExprCALL:

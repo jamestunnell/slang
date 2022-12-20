@@ -12,7 +12,8 @@ type (
 )
 
 const (
-	ObjectBOOL ObjectType = iota
+	ObjectARRAY ObjectType = iota
+	ObjectBOOL
 	ObjectFLOAT
 	ObjectFUNCTION
 	ObjectINTEGER
@@ -24,6 +25,8 @@ func (ot ObjectType) String() string {
 	var str string
 
 	switch ot {
+	case ObjectARRAY:
+		str = "ARRAY"
 	case ObjectBOOL:
 		str = "BOOL"
 	case ObjectFLOAT:

@@ -51,7 +51,7 @@ func (l *Lexer) NextToken() *slang.Token {
 
 		l.line++
 		l.col = 0
-	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/':
+	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
 		tokInfo = l.readSymbol()
 	case 0:
 		tokInfo = tokens.EOF()
@@ -124,8 +124,12 @@ func (l *Lexer) readSymbol() slang.TokenInfo {
 		tok = tokens.RPAREN()
 	case '{':
 		tok = tokens.LBRACE()
+	case '[':
+		tok = tokens.LBRACKET()
 	case '}':
 		tok = tokens.RBRACE()
+	case ']':
+		tok = tokens.RBRACKET()
 	default:
 		log.Fatal().
 			Str("rune", string([]rune{l.ch})).

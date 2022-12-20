@@ -49,6 +49,33 @@ func (p *Parser) parseGroupedExpression() slang.Expression {
 	return exp
 }
 
+func (p *Parser) parseArray() slang.Expression {
+	elems := []slang.Expression{}
+
+	noElems := p.peekTokenIs(slang.TokenRBRACKET)
+
+	p.nextToken()
+
+	if noElems {
+		return expressions.NewArray(elems...)
+	}
+
+	elems = append(elems, p.parseExpression(PrecedenceLOWEST))
+
+	for p.peekTokenIs(slang.TokenCOMMA) {
+		p.nextToken()
+		p.nextToken()
+
+		elems = append(elems, p.parseExpression(PrecedenceLOWEST))
+	}
+
+	if !p.expectPeekAndAdvance(slang.TokenRBRACKET) {
+		return nil
+	}
+
+	return expressions.NewArray(elems...)
+}
+
 func (p *Parser) parseIfExpression() slang.Expression {
 	p.nextToken()
 
