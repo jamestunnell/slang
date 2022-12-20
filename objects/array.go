@@ -1,12 +1,16 @@
 package objects
 
 import (
+	"errors"
+
 	"github.com/jamestunnell/slang"
 )
 
 type Array struct {
 	Elements []slang.Object
 }
+
+var errArrayEmpty = errors.New("array is empty")
 
 func NewArray(vals ...slang.Object) slang.Object {
 	return &Array{Elements: vals}
@@ -25,31 +29,44 @@ func (obj *Array) Type() slang.ObjectType {
 }
 
 func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error) {
-	// switch method {
-	// case slang.MethodNOT:
-	// 	return NewArray(!obj.Value), nil
-	// case slang.MethodEQ, slang.MethodNEQ:
-	// 	if err := checkArgCount(args, 1); err != nil {
-	// 		return nil, err
-	// 	}
+	switch method {
+	case slang.MethodFIRST, slang.MethodLAST:
+		if err := checkArgCount(args, 0); err != nil {
+			return nil, err
+		}
 
-	// 	arg, ok := args[0].(*Array)
-	// 	if !ok {
-	// 		return nil, slang.NewErrArgType(slang.ObjectArray, args[0].Type())
-	// 	}
+		if len(obj.Elements) == 0 {
+			return nil, errArrayEmpty
+		}
 
-	// 	var ret slang.Object
-	// 	switch method {
-	// 	case slang.MethodEQ:
-	// 		ret = NewArray(obj.Value == arg.Value)
-	// 	case slang.MethodNEQ:
-	// 		ret = NewArray(obj.Value != arg.Value)
-	// 	}
+		switch method {
+		case slang.MethodFIRST:
+			return obj.Elements[0], nil
+		case slang.MethodLAST:
+			return obj.Elements[len(obj.Elements)], nil
+		}
+	case slang.MethodINDEX:
+		if err := checkArgCount(args, 1); err != nil {
+			return nil, err
+		}
 
-	// 	return ret, nil
-	// }
+		return obj.Index(args[0])
+	}
 
 	err := slang.NewErrMethodUndefined(method, obj.Type())
 
 	return nil, err
+}
+
+func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
+	idx, ok := arg.(*Integer)
+	if !ok {
+		return nil, slang.NewErrArgType(slang.ObjectINTEGER, arg.Type())
+	}
+
+	if int(idx.Value) >= len(obj.Elements) {
+		return nil, slang.NewErrArrayBounds(idx.Value, int64(len(obj.Elements)))
+	}
+
+	return obj.Elements[idx.Value], nil
 }

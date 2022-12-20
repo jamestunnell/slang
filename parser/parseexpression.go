@@ -236,6 +236,18 @@ func (p *Parser) parseCall(fn slang.Expression) slang.Expression {
 	return expressions.NewCall(fn, args...)
 }
 
+func (p *Parser) parseIndex(ary slang.Expression) slang.Expression {
+	p.nextToken()
+
+	idx := p.parseExpression(PrecedenceLOWEST)
+
+	if !p.expectPeekAndAdvance(slang.TokenRBRACKET) {
+		return nil
+	}
+
+	return expressions.NewIndex(ary, idx)
+}
+
 func (p *Parser) parseCallArgs() []slang.Expression {
 	args := []slang.Expression{}
 

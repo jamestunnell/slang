@@ -21,5 +21,10 @@ const (
 	MethodGEQ = "geq"
 
 	MethodCALL = "call"
-	MethodSIZE = "size"
+
+	// array methods
+	MethodSIZE  = "size"
+	MethodINDEX = "index"
+	MethodFIRST = "first"
+	MethodLAST  = "last"
 )

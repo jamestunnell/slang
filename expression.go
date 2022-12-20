@@ -21,6 +21,7 @@ const (
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
 	ExprIF
+	ExprINDEX
 	ExprINTEGER
 	ExprLESS
 	ExprLESSEQUAL
@@ -60,6 +61,8 @@ func (st ExprType) String() string {
 		str = "IDENTIFIER"
 	case ExprIF:
 		str = "IF"
+	case ExprINDEX:
+		str = "INDEX"
 	case ExprINTEGER:
 		str = "INTEGER"
 	case ExprLESS:

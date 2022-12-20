@@ -88,6 +88,32 @@ func TestParserOneAssignStatement(t *testing.T) {
 	testParser(t, "x = 5", assign)
 }
 
+func TestParserArrayLiteral(t *testing.T) {
+	input := `x = [1, "abc", true]`
+
+	a := expressions.NewInteger(1)
+	b := expressions.NewString("abc")
+	c := expressions.NewBool(true)
+	ary := expressions.NewArray(a, b, c)
+	x := expressions.NewIdentifier("x")
+	s := statements.NewAssign(x, ary)
+
+	testParser(t, input, s)
+}
+
+func TestParserArrayIndx(t *testing.T) {
+	input := `ary[1+3]`
+
+	ary := expressions.NewIdentifier("ary")
+	add := expressions.NewAdd(
+		expressions.NewInteger(1),
+		expressions.NewInteger(3))
+	idx := expressions.NewIndex(ary, add)
+	s := statements.NewExpression(idx)
+
+	testParser(t, input, s)
+}
+
 func TestParserThreeAssignStatements(t *testing.T) {
 	input := `a = 77
 	b = 100.0
