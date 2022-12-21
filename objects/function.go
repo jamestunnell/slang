@@ -4,22 +4,30 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/akrennmair/slice"
 	"github.com/jamestunnell/slang"
 )
 
 type Function struct {
-	Params []string
-	Body   slang.Statement
-	Env    *slang.Environment
+	Params  []string
+	Body    slang.Statement
+	Env     *slang.Environment
+	methods map[string]*slang.Method
 }
 
 func NewFunction(
 	params []string, body slang.Statement, env *slang.Environment) *Function {
-	return &Function{
-		Params: params,
-		Body:   body,
-		Env:    env,
+	f := &Function{
+		Params:  params,
+		Body:    body,
+		Env:     env,
+		methods: map[string]*slang.Method{},
 	}
+
+	f.methods[slang.MethodCALL] = slang.NewMethod(f.call, params...)
+	f.methods[slang.MethodPARAMS] = slang.NewMethod(f.params)
+
+	return f
 }
 
 func (obj *Function) Inspect() string {
@@ -36,29 +44,20 @@ func (obj *Function) Type() slang.ObjectType {
 	return slang.ObjectFUNCTION
 }
 
-func (obj *Function) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
-	case slang.MethodCALL:
-		return obj.call(args)
-	}
-
-	err := slang.NewErrMethodUndefined(method, slang.ObjectFUNCTION)
-
-	return NULL(), err
+func (obj *Function) Methods() map[string]*slang.Method {
+	return obj.methods
 }
 
-func (obj *Function) call(args []slang.Object) (slang.Object, error) {
-	if len(args) != len(obj.Params) {
-		err := slang.NewErrArgCount(len(obj.Params), len(args))
+func (obj *Function) call(env *slang.Environment) (slang.Object, error) {
+	return obj.Body.Eval(env)
+}
 
-		return NULL(), err
-	}
+func (obj *Function) params(env *slang.Environment) (slang.Object, error) {
+	objs := slice.Map(obj.Params, stringToObject)
 
-	newEnv := slang.NewEnvironment(obj.Env)
+	return NewArray(objs...), nil
+}
 
-	for i, param := range obj.Params {
-		newEnv.Set(param, args[i])
-	}
-
-	return obj.Body.Eval(newEnv)
+func stringToObject(str string) slang.Object {
+	return NewString(str)
 }

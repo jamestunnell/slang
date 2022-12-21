@@ -3,11 +3,14 @@ package objects
 import "github.com/jamestunnell/slang"
 
 type Null struct {
+	methods map[string]*slang.Method
 }
 
 const StrNULL = "null"
 
-var null = &Null{}
+var null = &Null{
+	methods: map[string]*slang.Method{},
+}
 
 func NULL() *Null {
 	return null
@@ -25,6 +28,10 @@ func (obj *Null) Type() slang.ObjectType {
 	return slang.ObjectNULL
 }
 
-func (obj *Null) Send(method string, arg ...slang.Object) (slang.Object, error) {
-	return nil, slang.NewErrMethodUndefined(method, slang.ObjectNULL)
+func (obj *Null) Methods() map[string]*slang.Method {
+	return obj.methods
 }
+
+// func (obj *Null) Send(method string, arg ...slang.Object) (slang.Object, error) {
+// 	return nil, slang.NewErrMethodUndefined(method, slang.ObjectNULL)
+// }

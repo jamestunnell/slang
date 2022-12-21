@@ -1,5 +1,12 @@
 package slang
 
+type Method struct {
+	Function MethodFn
+	Params   []string
+}
+
+type MethodFn func(env *Environment) (Object, error)
+
 const (
 	// unary methods
 	MethodNEG = "neg"
@@ -20,11 +27,20 @@ const (
 	MethodGT  = "gt"
 	MethodGEQ = "geq"
 
-	MethodCALL = "call"
+	// function methods
+	MethodCALL   = "call"
+	MethodPARAMS = "params"
 
 	// array methods
-	MethodSIZE  = "size"
-	MethodINDEX = "index"
 	MethodFIRST = "first"
 	MethodLAST  = "last"
+	MethodSIZE  = "size"
+	MethodAT    = "at"
 )
+
+func NewMethod(fn MethodFn, params ...string) *Method {
+	return &Method{
+		Function: fn,
+		Params:   params,
+	}
+}

@@ -7,11 +7,35 @@ import (
 )
 
 type Bool struct {
-	Value bool
+	Value   bool
+	methods map[string]*slang.Method
+}
+
+func GetBool(env *slang.Environment, name string) (*Bool, error) {
+	obj, found := env.Get(name)
+	if !found {
+		return nil, slang.NewErrObjectNotFound(name)
+	}
+
+	b, ok := obj.(*Bool)
+	if !ok {
+		return nil, slang.NewErrObjectType(slang.ObjectBOOL, obj.Type())
+	}
+
+	return b, nil
 }
 
 func NewBool(val bool) slang.Object {
-	return &Bool{Value: val}
+	b := &Bool{
+		Value:   val,
+		methods: map[string]*slang.Method{},
+	}
+
+	b.methods[slang.MethodNOT] = slang.NewMethod(b.not)
+	b.methods[slang.MethodEQ] = slang.NewMethod(b.eq, ParamOTHER)
+	b.methods[slang.MethodNEQ] = slang.NewMethod(b.neq, ParamOTHER)
+
+	return b
 }
 
 func (obj *Bool) Inspect() string {
@@ -26,32 +50,28 @@ func (obj *Bool) Type() slang.ObjectType {
 	return slang.ObjectBOOL
 }
 
-func (obj *Bool) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
-	case slang.MethodNOT:
-		return NewBool(!obj.Value), nil
-	case slang.MethodEQ, slang.MethodNEQ:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
+func (obj *Bool) Methods() map[string]*slang.Method {
+	return obj.methods
+}
 
-		arg, ok := args[0].(*Bool)
-		if !ok {
-			return nil, slang.NewErrArgType(slang.ObjectBOOL, args[0].Type())
-		}
+func (obj *Bool) not(env *slang.Environment) (slang.Object, error) {
+	return NewBool(!obj.Value), nil
+}
 
-		var ret slang.Object
-		switch method {
-		case slang.MethodEQ:
-			ret = NewBool(obj.Value == arg.Value)
-		case slang.MethodNEQ:
-			ret = NewBool(obj.Value != arg.Value)
-		}
-
-		return ret, nil
+func (obj *Bool) eq(env *slang.Environment) (slang.Object, error) {
+	b, err := GetBool(env, ParamOTHER)
+	if err != nil {
+		return NULL(), err
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	return NewBool(obj.Value == b.Value), nil
+}
 
-	return nil, err
+func (obj *Bool) neq(env *slang.Environment) (slang.Object, error) {
+	b, err := GetBool(env, ParamOTHER)
+	if err != nil {
+		return NULL(), err
+	}
+
+	return NewBool(obj.Value != b.Value), nil
 }

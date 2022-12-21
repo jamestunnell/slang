@@ -8,12 +8,25 @@ import (
 
 type Array struct {
 	Elements []slang.Object
+	methods  map[string]*slang.Method
 }
+
+const ParamINDEX = "index"
 
 var errArrayEmpty = errors.New("array is empty")
 
 func NewArray(vals ...slang.Object) slang.Object {
-	return &Array{Elements: vals}
+	ary := &Array{
+		Elements: vals,
+		methods:  map[string]*slang.Method{},
+	}
+
+	ary.methods[slang.MethodFIRST] = slang.NewMethod(ary.first)
+	ary.methods[slang.MethodLAST] = slang.NewMethod(ary.last)
+	ary.methods[slang.MethodSIZE] = slang.NewMethod(ary.size)
+	ary.methods[slang.MethodAT] = slang.NewMethod(ary.at, ParamINDEX)
+
+	return ary
 }
 
 func (obj *Array) Inspect() string {
@@ -28,44 +41,40 @@ func (obj *Array) Type() slang.ObjectType {
 	return slang.ObjectARRAY
 }
 
-func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
-	case slang.MethodFIRST, slang.MethodLAST:
-		if err := checkArgCount(args, 0); err != nil {
-			return nil, err
-		}
-
-		if len(obj.Elements) == 0 {
-			return nil, errArrayEmpty
-		}
-
-		switch method {
-		case slang.MethodFIRST:
-			return obj.Elements[0], nil
-		case slang.MethodLAST:
-			return obj.Elements[len(obj.Elements)], nil
-		}
-	case slang.MethodINDEX:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
-
-		return obj.Index(args[0])
-	}
-
-	err := slang.NewErrMethodUndefined(method, obj.Type())
-
-	return nil, err
+func (obj *Array) Methods() map[string]*slang.Method {
+	return obj.methods
 }
 
-func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
-	idx, ok := arg.(*Integer)
-	if !ok {
-		return nil, slang.NewErrArgType(slang.ObjectINTEGER, arg.Type())
+func (obj *Array) size(env *slang.Environment) (slang.Object, error) {
+	return NewInteger(int64(len(obj.Elements))), nil
+}
+
+func (obj *Array) first(env *slang.Environment) (slang.Object, error) {
+
+	if len(obj.Elements) == 0 {
+		return nil, errArrayEmpty
 	}
 
-	if int(idx.Value) >= len(obj.Elements) {
-		return nil, slang.NewErrArrayBounds(idx.Value, int64(len(obj.Elements)))
+	return obj.Elements[0], nil
+}
+
+func (obj *Array) last(env *slang.Environment) (slang.Object, error) {
+	if len(obj.Elements) == 0 {
+		return nil, errArrayEmpty
+	}
+
+	return obj.Elements[len(obj.Elements)-1], nil
+}
+
+func (obj *Array) at(env *slang.Environment) (slang.Object, error) {
+	idx, err := GetInt(env, ParamINDEX)
+	if err != nil {
+		return NULL(), err
+	}
+
+	n := int64(len(obj.Elements))
+	if idx.Value >= n {
+		return nil, slang.NewErrArrayBounds(idx.Value, n)
 	}
 
 	return obj.Elements[idx.Value], nil

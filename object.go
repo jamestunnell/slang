@@ -5,7 +5,7 @@ type (
 		Inspect() string
 		Truthy() bool
 		Type() ObjectType
-		Send(method string, args ...Object) (Object, error)
+		Methods() map[string]*Method
 	}
 
 	ObjectType int
