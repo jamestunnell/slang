@@ -14,6 +14,7 @@ const (
 	ExprBOOL
 	ExprCALL
 	ExprDIVIDE
+	ExprDOTCHAIN
 	ExprEQUAL
 	ExprFLOAT
 	ExprFUNCTIONLITERAL
@@ -47,6 +48,8 @@ func (st ExprType) String() string {
 		str = "CALL"
 	case ExprDIVIDE:
 		str = "DIVIDE"
+	case ExprDOTCHAIN:
+		str = "DOTCHAIN"
 	case ExprEQUAL:
 		str = "EQUAL"
 	case ExprFLOAT:

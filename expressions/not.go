@@ -30,5 +30,5 @@ func (expr *Not) Eval(env *slang.Environment) (slang.Object, error) {
 		return objects.NULL(), err
 	}
 
-	return obj.Send(slang.MethodNOT)
+	return obj.Call(slang.MethodNOT)
 }

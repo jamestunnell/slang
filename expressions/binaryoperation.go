@@ -54,7 +54,7 @@ func (bo *BinaryOperation) Eval(env *slang.Environment) (slang.Object, error) {
 		return objects.NULL(), err
 	}
 
-	return a.Send(bo.Operator.MethodName(), b)
+	return a.Call(bo.Operator.MethodName(), b)
 }
 
 // func (bo *BinaryOperation) String() string {

@@ -49,6 +49,8 @@ func (obj *Function) Methods() map[string]*slang.Method {
 }
 
 func (obj *Function) call(env *slang.Environment) (slang.Object, error) {
+	env.Parent = obj.Env
+
 	return obj.Body.Eval(env)
 }
 

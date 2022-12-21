@@ -41,5 +41,5 @@ func (expr *Index) Eval(env *slang.Environment) (slang.Object, error) {
 		return objects.NULL(), err
 	}
 
-	return ary.Send(slang.MethodINDEX, idx)
+	return ary.Call(slang.MethodINDEX, idx)
 }

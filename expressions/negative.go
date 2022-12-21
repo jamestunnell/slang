@@ -30,5 +30,5 @@ func (expr *Negative) Eval(env *slang.Environment) (slang.Object, error) {
 		return objects.NULL(), err
 	}
 
-	return obj.Send(slang.MethodNEG)
+	return obj.Call(slang.MethodNEG)
 }

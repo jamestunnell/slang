@@ -230,6 +230,12 @@ func (p *Parser) parseFloat() slang.Expression {
 	return expressions.NewFloat(f)
 }
 
+func (p *Parser) parseDotChain(fn slang.Expression) slang.Expression {
+	// TODO
+
+	return expressions.NewDotChain()
+}
+
 func (p *Parser) parseCall(fn slang.Expression) slang.Expression {
 	args := p.parseCallArgs()
 

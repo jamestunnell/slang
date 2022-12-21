@@ -51,7 +51,7 @@ func (expr *Call) Eval(env *slang.Environment) (slang.Object, error) {
 		vals[i] = val
 	}
 
-	return obj.Send(slang.MethodCALL, vals...)
+	return obj.Call(slang.MethodCALL, vals...)
 }
 
 func expressionsEqual(a, b slang.Expression) bool {

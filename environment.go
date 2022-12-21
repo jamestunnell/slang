@@ -1,14 +1,14 @@
 package slang
 
 type Environment struct {
-	parent *Environment
+	Parent *Environment
 
 	objects map[string]Object
 }
 
-func NewEnvironment(parent *Environment) *Environment {
+func NewEnvironment(Parent *Environment) *Environment {
 	return &Environment{
-		parent:  parent,
+		Parent:  Parent,
 		objects: map[string]Object{},
 	}
 }
@@ -18,8 +18,8 @@ func (env *Environment) Get(name string) (Object, bool) {
 		return obj, true
 	}
 
-	if env.parent != nil {
-		return env.parent.Get(name)
+	if env.Parent != nil {
+		return env.Parent.Get(name)
 	}
 
 	return nil, false
