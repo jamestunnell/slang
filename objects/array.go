@@ -10,10 +10,19 @@ type Array struct {
 	Elements []slang.Object
 }
 
-var errArrayEmpty = errors.New("array is empty")
+const ClassARRAY = "Array"
+
+var (
+	errArrayEmpty = errors.New("array is empty")
+	aryClass      = NewBuiltInClass(ClassARRAY)
+)
 
 func NewArray(vals ...slang.Object) slang.Object {
 	return &Array{Elements: vals}
+}
+
+func (obj *Array) Class() slang.Class {
+	return aryClass
 }
 
 func (obj *Array) Inspect() string {
@@ -24,12 +33,13 @@ func (obj *Array) Truthy() bool {
 	return true
 }
 
-func (obj *Array) Type() slang.ObjectType {
-	return slang.ObjectARRAY
-}
+func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := aryClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+	switch methodName {
 	case slang.MethodFIRST, slang.MethodLAST:
 		if err := checkArgCount(args, 0); err != nil {
 			return nil, err
@@ -39,7 +49,7 @@ func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error
 			return nil, errArrayEmpty
 		}
 
-		switch method {
+		switch methodName {
 		case slang.MethodFIRST:
 			return obj.Elements[0], nil
 		case slang.MethodLAST:
@@ -53,7 +63,7 @@ func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error
 		return obj.Index(args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	err := slang.NewErrMethodUndefined(methodName, ClassARRAY)
 
 	return nil, err
 }
@@ -61,7 +71,7 @@ func (obj *Array) Send(method string, args ...slang.Object) (slang.Object, error
 func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
 	idx, ok := arg.(*Integer)
 	if !ok {
-		return nil, slang.NewErrArgType(slang.ObjectINTEGER, arg.Type())
+		return nil, slang.NewErrArgType(ClassINTEGER, arg.Class().Name())
 	}
 
 	if int(idx.Value) >= len(obj.Elements) {

@@ -8,8 +8,16 @@ type String struct {
 	Value string
 }
 
+const ClassSTRING = "String"
+
+var strClass = NewBuiltInClass(ClassSTRING)
+
 func NewString(val string) slang.Object {
 	return &String{Value: val}
+}
+
+func (obj *String) Class() slang.Class {
+	return strClass
 }
 
 func (obj *String) Inspect() string {
@@ -24,8 +32,13 @@ func (obj *String) Type() slang.ObjectType {
 	return slang.ObjectSTRING
 }
 
-func (obj *String) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := strClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
+
+	switch methodName {
 	case slang.MethodSIZE:
 		sz := NewInteger(int64(len(obj.Value)))
 		return sz, nil
@@ -38,10 +51,10 @@ func (obj *String) Send(method string, args ...slang.Object) (slang.Object, erro
 			return nil, err
 		}
 
-		return obj.sendOne(method, args[0])
+		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	err := slang.NewErrMethodUndefined(methodName, ClassSTRING)
 
 	return nil, err
 }
@@ -49,7 +62,7 @@ func (obj *String) Send(method string, args ...slang.Object) (slang.Object, erro
 func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*String)
 	if !ok {
-		return nil, slang.NewErrArgType(slang.ObjectSTRING, arg.Type())
+		return nil, slang.NewErrArgType(ClassSTRING, arg.Class().Name())
 	}
 
 	var ret slang.Object

@@ -5,12 +5,21 @@ import "github.com/jamestunnell/slang"
 type Null struct {
 }
 
-const StrNULL = "null"
+const (
+	StrNULL   = "null"
+	ClassNULL = "Null"
+)
 
 var null = &Null{}
 
+var nullClass = NewBuiltInClass(ClassNULL)
+
 func NULL() *Null {
 	return null
+}
+
+func (obj *Null) Class() slang.Class {
+	return nullClass
 }
 
 func (obj *Null) Inspect() string {
@@ -21,10 +30,11 @@ func (obj *Null) Truthy() bool {
 	return false
 }
 
-func (obj *Null) Type() slang.ObjectType {
-	return slang.ObjectNULL
-}
+func (obj *Null) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// I guess we could add instance methods to the null class?
+	if m, found := nullClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Null) Send(method string, arg ...slang.Object) (slang.Object, error) {
-	return nil, slang.NewErrMethodUndefined(method, slang.ObjectNULL)
+	return nil, slang.NewErrMethodUndefined(methodName, ClassNULL)
 }

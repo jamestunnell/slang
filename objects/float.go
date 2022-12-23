@@ -11,8 +11,16 @@ type Float struct {
 	Value float64
 }
 
+const ClassFLOAT = "Float"
+
+var fltClass = NewBuiltInClass(ClassFLOAT)
+
 func NewFloat(val float64) *Float {
 	return &Float{Value: val}
+}
+
+func (obj *Float) Class() slang.Class {
+	return fltClass
 }
 
 func (obj *Float) Inspect() string {
@@ -23,12 +31,13 @@ func (obj *Float) Truthy() bool {
 	return true
 }
 
-func (obj *Float) Type() slang.ObjectType {
-	return slang.ObjectFLOAT
-}
+func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := fltClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Float) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+	switch methodName {
 	case slang.MethodNEG:
 		return NewFloat(-obj.Value), nil
 	case slang.MethodABS:
@@ -40,10 +49,10 @@ func (obj *Float) Send(method string, args ...slang.Object) (slang.Object, error
 			return nil, err
 		}
 
-		return obj.sendOne(method, args[0])
+		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	err := slang.NewErrMethodUndefined(methodName, ClassFLOAT)
 
 	return nil, err
 }
@@ -51,7 +60,7 @@ func (obj *Float) Send(method string, args ...slang.Object) (slang.Object, error
 func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*Float)
 	if !ok {
-		return nil, slang.NewErrArgType(slang.ObjectFLOAT, arg.Type())
+		return nil, slang.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
 	var ret slang.Object

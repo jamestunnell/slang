@@ -3,10 +3,10 @@ package slang
 import "fmt"
 
 type ErrArgType struct {
-	expected, actual fmt.Stringer
+	expected, actual string
 }
 
-func NewErrArgType(expected, actual fmt.Stringer) *ErrArgType {
+func NewErrArgType(expected, actual string) *ErrArgType {
 	return &ErrArgType{
 		expected: expected,
 		actual:   actual,

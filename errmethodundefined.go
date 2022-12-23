@@ -3,19 +3,18 @@ package slang
 import "fmt"
 
 type ErrMethodUndefined struct {
-	methodName string
-	objectType fmt.Stringer
+	method, class string
 }
 
-func NewErrMethodUndefined(methodName string, objectType fmt.Stringer) *ErrMethodUndefined {
+func NewErrMethodUndefined(method string, class string) *ErrMethodUndefined {
 	return &ErrMethodUndefined{
-		methodName: methodName,
-		objectType: objectType,
+		method: method,
+		class:  class,
 	}
 }
 
 func (err *ErrMethodUndefined) Error() string {
-	const strFmt = "method %s is not defined for object type %s"
+	const strFmt = "method %s is not defined for class %s"
 
-	return fmt.Sprintf(strFmt, err.methodName, err.objectType)
+	return fmt.Sprintf(strFmt, err.method, err.class)
 }

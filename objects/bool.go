@@ -10,8 +10,16 @@ type Bool struct {
 	Value bool
 }
 
+const ClassBOOL = "Bool"
+
+var boolClass = NewBuiltInClass(ClassBOOL)
+
 func NewBool(val bool) slang.Object {
 	return &Bool{Value: val}
+}
+
+func (obj *Bool) Class() slang.Class {
+	return boolClass
 }
 
 func (obj *Bool) Inspect() string {
@@ -22,12 +30,13 @@ func (obj *Bool) Truthy() bool {
 	return obj.Value
 }
 
-func (obj *Bool) Type() slang.ObjectType {
-	return slang.ObjectBOOL
-}
+func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := boolClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Bool) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+	switch methodName {
 	case slang.MethodNOT:
 		return NewBool(!obj.Value), nil
 	case slang.MethodEQ, slang.MethodNEQ:
@@ -37,11 +46,11 @@ func (obj *Bool) Send(method string, args ...slang.Object) (slang.Object, error)
 
 		arg, ok := args[0].(*Bool)
 		if !ok {
-			return nil, slang.NewErrArgType(slang.ObjectBOOL, args[0].Type())
+			return nil, slang.NewErrArgType(ClassBOOL, args[0].Class().Name())
 		}
 
 		var ret slang.Object
-		switch method {
+		switch methodName {
 		case slang.MethodEQ:
 			ret = NewBool(obj.Value == arg.Value)
 		case slang.MethodNEQ:
@@ -51,7 +60,7 @@ func (obj *Bool) Send(method string, args ...slang.Object) (slang.Object, error)
 		return ret, nil
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	err := slang.NewErrMethodUndefined(methodName, ClassBOOL)
 
 	return nil, err
 }

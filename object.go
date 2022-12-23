@@ -2,9 +2,10 @@ package slang
 
 type (
 	Object interface {
+		Class() Class
 		Inspect() string
 		Truthy() bool
-		Type() ObjectType
+		// Type() ObjectType
 		Send(method string, args ...Object) (Object, error)
 	}
 

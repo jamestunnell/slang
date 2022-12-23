@@ -10,8 +10,19 @@ type Integer struct {
 	Value int64
 }
 
+const (
+	ClassINTEGER = "Integer"
+	ParamX       = "x"
+)
+
+var intClass = NewBuiltInClass(ClassINTEGER)
+
 func NewInteger(val int64) slang.Object {
 	return &Integer{Value: val}
+}
+
+func (obj *Integer) Class() slang.Class {
+	return intClass
 }
 
 func (obj *Integer) Inspect() string {
@@ -22,12 +33,13 @@ func (obj *Integer) Truthy() bool {
 	return true
 }
 
-func (obj *Integer) Type() slang.ObjectType {
-	return slang.ObjectINTEGER
-}
+func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := intClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Integer) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+	switch methodName {
 	case slang.MethodNEG:
 		return NewInteger(-obj.Value), nil
 	case slang.MethodABS:
@@ -39,47 +51,47 @@ func (obj *Integer) Send(method string, args ...slang.Object) (slang.Object, err
 			return nil, err
 		}
 
-		if args[0].Type() == slang.ObjectFLOAT {
-			return NewFloat(float64(obj.Value)).Send(method, args...)
+		if args[0].Class().Name() == ClassFLOAT {
+			return NewFloat(float64(obj.Value)).Send(methodName, args...)
 		}
 
-		return obj.sendOne(method, args[0])
+		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(method, obj.Type())
+	err := slang.NewErrMethodUndefined(methodName, ClassINTEGER)
 
 	return nil, err
 }
 
 func (obj *Integer) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	flt, ok := arg.(*Integer)
+	otherInt, ok := arg.(*Integer)
 	if !ok {
-		return nil, slang.NewErrArgType(slang.ObjectFLOAT, arg.Type())
+		return nil, slang.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
 	var ret slang.Object
 
 	switch method {
 	case slang.MethodADD:
-		ret = NewInteger(obj.Value + flt.Value)
+		ret = NewInteger(obj.Value + otherInt.Value)
 	case slang.MethodSUB:
-		ret = NewInteger(obj.Value - flt.Value)
+		ret = NewInteger(obj.Value - otherInt.Value)
 	case slang.MethodMUL:
-		ret = NewInteger(obj.Value * flt.Value)
+		ret = NewInteger(obj.Value * otherInt.Value)
 	case slang.MethodDIV:
-		ret = NewInteger(obj.Value / flt.Value)
+		ret = NewInteger(obj.Value / otherInt.Value)
 	case slang.MethodEQ:
-		ret = NewBool(obj.Value == flt.Value)
+		ret = NewBool(obj.Value == otherInt.Value)
 	case slang.MethodNEQ:
-		ret = NewBool(obj.Value != flt.Value)
+		ret = NewBool(obj.Value != otherInt.Value)
 	case slang.MethodLT:
-		ret = NewBool(obj.Value < flt.Value)
+		ret = NewBool(obj.Value < otherInt.Value)
 	case slang.MethodLEQ:
-		ret = NewBool(obj.Value <= flt.Value)
+		ret = NewBool(obj.Value <= otherInt.Value)
 	case slang.MethodGT:
-		ret = NewBool(obj.Value > flt.Value)
+		ret = NewBool(obj.Value > otherInt.Value)
 	case slang.MethodGEQ:
-		ret = NewBool(obj.Value >= flt.Value)
+		ret = NewBool(obj.Value >= otherInt.Value)
 	}
 
 	return ret, nil

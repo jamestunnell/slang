@@ -13,6 +13,10 @@ type Function struct {
 	Env    *slang.Environment
 }
 
+const ClassFUNCTION = "Function"
+
+var funClass = NewBuiltInClass(ClassFUNCTION)
+
 func NewFunction(
 	params []string, body slang.Statement, env *slang.Environment) *Function {
 	return &Function{
@@ -20,6 +24,10 @@ func NewFunction(
 		Body:   body,
 		Env:    env,
 	}
+}
+
+func (obj *Function) Class() slang.Class {
+	return funClass
 }
 
 func (obj *Function) Inspect() string {
@@ -32,17 +40,18 @@ func (obj *Function) Truthy() bool {
 	return true
 }
 
-func (obj *Function) Type() slang.ObjectType {
-	return slang.ObjectFUNCTION
-}
+func (obj *Function) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// an added instance method would override a standard one
+	if m, found := funClass.GetInstanceMethod(methodName); found {
+		return m.Run(args)
+	}
 
-func (obj *Function) Send(method string, args ...slang.Object) (slang.Object, error) {
-	switch method {
+	switch methodName {
 	case slang.MethodCALL:
 		return obj.call(args)
 	}
 
-	err := slang.NewErrMethodUndefined(method, slang.ObjectFUNCTION)
+	err := slang.NewErrMethodUndefined(methodName, ClassFUNCTION)
 
 	return NULL(), err
 }
