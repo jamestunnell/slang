@@ -40,7 +40,7 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 	}
 
 	switch methodName {
-	case slang.MethodFIRST, slang.MethodLAST:
+	case slang.MethodFIRST, slang.MethodLAST, slang.MethodSIZE:
 		if err := checkArgCount(args, 0); err != nil {
 			return nil, err
 		}
@@ -54,6 +54,8 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 			return obj.Elements[0], nil
 		case slang.MethodLAST:
 			return obj.Elements[len(obj.Elements)-1], nil
+		case slang.MethodSIZE:
+			return NewInteger(int64(len(obj.Elements))), nil
 		}
 	case slang.MethodINDEX:
 		if err := checkArgCount(args, 1); err != nil {
