@@ -25,6 +25,7 @@ const (
 	ExprINTEGER
 	ExprLESS
 	ExprLESSEQUAL
+	ExprMETHODCALL
 	ExprMULTIPLY
 	ExprNEGATIVE
 	ExprNOT
@@ -69,6 +70,8 @@ func (st ExprType) String() string {
 		str = "LESS"
 	case ExprLESSEQUAL:
 		str = "LESSEQUAL"
+	case ExprMETHODCALL:
+		str = "METHODCALL"
 	case ExprMULTIPLY:
 		str = "MULTIPLY"
 	case ExprNEGATIVE:

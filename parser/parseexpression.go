@@ -230,6 +230,23 @@ func (p *Parser) parseFloat() slang.Expression {
 	return expressions.NewFloat(f)
 }
 
+func (p *Parser) parseMethodCall(obj slang.Expression) slang.Expression {
+	if !p.expectPeekAndAdvance(slang.TokenIDENT) {
+		return nil
+	}
+
+	methodName := expressions.NewIdentifier(p.curToken.Info.Value())
+	args := []slang.Expression{}
+
+	if p.peekTokenIs(slang.TokenLPAREN) {
+		p.nextToken()
+
+		args = p.parseCallArgs()
+	}
+
+	return expressions.NewMethodCall(obj, methodName, args...)
+}
+
 func (p *Parser) parseFunctionCall(fn slang.Expression) slang.Expression {
 	args := p.parseCallArgs()
 

@@ -13,8 +13,7 @@ const (
 	PrecedenceSUM                    // +
 	PrecedencePRODUCT                // *
 	PrecedencePREFIX                 // -X or !X
-	PrecedenceCALL                   // myFunction(X)
-	PrecedenceINDEX                  // myArray[0]
+	PrecedenceDOTCALLIDX             // a.b.c, myFunction(X), myArray[0]
 )
 
 var precedences = map[slang.TokenType]Precedence{
@@ -28,6 +27,7 @@ var precedences = map[slang.TokenType]Precedence{
 	slang.TokenMINUS:        PrecedenceSUM,
 	slang.TokenSLASH:        PrecedencePRODUCT,
 	slang.TokenSTAR:         PrecedencePRODUCT,
-	slang.TokenLPAREN:       PrecedenceCALL,
-	slang.TokenLBRACKET:     PrecedenceINDEX,
+	slang.TokenDOT:          PrecedenceDOTCALLIDX,
+	slang.TokenLPAREN:       PrecedenceDOTCALLIDX,
+	slang.TokenLBRACKET:     PrecedenceDOTCALLIDX,
 }

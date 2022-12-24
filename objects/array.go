@@ -53,7 +53,7 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 		case slang.MethodFIRST:
 			return obj.Elements[0], nil
 		case slang.MethodLAST:
-			return obj.Elements[len(obj.Elements)], nil
+			return obj.Elements[len(obj.Elements)-1], nil
 		}
 	case slang.MethodINDEX:
 		if err := checkArgCount(args, 1); err != nil {
