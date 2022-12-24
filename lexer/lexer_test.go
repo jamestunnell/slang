@@ -62,6 +62,21 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 	testLexer(t, str, expected...)
 }
 
+func TestLexer_IntMethodCall(t *testing.T) {
+	const str = "25.add(12)"
+
+	expected := []*slang.Token{
+		tok(tokens.INT("25"), 1, 1),
+		tok(tokens.DOT(), 1, 3),
+		tok(tokens.IDENT("add"), 1, 4),
+		tok(tokens.LPAREN(), 1, 7),
+		tok(tokens.INT("12"), 1, 8),
+		tok(tokens.RPAREN(), 1, 10),
+	}
+
+	testLexer(t, str, expected...)
+}
+
 func TestLexer_FloatMath(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.IDENT("my_num"), 1, 1),

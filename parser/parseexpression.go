@@ -230,10 +230,10 @@ func (p *Parser) parseFloat() slang.Expression {
 	return expressions.NewFloat(f)
 }
 
-func (p *Parser) parseCall(fn slang.Expression) slang.Expression {
+func (p *Parser) parseFunctionCall(fn slang.Expression) slang.Expression {
 	args := p.parseCallArgs()
 
-	return expressions.NewCall(fn, args...)
+	return expressions.NewFunctionCall(fn, args...)
 }
 
 func (p *Parser) parseIndex(ary slang.Expression) slang.Expression {

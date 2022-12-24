@@ -11,33 +11,34 @@ import (
 )
 
 type Lexer struct {
-	scanner   io.RuneScanner
-	ch        rune
-	str       string
-	line, col int
+	scanner             io.RuneScanner
+	cur, next, nextNext rune
+	line, col           int
 }
 
 func New(scanner io.RuneScanner) slang.Lexer {
-	return &Lexer{
-		scanner: scanner,
-		ch:      0,
-		str:     "",
-		line:    1,
-		col:     0,
+	l := &Lexer{
+		scanner:  scanner,
+		cur:      0,
+		next:     0,
+		nextNext: 0,
+		line:     1,
+		col:      -2, //will be 1 after advancing thrice
 	}
+
+	// read runes for cur, next, and nextNext
+	l.advance()
+	l.advance()
+	l.advance()
+
+	return l
 }
 
 func (l *Lexer) NextToken() *slang.Token {
 	var tokInfo slang.TokenInfo
 
-	l.readRune()
-
-	for isSpaceOrTab(l.ch) {
-		// if isNewlineish(l.ch) {
-		// 	l.line++
-		// }
-
-		l.readRune()
+	for isSpaceOrTab(l.cur) {
+		l.advance()
 	}
 
 	loc := slang.SourceLocation{
@@ -45,7 +46,7 @@ func (l *Lexer) NextToken() *slang.Token {
 		Column: l.col,
 	}
 
-	switch l.ch {
+	switch l.cur {
 	case '\n', '\v', '\f':
 		tokInfo = tokens.LINE()
 
@@ -58,44 +59,34 @@ func (l *Lexer) NextToken() *slang.Token {
 	case '"':
 		tokInfo = l.readString()
 	default:
-		if isLetterOrUnderscore(l.ch) {
+		if isLetterOrUnderscore(l.cur) {
 			tokInfo = l.readIdentOrKeyword()
-		} else if unicode.IsDigit(l.ch) {
+		} else if unicode.IsDigit(l.cur) {
 			tokInfo = l.readNumber()
 		} else {
-			tokInfo = tokens.ILLEGAL(l.ch)
+			tokInfo = tokens.ILLEGAL(l.cur)
 		}
 	}
+
+	l.advance()
 
 	return slang.NewToken(tokInfo, loc)
 }
 
-func (l *Lexer) readRune() {
+func (l *Lexer) advance() {
 	r, _, _ := l.scanner.ReadRune()
 
 	l.col++
-	l.ch = r
-	l.str = string([]rune{r})
-}
 
-func (l *Lexer) unreadRune() {
-	// nothing read yet
-	if l.ch == 0 {
-		return
-	}
-
-	err := l.scanner.UnreadRune()
-	if err != nil {
-		log.Warn().Err(err).Msg("Lexer: failed to unread rune")
-	}
-
-	l.col--
+	l.cur = l.next
+	l.next = l.nextNext
+	l.nextNext = r
 }
 
 func (l *Lexer) readSymbol() slang.TokenInfo {
 	var tok slang.TokenInfo
 
-	switch l.ch {
+	switch l.cur {
 	case '!':
 		tok = l.readNot()
 	case '<':
@@ -132,7 +123,7 @@ func (l *Lexer) readSymbol() slang.TokenInfo {
 		tok = tokens.RBRACKET()
 	default:
 		log.Fatal().
-			Str("rune", string([]rune{l.ch})).
+			Str("rune", string([]rune{l.cur})).
 			Msg("unexpected symbol rune")
 	}
 
@@ -140,117 +131,121 @@ func (l *Lexer) readSymbol() slang.TokenInfo {
 }
 
 func (l *Lexer) readNot() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.NOTEQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.BANG()
 }
 
 func (l *Lexer) readLess() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.LESSEQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.LESS()
 }
 
 func (l *Lexer) readGreater() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.GREATEREQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.GREATER()
 }
 
 func (l *Lexer) readEqual() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.EQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.ASSIGN()
 }
 
 func (l *Lexer) readPlus() slang.TokenInfo {
-	l.readRune()
-	switch l.ch {
+	switch l.next {
 	case '=':
+		l.advance()
+
 		return tokens.PLUSEQUAL()
 	case '+':
+		l.advance()
+
 		return tokens.PLUSPLUS()
 	}
 
-	l.unreadRune()
 	return tokens.PLUS()
 }
 
 func (l *Lexer) readMinus() slang.TokenInfo {
-	l.readRune()
-	switch l.ch {
+	switch l.next {
 	case '=':
+		l.advance()
+
 		return tokens.MINUSEQUAL()
 	case '-':
+		l.advance()
+
 		return tokens.MINUSMINUS()
 	}
 
-	l.unreadRune()
 	return tokens.MINUS()
 }
 
 func (l *Lexer) readStar() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.STAREQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.STAR()
 }
 
 func (l *Lexer) readSlash() slang.TokenInfo {
-	l.readRune()
-	if l.ch == '=' {
+	if l.next == '=' {
+		l.advance()
+
 		return tokens.SLASHEQUAL()
 	}
 
-	l.unreadRune()
 	return tokens.SLASH()
 }
 
 func (l *Lexer) readString() slang.TokenInfo {
-	l.readRune()
+	l.advance()
 
 	runes := []rune{}
 
-	for l.ch != 0 && l.ch != '"' {
-		runes = append(runes, l.ch)
+	for l.cur != 0 && l.cur != '"' {
+		runes = append(runes, l.cur)
 
-		l.readRune()
+		l.advance()
+	}
+
+	if l.cur == 0 {
+		return tokens.ILLEGAL(l.cur)
 	}
 
 	return tokens.STRING(string(runes))
 }
 
 func (l *Lexer) readIdentOrKeyword() slang.TokenInfo {
-	runes := []rune{l.ch}
+	runes := []rune{l.cur}
 
-	l.readRune()
+	for unicode.IsDigit(l.next) || isLetterOrUnderscore(l.next) {
+		l.advance()
 
-	for unicode.IsDigit(l.ch) || isLetterOrUnderscore(l.ch) {
-		runes = append(runes, l.ch)
-
-		l.readRune()
+		runes = append(runes, l.cur)
 	}
-
-	l.unreadRune()
 
 	str := string(runes)
 
@@ -273,30 +268,33 @@ func (l *Lexer) readIdentOrKeyword() slang.TokenInfo {
 }
 
 func (l *Lexer) readNumber() slang.TokenInfo {
-	runes := []rune{l.ch}
-	dotUsed := false
+	preDotDigits := []rune{l.cur}
 
-	l.readRune()
+	for unicode.IsDigit(l.next) {
+		l.advance()
 
-	for unicode.IsDigit(l.ch) || (l.ch == '.' && !dotUsed) {
-		runes = append(runes, l.ch)
-
-		if l.ch == '.' {
-			dotUsed = true
-		}
-
-		l.readRune()
+		preDotDigits = append(preDotDigits, l.cur)
 	}
 
-	l.unreadRune()
-
-	str := string(runes)
-
-	if dotUsed {
-		return tokens.FLOAT(str)
+	if l.next != '.' || !unicode.IsDigit(l.nextNext) {
+		return tokens.INT(string(preDotDigits))
 	}
 
-	return tokens.INT(str)
+	l.advance()
+	l.advance()
+
+	postDotDigits := []rune{l.cur}
+
+	if unicode.IsDigit(l.next) {
+		l.advance()
+
+		postDotDigits = append(postDotDigits, l.cur)
+	}
+
+	runes := append(preDotDigits, '.')
+	runes = append(runes, postDotDigits...)
+
+	return tokens.FLOAT(string(runes))
 }
 
 func isLetterOrUnderscore(r rune) bool {
@@ -305,8 +303,4 @@ func isLetterOrUnderscore(r rune) bool {
 
 func isSpaceOrTab(r rune) bool {
 	return r == ' ' || r == '\t' || r == '\r'
-}
-
-func isNewlineish(r rune) bool {
-	return r == '\n' || r == '\v' || r == '\f'
 }

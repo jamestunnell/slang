@@ -6,24 +6,24 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type Call struct {
+type FunctionCall struct {
 	Function  slang.Expression // Identifier or FunctionLiteral
 	Arguments []slang.Expression
 }
 
-func NewCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
-	return &Call{
+func NewFunctionCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
+	return &FunctionCall{
 		Function:  fn,
 		Arguments: args,
 	}
 }
 
-func (c *Call) Type() slang.ExprType {
+func (c *FunctionCall) Type() slang.ExprType {
 	return slang.ExprFUNCTIONCALL
 }
 
-func (c *Call) Equal(other slang.Expression) bool {
-	c2, ok := other.(*Call)
+func (c *FunctionCall) Equal(other slang.Expression) bool {
+	c2, ok := other.(*FunctionCall)
 	if !ok {
 		return false
 	}
@@ -35,7 +35,7 @@ func (c *Call) Equal(other slang.Expression) bool {
 	return slices.EqualFunc(c.Arguments, c2.Arguments, expressionsEqual)
 }
 
-func (expr *Call) Eval(env *slang.Environment) (slang.Object, error) {
+func (expr *FunctionCall) Eval(env *slang.Environment) (slang.Object, error) {
 	obj, err := expr.Function.Eval(env)
 	if err != nil {
 		return objects.NULL(), err
