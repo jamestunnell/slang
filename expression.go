@@ -12,10 +12,10 @@ const (
 	ExprADD ExprType = iota
 	ExprARRAY
 	ExprBOOL
-	ExprCALL
 	ExprDIVIDE
 	ExprEQUAL
 	ExprFLOAT
+	ExprFUNCTIONCALL
 	ExprFUNCTIONLITERAL
 	ExprGREATER
 	ExprGREATEREQUAL
@@ -43,14 +43,14 @@ func (st ExprType) String() string {
 		str = "ARRAY"
 	case ExprBOOL:
 		str = "BOOL"
-	case ExprCALL:
-		str = "CALL"
 	case ExprDIVIDE:
 		str = "DIVIDE"
 	case ExprEQUAL:
 		str = "EQUAL"
 	case ExprFLOAT:
 		str = "FLOAT"
+	case ExprFUNCTIONCALL:
+		str = "FUNCTIONCALL"
 	case ExprFUNCTIONLITERAL:
 		str = "FUNCTIONLITERAL"
 	case ExprGREATER:

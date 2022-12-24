@@ -19,7 +19,7 @@ func NewCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
 }
 
 func (c *Call) Type() slang.ExprType {
-	return slang.ExprCALL
+	return slang.ExprFUNCTIONCALL
 }
 
 func (c *Call) Equal(other slang.Expression) bool {
