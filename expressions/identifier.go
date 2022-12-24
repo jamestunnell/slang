@@ -1,6 +1,9 @@
 package expressions
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/objects"
+)
 
 type Identifier struct {
 	Name string
@@ -24,7 +27,11 @@ func (i *Identifier) Equal(other slang.Expression) bool {
 func (expr *Identifier) Eval(env *slang.Environment) (slang.Object, error) {
 	obj, found := env.Get(expr.Name)
 	if !found {
-		return nil, slang.NewErrObjectNotFound(expr.Name)
+		obj, found = objects.FindBuiltInFn(expr.Name)
+
+		if !found {
+			return nil, slang.NewErrObjectNotFound(expr.Name)
+		}
 	}
 
 	return obj, nil
