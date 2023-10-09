@@ -88,23 +88,23 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.lexer.NextToken()
 }
 
-func (p *Parser) nextTokenSkipLines() {
-	p.nextToken()
+// func (p *Parser) nextTokenSkipLines() {
+// 	p.nextToken()
 
-	for p.curTokenIs(slang.TokenLINE) {
-		p.nextToken()
-	}
-}
+// 	for p.curTokenIs(slang.TokenLINE) {
+// 		p.nextToken()
+// 	}
+// }
 
-func (p *Parser) skipToNextLineOrEOF() {
-	for !p.curTokenIs(slang.TokenEOF) && !p.curTokenIs(slang.TokenLINE) {
-		p.nextToken()
-	}
+// func (p *Parser) skipToNextLineOrEOF() {
+// 	for !p.curTokenIs(slang.TokenEOF) && !p.curTokenIs(slang.TokenLINE) {
+// 		p.nextToken()
+// 	}
 
-	if p.curTokenIs(slang.TokenLINE) {
-		p.nextToken()
-	}
-}
+// 	if p.curTokenIs(slang.TokenLINE) {
+// 		p.nextToken()
+// 	}
+// }
 
 func (p *Parser) Run() *ParseResults {
 	statments := p.parseStatementsUntil(slang.TokenEOF)
@@ -119,32 +119,36 @@ func (p *Parser) Run() *ParseResults {
 
 func (p *Parser) parseStatementsUntil(
 	stopTokType slang.TokenType) []slang.Statement {
-	// skip past empty lines and semicolons at the beginning
-	for p.curTokenIs(slang.TokenLINE, slang.TokenSEMICOLON) {
+	// skip past comments, empty lines and semicolons at the beginning
+	for p.curTokenIs(slang.TokenLINE, slang.TokenSEMICOLON, slang.TokenCOMMENT) {
 		p.nextToken()
 	}
 
 	statements := []slang.Statement{}
 
+	// read each statement until stop token
 	for !p.curTokenIs(stopTokType, slang.TokenEOF) {
 		if st := p.parseStatement(); st != nil {
 			statements = append(statements, st)
 		}
 
-		if !p.expectPeek(stopTokType, slang.TokenLINE, slang.TokenSEMICOLON) {
+		// after a statement we expect semicolon, comment, newline, or EOF
+		if !p.expectPeek(slang.TokenSEMICOLON, slang.TokenCOMMENT, slang.TokenLINE, slang.TokenEOF) {
+			break
+		}
+
+		if p.peekTokenIs(stopTokType) {
 			p.nextToken()
 
-			for !p.peekTokenIs(stopTokType, slang.TokenEOF, slang.TokenLINE, slang.TokenSEMICOLON) {
-				p.nextToken()
-			}
+			break
+		}
+
+		// skip past lines, semicolons, and comments
+		for p.peekTokenIs(slang.TokenLINE, slang.TokenSEMICOLON, slang.TokenCOMMENT) {
+			p.nextToken()
 		}
 
 		p.nextToken()
-
-		// skip past consecutive lines and semicolons
-		for p.curTokenIs(slang.TokenLINE, slang.TokenSEMICOLON) {
-			p.nextToken()
-		}
 	}
 
 	// did we stop because of EOF or the expected stop token?

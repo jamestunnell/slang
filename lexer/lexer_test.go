@@ -43,7 +43,17 @@ func TestLexer_AssignInt(t *testing.T) {
 	}
 
 	testLexer(t, "   x=5", expected...)
-	// testLexer(t, "\t \tx   = 5   ", expected...)
+}
+
+func TestLexer_Comment(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.IDENT("x"), 1, 1),
+		tok(tokens.PLUS(), 1, 3),
+		tok(tokens.INT("10"), 1, 5),
+		tok(tokens.COMMENT(" + 15"), 1, 8),
+	}
+
+	testLexer(t, "x + 10 # + 15", expected...)
 }
 
 func TestLexer_StatementsWithNewline(t *testing.T) {

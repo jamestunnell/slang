@@ -16,6 +16,8 @@ type Lexer struct {
 	line, col           int
 }
 
+const eof = 0
+
 func New(scanner io.RuneScanner) slang.Lexer {
 	l := &Lexer{
 		scanner:  scanner,
@@ -47,14 +49,16 @@ func (l *Lexer) NextToken() *slang.Token {
 	}
 
 	switch l.cur {
-	case '\n', '\v', '\f':
+	case '\n':
 		tokInfo = tokens.LINE()
 
 		l.line++
 		l.col = 0
+	case '#':
+		tokInfo = l.readComment()
 	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
 		tokInfo = l.readSymbol()
-	case 0:
+	case eof:
 		tokInfo = tokens.EOF()
 	case '"':
 		tokInfo = l.readString()
@@ -81,6 +85,22 @@ func (l *Lexer) advance() {
 	l.cur = l.next
 	l.next = l.nextNext
 	l.nextNext = r
+}
+
+func (l *Lexer) readComment() slang.TokenInfo {
+	l.advance()
+
+	runes := []rune{}
+
+	for !(l.cur == eof || l.cur == '\n') {
+		if l.cur != '\r' {
+			runes = append(runes, l.cur)
+		}
+
+		l.advance()
+	}
+
+	return tokens.COMMENT(string(runes))
 }
 
 func (l *Lexer) readSymbol() slang.TokenInfo {
@@ -303,4 +323,8 @@ func isLetterOrUnderscore(r rune) bool {
 
 func isSpaceOrTab(r rune) bool {
 	return r == ' ' || r == '\t' || r == '\r'
+}
+
+func isLine(r rune) bool {
+	return r == '\v' || r == '\f' || r == '\n'
 }

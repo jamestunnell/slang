@@ -37,6 +37,7 @@ const (
 	TokenASSIGN TokenType = iota
 	TokenBANG
 	TokenCOMMA
+	TokenCOMMENT
 	TokenDOT
 	TokenIDENT
 	TokenIF

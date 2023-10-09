@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	fmt.Println("go-synth wiring REPL")
+	fmt.Println("slang REPL (CTRL-C to exit)")
 
 	Start(os.Stdin, os.Stdout)
 }
