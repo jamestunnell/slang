@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/rs/zerolog/log"
@@ -121,7 +120,8 @@ func TestParserArrayIndx(t *testing.T) {
 }
 
 func TestParserThreeAssignStatements(t *testing.T) {
-	input := `a = 77
+	input := `
+	a = 77
 	b = 100.0
 	longer_name = 75.0 - 22.2`
 
@@ -138,34 +138,33 @@ func TestParserThreeAssignStatements(t *testing.T) {
 	s3 := statements.NewAssign(c, cVal)
 
 	testParser(t, input, s1, s2, s3)
-
-	input = strings.ReplaceAll(input, "\n", ";")
-
-	testParser(t, input, s1, s2, s3)
-
-	// extra separation is fine
-	input = strings.ReplaceAll(input, ";", ";;")
-
-	testParser(t, input, s1, s2, s3)
-
-	input = strings.ReplaceAll(input, ";;", "")
-
-	testParserErrs(t, input)
 }
 
-func TestParserReturnStatement(t *testing.T) {
+func TestParserFunctionReturnStatement(t *testing.T) {
 	l := expressions.NewFloat(12.77)
 	r := expressions.NewIdentifier("num")
 	add := expressions.NewAdd(l, r)
 	ret := statements.NewReturn(add)
+	fnParams := []*expressions.Identifier{
+		expressions.NewIdentifier("num"),
+	}
+	fnBody := statements.NewBlock(ret)
+	fn := expressions.NewFunctionLiteral(fnParams, fnBody)
+	assign := statements.NewAssign(expressions.NewIdentifier("x"), fn)
 
-	testParser(t, "return 12.77 + num", ret)
+	testParser(t, "x = func(num){return 12.77 + num}", assign)
 }
 
 func TestParserErrsIfMissingRBrace(t *testing.T) {
 	const input = `if true {
 		x = 2
 	`
+
+	testParserErrs(t, input)
+}
+
+func TestParserErrsIfMissingRBraceInline(t *testing.T) {
+	const input = `if true { x = 2`
 
 	testParserErrs(t, input)
 }
@@ -198,6 +197,32 @@ func TestParserIfExpr(t *testing.T) {
 	ifElseExpr := expressions.NewIfElse(cond, conseq, altern)
 
 	testParser(t, input, statements.NewAssign(id("y"), ifElseExpr))
+}
+
+func TestParserIfEquivalents(t *testing.T) {
+	inputs := []string{
+		`y = if a == 2 { x + 10 }`,
+		`y = if a == 2 {
+			x + 10
+		}`,
+		`y = if a == 2 {
+			x + 10	# comments are fine
+		}`,
+	}
+	cond := expressions.NewEqual(
+		expressions.NewIdentifier("a"),
+		expressions.NewInteger(2))
+	assign := statements.NewExpression(
+		expressions.NewAdd(
+			expressions.NewIdentifier("x"),
+			expressions.NewInteger(10)))
+	conseq := statements.NewBlock(assign)
+	ifExpr := expressions.NewIf(cond, conseq)
+	st := statements.NewAssign(id("y"), ifExpr)
+
+	for _, input := range inputs {
+		testParser(t, input, st)
+	}
 }
 
 func TestParserFuncLiteralNoParams(t *testing.T) {

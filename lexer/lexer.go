@@ -48,28 +48,26 @@ func (l *Lexer) NextToken() *slang.Token {
 		Column: l.col,
 	}
 
-	switch l.cur {
-	case '\n':
+	switch {
+	case l.cur == '\n' || (l.cur == '\r' && l.next == '\n'):
 		tokInfo = tokens.LINE()
 
 		l.line++
 		l.col = 0
-	case '#':
+	case l.cur == '#':
 		tokInfo = l.readComment()
-	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
+	case isSymbol(l.cur):
 		tokInfo = l.readSymbol()
-	case eof:
+	case l.cur == eof:
 		tokInfo = tokens.EOF()
-	case '"':
+	case l.cur == '"':
 		tokInfo = l.readString()
+	case isLetterOrUnderscore(l.cur):
+		tokInfo = l.readIdentOrKeyword()
+	case unicode.IsDigit(l.cur):
+		tokInfo = l.readNumber()
 	default:
-		if isLetterOrUnderscore(l.cur) {
-			tokInfo = l.readIdentOrKeyword()
-		} else if unicode.IsDigit(l.cur) {
-			tokInfo = l.readNumber()
-		} else {
-			tokInfo = tokens.ILLEGAL(l.cur)
-		}
+		tokInfo = tokens.ILLEGAL(l.cur)
 	}
 
 	l.advance()
@@ -88,19 +86,26 @@ func (l *Lexer) advance() {
 }
 
 func (l *Lexer) readComment() slang.TokenInfo {
-	l.advance()
-
 	runes := []rune{}
 
-	for !(l.cur == eof || l.cur == '\n') {
-		if l.cur != '\r' {
-			runes = append(runes, l.cur)
+	for l.next != eof && l.next != '\n' {
+		if l.next != '\r' {
+			runes = append(runes, l.next)
 		}
 
 		l.advance()
 	}
 
 	return tokens.COMMENT(string(runes))
+}
+
+func isSymbol(r rune) bool {
+	switch r {
+	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
+		return true
+	}
+
+	return false
 }
 
 func (l *Lexer) readSymbol() slang.TokenInfo {

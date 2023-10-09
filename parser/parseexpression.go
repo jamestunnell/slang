@@ -13,23 +13,23 @@ import (
 var errBadExpressionStart = errors.New("bad expression start")
 
 func (p *Parser) parseExpression(prec Precedence) slang.Expression {
-	prefix := p.prefixParseFns[p.curToken.Info.Type()]
-	if prefix == nil {
+	prefixParse, found := p.prefixParseFns[p.curToken.Info.Type()]
+	if !found {
 		err := NewErrMissingPrefixParseFn(p.curToken.Info.Type())
 
 		p.Errors = append(p.Errors, p.NewParseErr(err))
 
 		return nil
 	}
-	leftExp := prefix()
+	leftExp := prefixParse()
 
-	for !p.peekTokenIs(slang.TokenSEMICOLON) && prec < p.peekPrecedence() {
+	for prec < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Info.Type()]
 		if infix == nil {
 			return leftExp
 		}
 
-		p.nextToken()
+		p.nextTokenSkipComments()
 
 		leftExp = infix(leftExp)
 	}
@@ -38,7 +38,7 @@ func (p *Parser) parseExpression(prec Precedence) slang.Expression {
 }
 
 func (p *Parser) parseGroupedExpression() slang.Expression {
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	exp := p.parseExpression(PrecedenceLOWEST)
 
@@ -54,7 +54,7 @@ func (p *Parser) parseArray() slang.Expression {
 
 	noElems := p.peekTokenIs(slang.TokenRBRACKET)
 
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	if noElems {
 		return expressions.NewArray(elems...)
@@ -63,8 +63,8 @@ func (p *Parser) parseArray() slang.Expression {
 	elems = append(elems, p.parseExpression(PrecedenceLOWEST))
 
 	for p.peekTokenIs(slang.TokenCOMMA) {
-		p.nextToken()
-		p.nextToken()
+		p.nextTokenSkipComments()
+		p.nextTokenSkipComments()
 
 		elems = append(elems, p.parseExpression(PrecedenceLOWEST))
 	}
@@ -77,7 +77,7 @@ func (p *Parser) parseArray() slang.Expression {
 }
 
 func (p *Parser) parseIfExpression() slang.Expression {
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	cond := p.parseExpression(PrecedenceLOWEST)
 
@@ -85,18 +85,18 @@ func (p *Parser) parseIfExpression() slang.Expression {
 		return nil
 	}
 
-	conseq := p.parseBlockStatement()
+	conseq := p.parseBlock()
 
 	var altern *statements.Block
 
 	if p.peekTokenIs(slang.TokenELSE) {
-		p.nextToken()
+		p.nextTokenSkipComments()
 
 		if !p.expectPeekAndAdvance(slang.TokenLBRACE) {
 			return nil
 		}
 
-		altern = p.parseBlockStatement()
+		altern = p.parseBlock()
 	}
 
 	if altern == nil {
@@ -117,7 +117,7 @@ func (p *Parser) parseFuncLiteral() slang.Expression {
 		return nil
 	}
 
-	body := p.parseBlockStatement()
+	body := p.parseBlock()
 
 	return expressions.NewFunctionLiteral(params, body)
 }
@@ -130,7 +130,7 @@ func (p *Parser) parseFuncParams() []*expressions.Identifier {
 	}
 
 	if p.peekTokenIs(slang.TokenRPAREN) {
-		p.nextToken() // end on RPAREN
+		p.nextTokenSkipComments() // end on RPAREN
 
 		return params
 	}
@@ -142,7 +142,7 @@ func (p *Parser) parseFuncParams() []*expressions.Identifier {
 	addCur()
 
 	for p.peekTokenIs(slang.TokenCOMMA) {
-		p.nextToken()
+		p.nextTokenSkipComments()
 
 		if !p.expectPeekAndAdvance(slang.TokenIDENT) {
 			return nil
@@ -158,10 +158,10 @@ func (p *Parser) parseFuncParams() []*expressions.Identifier {
 	return params
 }
 
-func (p *Parser) parseBlockStatement() *statements.Block {
-	p.nextToken()
+func (p *Parser) parseBlock() *statements.Block {
+	p.nextTokenSkipComments()
 
-	stmts := p.parseStatementsUntil(slang.TokenRBRACE)
+	stmts := p.parseBlockStatements()
 
 	return statements.NewBlock(stmts...)
 }
@@ -189,7 +189,7 @@ func (p *Parser) parseNot() slang.Expression {
 type newPrefixExprFn func(slang.Expression) slang.Expression
 
 func (p *Parser) parsePrefixExpr(fn newPrefixExprFn) slang.Expression {
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	val := p.parseExpression(PrecedencePREFIX)
 
@@ -239,7 +239,7 @@ func (p *Parser) parseMethodCall(obj slang.Expression) slang.Expression {
 	args := []slang.Expression{}
 
 	if p.peekTokenIs(slang.TokenLPAREN) {
-		p.nextToken()
+		p.nextTokenSkipComments()
 
 		args = p.parseCallArgs()
 	}
@@ -254,7 +254,7 @@ func (p *Parser) parseFunctionCall(fn slang.Expression) slang.Expression {
 }
 
 func (p *Parser) parseIndex(ary slang.Expression) slang.Expression {
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	idx := p.parseExpression(PrecedenceLOWEST)
 
@@ -270,7 +270,7 @@ func (p *Parser) parseCallArgs() []slang.Expression {
 
 	noArgs := p.peekTokenIs(slang.TokenRPAREN)
 
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	if noArgs {
 		return args
@@ -279,8 +279,8 @@ func (p *Parser) parseCallArgs() []slang.Expression {
 	args = append(args, p.parseExpression(PrecedenceLOWEST))
 
 	for p.peekTokenIs(slang.TokenCOMMA) {
-		p.nextToken()
-		p.nextToken()
+		p.nextTokenSkipComments()
+		p.nextTokenSkipComments()
 
 		args = append(args, p.parseExpression(PrecedenceLOWEST))
 	}
@@ -337,7 +337,7 @@ type newInfixExprFn func(left, right slang.Expression) slang.Expression
 func (p *Parser) parseInfixExpr(left slang.Expression, fn newInfixExprFn) slang.Expression {
 	prec := p.curPrecedence()
 
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	right := p.parseExpression(prec)
 

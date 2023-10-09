@@ -10,7 +10,24 @@ import (
 
 var errBadStatementStart = errors.New("bad statment start")
 
-func (p *Parser) parseStatement() slang.Statement {
+func (p *Parser) parseFileStatement() slang.Statement {
+	var s slang.Statement
+
+	switch p.curToken.Info.Type() {
+	case slang.TokenIDENT:
+		if p.peekTokenIs(slang.TokenASSIGN) {
+			s = p.parseAssignStatement()
+		} else {
+			s = p.parseExprStatement()
+		}
+	default:
+		s = p.parseExprStatement()
+	}
+
+	return s
+}
+
+func (p *Parser) parseBlockStatement() slang.Statement {
 	var s slang.Statement
 
 	switch p.curToken.Info.Type() {
@@ -30,7 +47,7 @@ func (p *Parser) parseStatement() slang.Statement {
 }
 
 func (p *Parser) parseRetStatement() slang.Statement {
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	expr := p.parseExpression(PrecedenceLOWEST)
 
@@ -40,9 +57,9 @@ func (p *Parser) parseRetStatement() slang.Statement {
 func (p *Parser) parseAssignStatement() slang.Statement {
 	ident := expressions.NewIdentifier(p.curToken.Info.Value())
 
-	p.nextToken()
+	p.nextTokenSkipComments()
 
-	p.nextToken()
+	p.nextTokenSkipComments()
 
 	expr := p.parseExpression(PrecedenceLOWEST)
 
