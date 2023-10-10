@@ -135,7 +135,7 @@ func (p *Parser) parseFuncParams() []*expressions.Identifier {
 		return params
 	}
 
-	if !p.expectPeekAndAdvance(slang.TokenIDENT) {
+	if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
 		return nil
 	}
 
@@ -144,7 +144,7 @@ func (p *Parser) parseFuncParams() []*expressions.Identifier {
 	for p.peekTokenIs(slang.TokenCOMMA) {
 		p.nextTokenSkipComments()
 
-		if !p.expectPeekAndAdvance(slang.TokenIDENT) {
+		if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
 			return nil
 		}
 
@@ -231,7 +231,7 @@ func (p *Parser) parseFloat() slang.Expression {
 }
 
 func (p *Parser) parseMethodCall(obj slang.Expression) slang.Expression {
-	if !p.expectPeekAndAdvance(slang.TokenIDENT) {
+	if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
 		return nil
 	}
 

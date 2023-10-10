@@ -41,7 +41,7 @@ func New(l slang.Lexer) *Parser {
 		infixParseFns:  map[slang.TokenType]infixParseFn{},
 	}
 
-	p.registerPrefix(slang.TokenIDENT, p.parseIdentifier)
+	p.registerPrefix(slang.TokenSYMBOL, p.parseIdentifier)
 	p.registerPrefix(slang.TokenINT, p.parseInteger)
 	p.registerPrefix(slang.TokenFLOAT, p.parseFloat)
 	p.registerPrefix(slang.TokenSTRING, p.parseString)
