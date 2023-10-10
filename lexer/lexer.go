@@ -63,7 +63,7 @@ func (l *Lexer) NextToken() *slang.Token {
 	case l.cur == '"':
 		tokInfo = l.readString()
 	case isLetterOrUnderscore(l.cur):
-		tokInfo = l.readIdentOrKeyword()
+		tokInfo = l.readSymbolOrKeyword()
 	case unicode.IsDigit(l.cur):
 		tokInfo = l.readNumber()
 	default:
@@ -101,7 +101,7 @@ func (l *Lexer) readComment() slang.TokenInfo {
 
 func isSymbol(r rune) bool {
 	switch r {
-	case '!', '>', '<', '=', '.', ',', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
+	case '!', '>', '<', '=', '.', ',', ':', ';', '(', ')', '{', '}', '+', '-', '*', '/', '[', ']':
 		return true
 	}
 
@@ -132,6 +132,8 @@ func (l *Lexer) readSymbol() slang.TokenInfo {
 		tok = tokens.DOT()
 	case ',':
 		tok = tokens.COMMA()
+	case ':':
+		tok = tokens.COLON()
 	case ';':
 		tok = tokens.SEMICOLON()
 	case '(':
@@ -263,7 +265,7 @@ func (l *Lexer) readString() slang.TokenInfo {
 	return tokens.STRING(string(runes))
 }
 
-func (l *Lexer) readIdentOrKeyword() slang.TokenInfo {
+func (l *Lexer) readSymbolOrKeyword() slang.TokenInfo {
 	runes := []rune{l.cur}
 
 	for unicode.IsDigit(l.next) || isLetterOrUnderscore(l.next) {
@@ -289,7 +291,7 @@ func (l *Lexer) readIdentOrKeyword() slang.TokenInfo {
 		return tokens.TRUE()
 	}
 
-	return tokens.IDENT(str)
+	return tokens.SYMBOL(str)
 }
 
 func (l *Lexer) readNumber() slang.TokenInfo {

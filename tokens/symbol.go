@@ -2,10 +2,10 @@ package tokens
 
 import "github.com/jamestunnell/slang"
 
-type Ident struct {
+type Symbol struct {
 	val string
 }
 
-func IDENT(val string) slang.TokenInfo { return &Ident{val: val} }
-func (t *Ident) Type() slang.TokenType { return slang.TokenIDENT }
-func (t *Ident) Value() string         { return t.val }
+func SYMBOL(val string) slang.TokenInfo { return &Symbol{val: val} }
+func (t *Symbol) Type() slang.TokenType { return slang.TokenSYMBOL }
+func (t *Symbol) Value() string         { return t.val }

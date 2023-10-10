@@ -36,10 +36,10 @@ func (loc SourceLocation) String() string {
 const (
 	TokenASSIGN TokenType = iota
 	TokenBANG
+	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
 	TokenDOT
-	TokenIDENT
 	TokenIF
 	TokenELSE
 	TokenEOF
@@ -74,6 +74,7 @@ const (
 	TokenSTAR
 	TokenSTAREQUAL
 	TokenSTRING
+	TokenSYMBOL
 	TokenTRUE
 )
 
@@ -85,12 +86,12 @@ func (tt TokenType) String() string {
 		str = "ASSIGN"
 	case TokenBANG:
 		str = "BANG"
+	case TokenCOLON:
+		str = "COLON"
 	case TokenCOMMA:
 		str = "COMMA"
 	case TokenDOT:
 		str = "DOT"
-	case TokenIDENT:
-		str = "IDENT"
 	case TokenIF:
 		str = "IF"
 	case TokenELSE:
@@ -159,6 +160,8 @@ func (tt TokenType) String() string {
 		str = "STAREQUAL"
 	case TokenSTRING:
 		str = "STRING"
+	case TokenSYMBOL:
+		str = "SYMBOL"
 	case TokenTRUE:
 		str = "TRUE"
 	}
