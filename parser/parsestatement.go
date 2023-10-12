@@ -14,7 +14,7 @@ func (p *Parser) parseFileStatement() slang.Statement {
 	var s slang.Statement
 
 	switch p.curToken.Info.Type() {
-	case slang.TokenIDENT:
+	case slang.TokenSYMBOL:
 		if p.peekTokenIs(slang.TokenASSIGN) {
 			s = p.parseAssignStatement()
 		} else {
@@ -33,7 +33,7 @@ func (p *Parser) parseBlockStatement() slang.Statement {
 	switch p.curToken.Info.Type() {
 	case slang.TokenRETURN:
 		s = p.parseRetStatement()
-	case slang.TokenIDENT:
+	case slang.TokenSYMBOL:
 		if p.peekTokenIs(slang.TokenASSIGN) {
 			s = p.parseAssignStatement()
 		} else {

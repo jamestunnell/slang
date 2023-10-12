@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Integer struct {
@@ -58,7 +59,7 @@ func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object,
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassINTEGER)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassINTEGER)
 
 	return nil, err
 }
@@ -66,7 +67,7 @@ func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object,
 func (obj *Integer) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	otherInt, ok := arg.(*Integer)
 	if !ok {
-		return nil, slang.NewErrArgType(ClassFLOAT, arg.Class().Name())
+		return nil, customerrs.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
 	var ret slang.Object
@@ -107,7 +108,7 @@ func intAbs(val int64) int64 {
 
 func checkArgCount(args []slang.Object, count int) error {
 	if len(args) != count {
-		return slang.NewErrArgCount(count, len(args))
+		return customerrs.NewErrArgCount(count, len(args))
 	}
 
 	return nil
