@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type CallFn func(args ...slang.Object) (slang.Object, error)
@@ -66,7 +67,7 @@ func (obj *BuiltInFn) Send(methodName string, args ...slang.Object) (slang.Objec
 		return obj.Fn(args...)
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassBUILTINFN)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassBUILTINFN)
 
 	return nil, err
 }

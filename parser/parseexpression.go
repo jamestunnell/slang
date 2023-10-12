@@ -122,33 +122,48 @@ func (p *Parser) parseFuncLiteral() slang.Expression {
 	return expressions.NewFunctionLiteral(params, body)
 }
 
-func (p *Parser) parseFuncParams() []*expressions.Identifier {
-	params := []*expressions.Identifier{}
-	addCur := func() {
-		params = append(params,
-			expressions.NewIdentifier(p.curToken.Info.Value()))
-	}
-
+func (p *Parser) parseFuncParams() []*slang.Param {
+	params := []*slang.Param{}
 	if p.peekTokenIs(slang.TokenRPAREN) {
 		p.nextTokenSkipComments() // end on RPAREN
 
 		return params
 	}
 
+	// require a symbol for param name
 	if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
 		return nil
 	}
 
-	addCur()
+	paramName := p.curToken.Info.Value()
+
+	// require a symbol for param type
+	if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
+		return nil
+	}
+
+	paramType := p.curToken.Info.Value()
+
+	params = append(params, slang.NewParam(paramName, paramType))
 
 	for p.peekTokenIs(slang.TokenCOMMA) {
 		p.nextTokenSkipComments()
 
+		// require a symbole for param name
 		if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
 			return nil
 		}
 
-		addCur()
+		paramName = p.curToken.Info.Value()
+
+		// require a symbol for param type
+		if !p.expectPeekAndAdvance(slang.TokenSYMBOL) {
+			return nil
+		}
+
+		paramType := p.curToken.Info.Value()
+
+		params = append(params, slang.NewParam(paramName, paramType))
 	}
 
 	if !p.expectPeekAndAdvance(slang.TokenRPAREN) {

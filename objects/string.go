@@ -2,6 +2,7 @@ package objects
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type String struct {
@@ -54,7 +55,7 @@ func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, 
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassSTRING)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
 
 	return nil, err
 }
@@ -62,7 +63,7 @@ func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, 
 func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*String)
 	if !ok {
-		return nil, slang.NewErrArgType(ClassSTRING, arg.Class().Name())
+		return nil, customerrs.NewErrArgType(ClassSTRING, arg.Class().Name())
 	}
 
 	var ret slang.Object

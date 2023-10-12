@@ -1,6 +1,9 @@
 package objects
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
+)
 
 type Null struct {
 }
@@ -36,5 +39,5 @@ func (obj *Null) Send(methodName string, args ...slang.Object) (slang.Object, er
 		return m.Run(args)
 	}
 
-	return nil, slang.NewErrMethodUndefined(methodName, ClassNULL)
+	return nil, customerrs.NewErrMethodUndefined(methodName, ClassNULL)
 }

@@ -2,6 +2,7 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 	"github.com/jamestunnell/slang/objects"
 )
 
@@ -30,7 +31,7 @@ func (expr *Identifier) Eval(env *slang.Environment) (slang.Object, error) {
 		obj, found = objects.FindBuiltInFn(expr.Name)
 
 		if !found {
-			return nil, slang.NewErrObjectNotFound(expr.Name)
+			return nil, customerrs.NewErrObjectNotFound(expr.Name)
 		}
 	}
 
