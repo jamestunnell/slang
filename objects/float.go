@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Float struct {
@@ -52,7 +53,7 @@ func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, e
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassFLOAT)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassFLOAT)
 
 	return nil, err
 }
@@ -60,7 +61,7 @@ func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, e
 func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*Float)
 	if !ok {
-		return nil, slang.NewErrArgType(ClassFLOAT, arg.Class().Name())
+		return nil, customerrs.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
 	var ret slang.Object

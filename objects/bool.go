@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Bool struct {
@@ -46,7 +47,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 
 		arg, ok := args[0].(*Bool)
 		if !ok {
-			return nil, slang.NewErrArgType(ClassBOOL, args[0].Class().Name())
+			return nil, customerrs.NewErrArgType(ClassBOOL, args[0].Class().Name())
 		}
 
 		var ret slang.Object
@@ -60,7 +61,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 		return ret, nil
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassBOOL)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
 
 	return nil, err
 }

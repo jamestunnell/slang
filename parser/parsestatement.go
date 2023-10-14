@@ -16,7 +16,7 @@ func (p *Parser) parseStatement() slang.Statement {
 	switch p.curToken.Info.Type() {
 	case slang.TokenRETURN:
 		s = p.parseRetStatement()
-	case slang.TokenIDENT:
+	case slang.TokenSYMBOL:
 		if p.peekTokenIs(slang.TokenASSIGN) {
 			s = p.parseAssignStatement()
 		} else {

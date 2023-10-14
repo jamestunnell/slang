@@ -12,7 +12,7 @@ import (
 )
 
 func TestLexer_IndentWithDigits(t *testing.T) {
-	testLexer(t, "var_1", tok(tokens.IDENT("var_1"), 1, 1))
+	testLexer(t, "var_1", tok(tokens.SYMBOL("var_1"), 1, 1))
 }
 
 func tok(info slang.TokenInfo, line, col int) *slang.Token {
@@ -37,7 +37,7 @@ func TestLexer_StringPlusString(t *testing.T) {
 
 func TestLexer_AssignInt(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.IDENT("x"), 1, 4),
+		tok(tokens.SYMBOL("x"), 1, 4),
 		tok(tokens.ASSIGN(), 1, 5),
 		tok(tokens.INT("5"), 1, 6),
 	}
@@ -47,7 +47,7 @@ func TestLexer_AssignInt(t *testing.T) {
 
 func TestLexer_Comment(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.IDENT("x"), 1, 1),
+		tok(tokens.SYMBOL("x"), 1, 1),
 		tok(tokens.PLUS(), 1, 3),
 		tok(tokens.INT("10"), 1, 5),
 	}
@@ -59,10 +59,10 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 	const str = "x = 5\ny = 10"
 
 	expected := []*slang.Token{
-		tok(tokens.IDENT("x"), 1, 1),
+		tok(tokens.SYMBOL("x"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
 		tok(tokens.INT("5"), 1, 5),
-		tok(tokens.IDENT("y"), 2, 1),
+		tok(tokens.SYMBOL("y"), 2, 1),
 		tok(tokens.ASSIGN(), 2, 3),
 		tok(tokens.INT("10"), 2, 5),
 	}
@@ -76,7 +76,7 @@ func TestLexer_IntMethodCall(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.INT("25"), 1, 1),
 		tok(tokens.DOT(), 1, 3),
-		tok(tokens.IDENT("add"), 1, 4),
+		tok(tokens.SYMBOL("add"), 1, 4),
 		tok(tokens.LPAREN(), 1, 7),
 		tok(tokens.INT("12"), 1, 8),
 		tok(tokens.RPAREN(), 1, 10),
@@ -87,7 +87,7 @@ func TestLexer_IntMethodCall(t *testing.T) {
 
 func TestLexer_FloatMath(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.IDENT("my_num"), 1, 1),
+		tok(tokens.SYMBOL("my_num"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 8),
 		tok(tokens.LPAREN(), 1, 10),
 		tok(tokens.FLOAT("2.5"), 1, 11),
@@ -96,7 +96,7 @@ func TestLexer_FloatMath(t *testing.T) {
 		tok(tokens.RPAREN(), 1, 20),
 		tok(tokens.STAR(), 1, 22),
 		tok(tokens.LPAREN(), 1, 24),
-		tok(tokens.IDENT("otherNum"), 1, 25),
+		tok(tokens.SYMBOL("otherNum"), 1, 25),
 		tok(tokens.SLASH(), 1, 34),
 		tok(tokens.FLOAT("33.5"), 1, 36),
 		tok(tokens.RPAREN(), 1, 40),
@@ -106,14 +106,17 @@ func TestLexer_FloatMath(t *testing.T) {
 }
 
 func TestLexer_AssignFunc(t *testing.T) {
-	input := "y = func() { \n\treturn 7\n}"
+	input := "y = func(myName: uint) { \n\treturn 7\n}"
 	expected := []*slang.Token{
-		tok(tokens.IDENT("y"), 1, 1),
+		tok(tokens.SYMBOL("y"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
 		tok(tokens.FUNC(), 1, 5),
 		tok(tokens.LPAREN(), 1, 9),
-		tok(tokens.RPAREN(), 1, 10),
-		tok(tokens.LBRACE(), 1, 12),
+		tok(tokens.SYMBOL("myName"), 1, 10),
+		tok(tokens.COLON(), 1, 16),
+		tok(tokens.SYMBOL("uint"), 1, 18),
+		tok(tokens.RPAREN(), 1, 22),
+		tok(tokens.LBRACE(), 1, 24),
 		tok(tokens.RETURN(), 2, 2),
 		tok(tokens.INT("7"), 2, 9),
 		tok(tokens.RBRACE(), 3, 1),

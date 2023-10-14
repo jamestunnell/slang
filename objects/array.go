@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Array struct {
@@ -65,7 +66,7 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 		return obj.Index(args[0])
 	}
 
-	err := slang.NewErrMethodUndefined(methodName, ClassARRAY)
+	err := customerrs.NewErrMethodUndefined(methodName, ClassARRAY)
 
 	return nil, err
 }
@@ -73,11 +74,11 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
 	idx, ok := arg.(*Integer)
 	if !ok {
-		return nil, slang.NewErrArgType(ClassINTEGER, arg.Class().Name())
+		return nil, customerrs.NewErrArgType(ClassINTEGER, arg.Class().Name())
 	}
 
 	if int(idx.Value) >= len(obj.Elements) {
-		return nil, slang.NewErrArrayBounds(idx.Value, int64(len(obj.Elements)))
+		return nil, customerrs.NewErrArrayBounds(idx.Value, int64(len(obj.Elements)))
 	}
 
 	return obj.Elements[idx.Value], nil

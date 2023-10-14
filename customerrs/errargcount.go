@@ -1,4 +1,4 @@
-package slang
+package customerrs
 
 import "fmt"
 

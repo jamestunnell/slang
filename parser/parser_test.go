@@ -148,14 +148,12 @@ func TestParserFunctionReturnStatement(t *testing.T) {
 	r := expressions.NewIdentifier("num")
 	add := expressions.NewAdd(l, r)
 	ret := statements.NewReturn(add)
-	fnParams := []*expressions.Identifier{
-		expressions.NewIdentifier("num"),
-	}
+	fnParams := []*slang.Param{slang.NewParam("num", "Integer")}
 	fnBody := statements.NewBlock(ret)
 	fn := expressions.NewFunctionLiteral(fnParams, fnBody)
 	assign := statements.NewAssign(expressions.NewIdentifier("x"), fn)
 
-	testParser(t, "x = func(num){return 12.77 + num}", assign)
+	testParser(t, "x = func(num Integer){return 12.77 + num}", assign)
 }
 
 func TestParserErrsIfMissingRBrace(t *testing.T) {
@@ -236,8 +234,7 @@ func TestParserFuncLiteralNoParams(t *testing.T) {
 	body := statements.NewBlock(
 		statements.NewReturn(expressions.NewInteger(7)),
 	)
-	af := expressions.NewFunctionLiteral(
-		[]*expressions.Identifier{}, body)
+	af := expressions.NewFunctionLiteral([]*slang.Param{}, body)
 	assign := statements.NewAssign(
 		expressions.NewIdentifier("myvar"), af)
 
@@ -252,8 +249,8 @@ func TestParserFuncLiteralOneParams(t *testing.T) {
 	body := statements.NewBlock(
 		statements.NewReturn(expressions.NewInteger(7)),
 	)
-	af := expressions.NewFunctionLiteral(
-		[]*expressions.Identifier{expressions.NewIdentifier("x")}, body)
+	params := []*slang.Param{slang.NewParam("x", "Integer")}
+	af := expressions.NewFunctionLiteral(params, body)
 	assign := statements.NewAssign(
 		expressions.NewIdentifier("myvar"), af)
 
@@ -261,18 +258,18 @@ func TestParserFuncLiteralOneParams(t *testing.T) {
 }
 
 func TestParserFuncLiteralTwoParams(t *testing.T) {
-	const input = `myvar = func(x, y){
+	const input = `myvar = func(x Integer, y Float){
 		return 7
 	}`
 
 	body := statements.NewBlock(
 		statements.NewReturn(expressions.NewInteger(7)),
 	)
-	af := expressions.NewFunctionLiteral(
-		[]*expressions.Identifier{
-			expressions.NewIdentifier("x"),
-			expressions.NewIdentifier("y"),
-		}, body)
+	params := []*slang.Param{
+		slang.NewParam("x", "Integer"),
+		slang.NewParam("y", "Float"),
+	}
+	af := expressions.NewFunctionLiteral(params, body)
 	assign := statements.NewAssign(
 		expressions.NewIdentifier("myvar"), af)
 
