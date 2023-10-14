@@ -69,8 +69,11 @@ func TestParserErrsAssignMissingValue(t *testing.T) {
 	testParserErrs(t, "x = ")
 }
 
-func TestParserErrsAssignMissingEqual(t *testing.T) {
-	testParserErrs(t, "x 5")
+func TestParserTwoExpressionStatementsSeparatedBySpace(t *testing.T) {
+	x := expressions.NewIdentifier("x")
+	five := expressions.NewInteger(5)
+
+	testParser(t, "x 5", se(x), se(five))
 }
 
 func TestParserGroupedExpr(t *testing.T) {

@@ -50,7 +50,6 @@ func TestLexer_Comment(t *testing.T) {
 		tok(tokens.IDENT("x"), 1, 1),
 		tok(tokens.PLUS(), 1, 3),
 		tok(tokens.INT("10"), 1, 5),
-		tok(tokens.COMMENT(" + 15"), 1, 8),
 	}
 
 	testLexer(t, "x + 10 # + 15", expected...)
@@ -63,7 +62,6 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 		tok(tokens.IDENT("x"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
 		tok(tokens.INT("5"), 1, 5),
-		tok(tokens.LINE(), 1, 6),
 		tok(tokens.IDENT("y"), 2, 1),
 		tok(tokens.ASSIGN(), 2, 3),
 		tok(tokens.INT("10"), 2, 5),
@@ -116,10 +114,8 @@ func TestLexer_AssignFunc(t *testing.T) {
 		tok(tokens.LPAREN(), 1, 9),
 		tok(tokens.RPAREN(), 1, 10),
 		tok(tokens.LBRACE(), 1, 12),
-		tok(tokens.LINE(), 1, 14),
 		tok(tokens.RETURN(), 2, 2),
 		tok(tokens.INT("7"), 2, 9),
-		tok(tokens.LINE(), 2, 10),
 		tok(tokens.RBRACE(), 3, 1),
 	}
 

@@ -69,8 +69,8 @@ func New(l slang.Lexer) *Parser {
 	p.registerInfix(slang.TokenLBRACKET, p.parseIndex)
 
 	// Read two tokens to get current and next
-	p.nextTokenSkipComments()
-	p.nextTokenSkipComments()
+	p.nextToken()
+	p.nextToken()
 
 	return p
 }
@@ -82,14 +82,9 @@ func (p *Parser) registerInfix(tokenType slang.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
-func (p *Parser) nextTokenSkipComments() {
-	tok := p.lexer.NextToken()
-	for tok.Info.Type() == slang.TokenCOMMENT {
-		tok = p.lexer.NextToken()
-	}
-
+func (p *Parser) nextToken(types ...slang.TokenType) {
 	p.curToken = p.peekToken
-	p.peekToken = tok
+	p.peekToken = p.lexer.NextToken()
 }
 
 // func (p *Parser) nextTokenSkipLines() {
@@ -122,57 +117,28 @@ func (p *Parser) Run() *ParseResults {
 }
 
 func (p *Parser) parseFileStatements() []slang.Statement {
-	// skip past empty lines at the beginning
-	for p.curTokenIs(slang.TokenLINE) {
-		p.nextTokenSkipComments()
-	}
-
 	statements := []slang.Statement{}
 
 	for !p.curTokenIs(slang.TokenEOF) {
-		if st := p.parseFileStatement(); st != nil {
+		if st := p.parseStatement(); st != nil {
 			statements = append(statements, st)
 		}
 
-		if !p.expectPeek(slang.TokenLINE, slang.TokenEOF) {
-			p.nextTokenSkipComments()
-		}
-
-		p.nextTokenSkipComments()
-
-		// remove extra lines
-		for p.curTokenIs(slang.TokenLINE) {
-			p.nextTokenSkipComments()
-		}
+		p.nextToken()
 	}
 
 	return statements
 }
 
 func (p *Parser) parseBlockStatements() []slang.Statement {
-	// skip past empty lines at the beginning
-	for p.curTokenIs(slang.TokenLINE) {
-		p.nextTokenSkipComments()
-	}
-
 	statements := []slang.Statement{}
 
-	// read each statement until RBRACE or EOF
 	for !p.curTokenIs(slang.TokenEOF, slang.TokenRBRACE) {
-		if st := p.parseBlockStatement(); st != nil {
+		if st := p.parseStatement(); st != nil {
 			statements = append(statements, st)
 		}
 
-		if !p.expectPeek(slang.TokenLINE, slang.TokenRBRACE) {
-			p.nextTokenSkipComments()
-		}
-
-		p.nextTokenSkipComments()
-
-		// remove extra lines
-		for p.curTokenIs(slang.TokenLINE) {
-			p.nextTokenSkipComments()
-		}
+		p.nextToken()
 	}
 
 	// if we quit loop because of EOF then the block wasn't terminated correctly
@@ -233,7 +199,7 @@ func (p *Parser) expectPeekAndAdvance(expectedTypes ...slang.TokenType) bool {
 		return false
 	}
 
-	p.nextTokenSkipComments()
+	p.nextToken()
 
 	return true
 }

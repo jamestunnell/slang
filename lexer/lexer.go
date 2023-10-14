@@ -39,8 +39,8 @@ func New(scanner io.RuneScanner) slang.Lexer {
 func (l *Lexer) NextToken() *slang.Token {
 	var tokInfo slang.TokenInfo
 
-	for isSpaceOrTab(l.cur) {
-		l.advance()
+	for isWhitespaceOrComment(l.cur) {
+		l.skipWhitespaceOrComment()
 	}
 
 	loc := slang.SourceLocation{
@@ -49,13 +49,6 @@ func (l *Lexer) NextToken() *slang.Token {
 	}
 
 	switch {
-	case l.cur == '\n' || (l.cur == '\r' && l.next == '\n'):
-		tokInfo = tokens.LINE()
-
-		l.line++
-		l.col = 0
-	case l.cur == '#':
-		tokInfo = l.readComment()
 	case isSymbol(l.cur):
 		tokInfo = l.readSymbol()
 	case l.cur == eof:
@@ -85,18 +78,22 @@ func (l *Lexer) advance() {
 	l.nextNext = r
 }
 
-func (l *Lexer) readComment() slang.TokenInfo {
-	runes := []rune{}
+func (l *Lexer) skipWhitespaceOrComment() {
+	switch l.cur {
+	case ' ', '\t', '\r':
+		l.advance()
+	case '#':
+		l.advance()
 
-	for l.next != eof && l.next != '\n' {
-		if l.next != '\r' {
-			runes = append(runes, l.next)
+		for l.cur != eof && l.cur != '\n' {
+			l.advance()
 		}
+	case '\n':
+		l.line++
+		l.col = 0
 
 		l.advance()
 	}
-
-	return tokens.COMMENT(string(runes))
 }
 
 func isSymbol(r rune) bool {
@@ -332,4 +329,13 @@ func isSpaceOrTab(r rune) bool {
 
 func isLine(r rune) bool {
 	return r == '\v' || r == '\f' || r == '\n'
+}
+
+func isWhitespaceOrComment(r rune) bool {
+	switch r {
+	case ' ', '\t', '\r', '\n', '#':
+		return true
+	}
+
+	return false
 }
