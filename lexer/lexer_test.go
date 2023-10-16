@@ -70,6 +70,34 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 	testLexer(t, str, expected...)
 }
 
+func TestLexer_Use(t *testing.T) {
+	const str = `use "lib/console"`
+
+	expected := []*slang.Token{
+		tok(tokens.USE(), 1, 1),
+		tok(tokens.STRING("lib/console"), 1, 5),
+	}
+
+	testLexer(t, str, expected...)
+}
+
+func TestLexer_StructBlock(t *testing.T) {
+	const str = `struct X {
+		Y string
+	}`
+
+	expected := []*slang.Token{
+		tok(tokens.STRUCT(), 1, 1),
+		tok(tokens.SYMBOL("X"), 1, 8),
+		tok(tokens.LBRACE(), 1, 10),
+		tok(tokens.SYMBOL("Y"), 2, 3),
+		tok(tokens.SYMBOL("string"), 2, 5),
+		tok(tokens.RBRACE(), 3, 2),
+	}
+
+	testLexer(t, str, expected...)
+}
+
 func TestLexer_IntMethodCall(t *testing.T) {
 	const str = "25.add(12)"
 
@@ -136,8 +164,12 @@ func testLexer(t *testing.T, input string, expected ...*slang.Token) {
 }
 
 func testTokensEqual(t *testing.T, exp, act *slang.Token) {
-	assert.Equal(t, exp.Info.Type(), act.Info.Type())
-	assert.Equal(t, exp.Info.Value(), act.Info.Value())
-	assert.Equal(t, exp.Location.Line, act.Location.Line)
-	assert.Equal(t, exp.Location.Column, act.Location.Column)
+	result := assert.Equal(t, exp.Info.Type(), act.Info.Type()) &&
+		assert.Equal(t, exp.Info.Value(), act.Info.Value()) &&
+		assert.Equal(t, exp.Location.Line, act.Location.Line) &&
+		assert.Equal(t, exp.Location.Column, act.Location.Column)
+
+	if !result {
+		t.Errorf("expected token %v does not equal actual %v", exp, act)
+	}
 }

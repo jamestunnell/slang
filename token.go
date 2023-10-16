@@ -74,8 +74,10 @@ const (
 	TokenSTAR
 	TokenSTAREQUAL
 	TokenSTRING
+	TokenSTRUCT
 	TokenSYMBOL
 	TokenTRUE
+	TokenUSE
 )
 
 func (tt TokenType) String() string {

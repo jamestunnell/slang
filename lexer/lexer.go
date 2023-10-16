@@ -284,8 +284,12 @@ func (l *Lexer) readSymbolOrKeyword() slang.TokenInfo {
 		return tokens.IF()
 	case tokens.StrRETURN:
 		return tokens.RETURN()
+	case tokens.StrSTRUCT:
+		return tokens.STRUCT()
 	case tokens.StrTRUE:
 		return tokens.TRUE()
+	case tokens.StrUSE:
+		return tokens.USE()
 	}
 
 	return tokens.SYMBOL(str)
