@@ -35,6 +35,25 @@ func TestLexer_StringPlusString(t *testing.T) {
 	testLexer(t, `"foo bar"`, expected...)
 }
 
+func TestLexer_WholeLineComment(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.COMMENT("# not gonna lie..."), 1, 3),
+	}
+
+	testLexer(t, `  # not gonna lie...`, expected...)
+}
+
+func TestLexer_InlineComment(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("x"), 1, 1),
+		tok(tokens.ASSIGN(), 1, 3),
+		tok(tokens.INT("10"), 1, 5),
+		tok(tokens.COMMENT("# this is why"), 1, 8),
+	}
+
+	testLexer(t, `x = 10 # this is why`, expected...)
+}
+
 func TestLexer_AssignInt(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("x"), 1, 4),
@@ -45,16 +64,6 @@ func TestLexer_AssignInt(t *testing.T) {
 	testLexer(t, "   x=5", expected...)
 }
 
-func TestLexer_Comment(t *testing.T) {
-	expected := []*slang.Token{
-		tok(tokens.SYMBOL("x"), 1, 1),
-		tok(tokens.PLUS(), 1, 3),
-		tok(tokens.INT("10"), 1, 5),
-	}
-
-	testLexer(t, "x + 10 # + 15", expected...)
-}
-
 func TestLexer_StatementsWithNewline(t *testing.T) {
 	const str = "x = 5\ny = 10"
 
@@ -62,6 +71,7 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 		tok(tokens.SYMBOL("x"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
 		tok(tokens.INT("5"), 1, 5),
+		tok(tokens.NEWLINE(), 1, 6),
 		tok(tokens.SYMBOL("y"), 2, 1),
 		tok(tokens.ASSIGN(), 2, 3),
 		tok(tokens.INT("10"), 2, 5),
@@ -90,8 +100,10 @@ func TestLexer_StructBlock(t *testing.T) {
 		tok(tokens.STRUCT(), 1, 1),
 		tok(tokens.SYMBOL("X"), 1, 8),
 		tok(tokens.LBRACE(), 1, 10),
+		tok(tokens.NEWLINE(), 1, 11),
 		tok(tokens.SYMBOL("Y"), 2, 3),
 		tok(tokens.SYMBOL("string"), 2, 5),
+		tok(tokens.NEWLINE(), 2, 11),
 		tok(tokens.RBRACE(), 3, 2),
 	}
 
@@ -134,7 +146,7 @@ func TestLexer_FloatMath(t *testing.T) {
 }
 
 func TestLexer_AssignFunc(t *testing.T) {
-	input := "y = func(myName: uint) { \n\treturn 7\n}"
+	input := "y = func(myName: uint) {\n\treturn 7\n}"
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("y"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
@@ -145,8 +157,10 @@ func TestLexer_AssignFunc(t *testing.T) {
 		tok(tokens.SYMBOL("uint"), 1, 18),
 		tok(tokens.RPAREN(), 1, 22),
 		tok(tokens.LBRACE(), 1, 24),
+		tok(tokens.NEWLINE(), 1, 25),
 		tok(tokens.RETURN(), 2, 2),
 		tok(tokens.INT("7"), 2, 9),
+		tok(tokens.NEWLINE(), 2, 10),
 		tok(tokens.RBRACE(), 3, 1),
 	}
 

@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"io"
+	"strings"
 	"unicode"
 
 	"github.com/rs/zerolog/log"
@@ -39,9 +40,7 @@ func New(scanner io.RuneScanner) slang.Lexer {
 func (l *Lexer) NextToken() *slang.Token {
 	var tokInfo slang.TokenInfo
 
-	for isWhitespaceOrComment(l.cur) {
-		l.skipWhitespaceOrComment()
-	}
+	l.skipWhitespace()
 
 	loc := slang.SourceLocation{
 		Line:   l.line,
@@ -49,6 +48,10 @@ func (l *Lexer) NextToken() *slang.Token {
 	}
 
 	switch {
+	case l.cur == '#':
+		tokInfo = l.readComment()
+	case l.cur == '\n':
+		tokInfo = l.readNewline()
 	case isSymbol(l.cur):
 		tokInfo = l.readSymbol()
 	case l.cur == eof:
@@ -78,20 +81,8 @@ func (l *Lexer) advance() {
 	l.nextNext = r
 }
 
-func (l *Lexer) skipWhitespaceOrComment() {
-	switch l.cur {
-	case ' ', '\t', '\r':
-		l.advance()
-	case '#':
-		l.advance()
-
-		for l.cur != eof && l.cur != '\n' {
-			l.advance()
-		}
-	case '\n':
-		l.line++
-		l.col = 0
-
+func (l *Lexer) skipWhitespace() {
+	for l.cur == ' ' || l.cur == '\t' || l.cur == '\r' {
 		l.advance()
 	}
 }
@@ -103,6 +94,29 @@ func isSymbol(r rune) bool {
 	}
 
 	return false
+}
+
+func (l *Lexer) readComment() slang.TokenInfo {
+	var b strings.Builder
+
+	b.WriteRune('#')
+
+	l.advance()
+
+	for l.cur != eof && l.cur != '\n' {
+		b.WriteRune(l.cur)
+
+		l.advance()
+	}
+
+	return tokens.COMMENT(b.String())
+}
+
+func (l *Lexer) readNewline() slang.TokenInfo {
+	l.line++
+	l.col = 0
+
+	return tokens.NEWLINE()
 }
 
 func (l *Lexer) readSymbol() slang.TokenInfo {
@@ -327,21 +341,4 @@ func (l *Lexer) readNumber() slang.TokenInfo {
 
 func isLetterOrUnderscore(r rune) bool {
 	return unicode.IsLetter(r) || r == '_'
-}
-
-func isSpaceOrTab(r rune) bool {
-	return r == ' ' || r == '\t' || r == '\r'
-}
-
-func isLine(r rune) bool {
-	return r == '\v' || r == '\f' || r == '\n'
-}
-
-func isWhitespaceOrComment(r rune) bool {
-	switch r {
-	case ' ', '\t', '\r', '\n', '#':
-		return true
-	}
-
-	return false
 }

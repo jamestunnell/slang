@@ -55,11 +55,11 @@ const (
 	TokenLBRACKET
 	TokenLESS
 	TokenLESSEQUAL
-	TokenLINE
 	TokenLPAREN
 	TokenMINUS
 	TokenMINUSEQUAL
 	TokenMINUSMINUS
+	TokenNEWLINE
 	TokenNOTEQUAL
 	TokenPLUS
 	TokenPLUSEQUAL
@@ -124,8 +124,6 @@ func (tt TokenType) String() string {
 		str = "LESS"
 	case TokenLESSEQUAL:
 		str = "LESSEQUAL"
-	case TokenLINE:
-		str = "LINE"
 	case TokenLPAREN:
 		str = "LPAREN"
 	case TokenMINUS:
@@ -134,6 +132,8 @@ func (tt TokenType) String() string {
 		str = "MINUSEQUAL"
 	case TokenMINUSMINUS:
 		str = "MINUSMINUS"
+	case TokenNEWLINE:
+		str = "NEWLINE"
 	case TokenNOTEQUAL:
 		str = "NOTEQUAL"
 	case TokenPLUS:
