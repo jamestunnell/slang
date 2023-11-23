@@ -6,8 +6,8 @@ import (
 )
 
 type Class struct {
-	Name  string
-	Class *ast.Class
+	Name  string     `json:"name"`
+	Class *ast.Class `json:"class"`
 }
 
 func NewClass(name string, c *ast.Class) *Class {

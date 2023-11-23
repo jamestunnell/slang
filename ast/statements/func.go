@@ -6,8 +6,8 @@ import (
 )
 
 type Func struct {
-	Name     string
-	Function *ast.Function
+	Name     string        `json:"name"`
+	Function *ast.Function `json:"function"`
 }
 
 func NewFunc(name string, f *ast.Function) *Func {

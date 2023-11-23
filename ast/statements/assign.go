@@ -5,14 +5,14 @@ import (
 )
 
 type Assign struct {
-	Targets []string
-	Value   slang.Expression
+	Target string           `json:"target"`
+	Value  slang.Expression `json:"value"`
 }
 
-func NewAssign(val slang.Expression, Targets ...string) slang.Statement {
+func NewAssign(val slang.Expression, Target string) slang.Statement {
 	return &Assign{
-		Targets: Targets,
-		Value:   val,
+		Target: Target,
+		Value:  val,
 	}
 }
 
@@ -26,17 +26,7 @@ func (a *Assign) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if len(a.Targets) != len(a2.Targets) {
-		return false
-	}
-
-	for i, tgt := range a.Targets {
-		if tgt != a2.Targets[i] {
-			return false
-		}
-	}
-
-	return a2.Value.Equal(a.Value)
+	return a.Target == a2.Target && a2.Value.Equal(a.Value)
 }
 
 // func (st *Assign) Eval(env *slang.Environment) (slang.Object, error) {

@@ -5,7 +5,7 @@ import (
 )
 
 type Expression struct {
-	Value slang.Expression
+	Value slang.Expression `json:"value"`
 }
 
 func NewExpression(val slang.Expression) *Expression {

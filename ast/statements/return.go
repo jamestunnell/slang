@@ -5,11 +5,11 @@ import (
 )
 
 type Return struct {
-	value slang.Expression
+	Value slang.Expression `json:"value"`
 }
 
 func NewReturn(value slang.Expression) *Return {
-	return &Return{value: value}
+	return &Return{Value: value}
 }
 
 func (r *Return) Type() slang.StatementType {
@@ -22,7 +22,7 @@ func (r *Return) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return r2.value.Equal(r.value)
+	return r2.Value.Equal(r.Value)
 }
 
 // func (st *Return) Eval(env *slang.Environment) (slang.Object, error) {

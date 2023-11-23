@@ -10,11 +10,16 @@ type Statement interface {
 
 const (
 	StatementASSIGN StatementType = iota
-	StatementBLOCK
 	StatementEXPRESSION
 	StatementFUNC
 	StatementRETURN
 	StatementUSE
+
+	StrASSIGN     = "ASSIGN"
+	StrEXPRESSION = "EXPRESSION"
+	StrFUNC       = "FUNC"
+	StrRETURN     = "RETURN"
+	StrUSE        = "USE"
 )
 
 func (st StatementType) String() string {
@@ -22,17 +27,15 @@ func (st StatementType) String() string {
 
 	switch st {
 	case StatementASSIGN:
-		str = "ASSIGN"
-	case StatementBLOCK:
-		str = "BLOCK"
+		str = StrASSIGN
 	case StatementEXPRESSION:
-		str = "EXPRESSION"
+		str = StrEXPRESSION
 	case StatementFUNC:
-		str = "FUNC"
+		str = StrFUNC
 	case StatementRETURN:
-		str = "RETURN"
+		str = StrRETURN
 	case StatementUSE:
-		str = "USE"
+		str = StrUSE
 	}
 
 	return str
