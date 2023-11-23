@@ -288,18 +288,22 @@ func (l *Lexer) readSymbolOrKeyword() slang.TokenInfo {
 	str := string(runes)
 
 	switch str {
+	case tokens.StrCLASS:
+		return tokens.CLASS()
 	case tokens.StrELSE:
 		return tokens.ELSE()
 	case tokens.StrFALSE:
 		return tokens.FALSE()
+	case tokens.StrFIELD:
+		return tokens.FIELD()
 	case tokens.StrFUNC:
 		return tokens.FUNC()
 	case tokens.StrIF:
 		return tokens.IF()
+	case tokens.StrMETHOD:
+		return tokens.METHOD()
 	case tokens.StrRETURN:
 		return tokens.RETURN()
-	case tokens.StrSTRUCT:
-		return tokens.STRUCT()
 	case tokens.StrTRUE:
 		return tokens.TRUE()
 	case tokens.StrUSE:

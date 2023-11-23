@@ -5,22 +5,24 @@ type ExprType int
 type Expression interface {
 	Type() ExprType
 	Equal(Expression) bool
-	Eval(env *Environment) (Object, error)
+	// Eval(env *objects.Environment) (objects.Object, error)
 }
 
 const (
 	ExprADD ExprType = iota
 	ExprARRAY
 	ExprBOOL
+	ExprCALL
 	ExprDIVIDE
 	ExprEQUAL
 	ExprFLOAT
-	ExprFUNCTIONCALL
-	ExprFUNCTIONLITERAL
+	ExprFUNC
+	ExprFUNCCALL
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
 	ExprIF
+	ExprIFELSE
 	ExprINDEX
 	ExprINTEGER
 	ExprLESS
@@ -50,10 +52,10 @@ func (st ExprType) String() string {
 		str = "EQUAL"
 	case ExprFLOAT:
 		str = "FLOAT"
-	case ExprFUNCTIONCALL:
-		str = "FUNCTIONCALL"
-	case ExprFUNCTIONLITERAL:
-		str = "FUNCTIONLITERAL"
+	case ExprFUNC:
+		str = "FUNC"
+	case ExprFUNCCALL:
+		str = "FUNCCALL"
 	case ExprGREATER:
 		str = "GREATER"
 	case ExprGREATEREQUAL:
@@ -62,6 +64,8 @@ func (st ExprType) String() string {
 		str = "IDENTIFIER"
 	case ExprIF:
 		str = "IF"
+	case ExprIFELSE:
+		str = "IFELSE"
 	case ExprINDEX:
 		str = "INDEX"
 	case ExprINTEGER:

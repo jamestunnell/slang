@@ -1,12 +1,11 @@
 package slang
 
 type Class interface {
-	Name() string
-	// GetInstanceMethod(string) (Method, bool)
-	AddInstanceMethod(string, Method)
-}
+	GetComment() string
 
-type Method interface {
-	ParamNames() []string
-	Run(args []Object) (Object, error)
+	GetFieldNames() []string
+	GetFieldType(name string) (string, bool)
+
+	GetMethodNames() []string
+	GetMethod(name string) (Function, bool)
 }

@@ -1,16 +1,14 @@
 package objects
 
-import "github.com/jamestunnell/slang"
-
 type BuiltInClass struct {
 	name            string
-	instanceMethods map[string]slang.Method
+	instanceMethods map[string]Method
 }
 
 func NewBuiltInClass(name string) *BuiltInClass {
 	return &BuiltInClass{
 		name:            name,
-		instanceMethods: map[string]slang.Method{},
+		instanceMethods: map[string]Method{},
 	}
 }
 
@@ -18,7 +16,7 @@ func (c *BuiltInClass) Name() string {
 	return c.name
 }
 
-func (c *BuiltInClass) GetInstanceMethod(methodName string) (slang.Method, bool) {
+func (c *BuiltInClass) GetInstanceMethod(methodName string) (Method, bool) {
 	if method, found := c.instanceMethods[methodName]; found {
 		return method, true
 	}
@@ -26,6 +24,6 @@ func (c *BuiltInClass) GetInstanceMethod(methodName string) (slang.Method, bool)
 	return nil, false
 }
 
-func (c *BuiltInClass) AddInstanceMethod(methodName string, method slang.Method) {
+func (c *BuiltInClass) AddInstanceMethod(methodName string, method Method) {
 	c.instanceMethods[methodName] = method
 }

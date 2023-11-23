@@ -8,7 +8,7 @@ import (
 	"github.com/jamestunnell/slang/customerrs"
 )
 
-type CallFn func(args ...slang.Object) (slang.Object, error)
+type CallFn func(args ...Object) (Object, error)
 
 type BuiltInFn struct {
 	Name   string
@@ -43,7 +43,7 @@ func NewBuiltInFn(name string, fn CallFn, params ...string) *BuiltInFn {
 	}
 }
 
-func (obj *BuiltInFn) Class() slang.Class {
+func (obj *BuiltInFn) Class() Class {
 	return builtinFnClass
 }
 
@@ -56,7 +56,7 @@ func (obj *BuiltInFn) Truthy() bool {
 	return true
 }
 
-func (obj *BuiltInFn) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *BuiltInFn) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := builtinFnClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -72,7 +72,7 @@ func (obj *BuiltInFn) Send(methodName string, args ...slang.Object) (slang.Objec
 	return nil, err
 }
 
-func puts(args ...slang.Object) (slang.Object, error) {
+func puts(args ...Object) (Object, error) {
 	for _, arg := range args {
 		fmt.Println(arg.Inspect())
 	}

@@ -1,6 +1,10 @@
 package slang
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/exp/slices"
+)
 
 type TokenType int
 
@@ -29,6 +33,18 @@ func NewLoc(line, col int) SourceLocation {
 	return SourceLocation{Line: line, Column: col}
 }
 
+func (tok *Token) Type() TokenType {
+	return tok.Info.Type()
+}
+
+func (tok *Token) Value() string {
+	return tok.Info.Value()
+}
+
+func (tok *Token) Is(tokTypes ...TokenType) bool {
+	return slices.Contains(tokTypes, tok.Info.Type())
+}
+
 func (loc SourceLocation) String() string {
 	return fmt.Sprintf("(line: %d, col: %d)", loc.Line, loc.Column)
 }
@@ -45,6 +61,7 @@ const (
 	TokenEOF
 	TokenEQUAL
 	TokenFALSE
+	TokenFIELD
 	TokenFLOAT
 	TokenFUNC
 	TokenGREATER
@@ -56,9 +73,11 @@ const (
 	TokenLESS
 	TokenLESSEQUAL
 	TokenLPAREN
+	TokenMETHOD
 	TokenMINUS
 	TokenMINUSEQUAL
 	TokenMINUSMINUS
+	TokenMODULE
 	TokenNEWLINE
 	TokenNOTEQUAL
 	TokenPLUS
@@ -74,7 +93,7 @@ const (
 	TokenSTAR
 	TokenSTAREQUAL
 	TokenSTRING
-	TokenSTRUCT
+	TokenCLASS
 	TokenSYMBOL
 	TokenTRUE
 	TokenUSE
@@ -88,6 +107,8 @@ func (tt TokenType) String() string {
 		str = "ASSIGN"
 	case TokenBANG:
 		str = "BANG"
+	case TokenCLASS:
+		str = "CLASS"
 	case TokenCOLON:
 		str = "COLON"
 	case TokenCOMMA:
@@ -104,6 +125,8 @@ func (tt TokenType) String() string {
 		str = "EQUAL"
 	case TokenFALSE:
 		str = "FALSE"
+	case TokenFIELD:
+		str = "FIELD"
 	case TokenFLOAT:
 		str = "FLOAT"
 	case TokenFUNC:
@@ -126,6 +149,10 @@ func (tt TokenType) String() string {
 		str = "LESSEQUAL"
 	case TokenLPAREN:
 		str = "LPAREN"
+	case TokenMODULE:
+		str = "MODULE"
+	case TokenMETHOD:
+		str = "METHOD"
 	case TokenMINUS:
 		str = "MINUS"
 	case TokenMINUSEQUAL:

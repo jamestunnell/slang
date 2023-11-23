@@ -2,10 +2,10 @@ package tokens
 
 import "github.com/jamestunnell/slang"
 
-type Struct struct{}
+type Class struct{}
 
-const StrSTRUCT = "struct"
+const StrCLASS = "class"
 
-func STRUCT() slang.TokenInfo           { return &Struct{} }
-func (t *Struct) Type() slang.TokenType { return slang.TokenSTRUCT }
-func (t *Struct) Value() string         { return StrSTRUCT }
+func CLASS() slang.TokenInfo           { return &Class{} }
+func (t *Class) Type() slang.TokenType { return slang.TokenCLASS }
+func (t *Class) Value() string         { return StrCLASS }

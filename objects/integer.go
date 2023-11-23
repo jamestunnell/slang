@@ -18,11 +18,11 @@ const (
 
 var intClass = NewBuiltInClass(ClassINTEGER)
 
-func NewInteger(val int64) slang.Object {
+func NewInteger(val int64) Object {
 	return &Integer{Value: val}
 }
 
-func (obj *Integer) Class() slang.Class {
+func (obj *Integer) Class() Class {
 	return intClass
 }
 
@@ -34,7 +34,7 @@ func (obj *Integer) Truthy() bool {
 	return true
 }
 
-func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Integer) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := intClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -64,13 +64,13 @@ func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object,
 	return nil, err
 }
 
-func (obj *Integer) sendOne(method string, arg slang.Object) (slang.Object, error) {
+func (obj *Integer) sendOne(method string, arg Object) (Object, error) {
 	otherInt, ok := arg.(*Integer)
 	if !ok {
 		return nil, customerrs.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
-	var ret slang.Object
+	var ret Object
 
 	switch method {
 	case slang.MethodADD:
@@ -106,7 +106,7 @@ func intAbs(val int64) int64 {
 	return -val
 }
 
-func checkArgCount(args []slang.Object, count int) error {
+func checkArgCount(args []Object, count int) error {
 	if len(args) != count {
 		return customerrs.NewErrArgCount(count, len(args))
 	}

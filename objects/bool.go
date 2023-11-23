@@ -15,11 +15,11 @@ const ClassBOOL = "Bool"
 
 var boolClass = NewBuiltInClass(ClassBOOL)
 
-func NewBool(val bool) slang.Object {
+func NewBool(val bool) Object {
 	return &Bool{Value: val}
 }
 
-func (obj *Bool) Class() slang.Class {
+func (obj *Bool) Class() Class {
 	return boolClass
 }
 
@@ -31,7 +31,7 @@ func (obj *Bool) Truthy() bool {
 	return obj.Value
 }
 
-func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Bool) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := boolClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -50,7 +50,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 			return nil, customerrs.NewErrArgType(ClassBOOL, args[0].Class().Name())
 		}
 
-		var ret slang.Object
+		var ret Object
 		switch methodName {
 		case slang.MethodEQ:
 			ret = NewBool(obj.Value == arg.Value)

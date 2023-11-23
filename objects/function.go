@@ -28,7 +28,7 @@ func NewFunction(
 	}
 }
 
-func (obj *Function) Class() slang.Class {
+func (obj *Function) Class() Class {
 	return funClass
 }
 
@@ -43,7 +43,7 @@ func (obj *Function) Truthy() bool {
 	return true
 }
 
-func (obj *Function) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Function) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := funClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -59,7 +59,7 @@ func (obj *Function) Send(methodName string, args ...slang.Object) (slang.Object
 	return NULL(), err
 }
 
-func (obj *Function) call(args []slang.Object) (slang.Object, error) {
+func (obj *Function) call(args []Object) (Object, error) {
 	if len(args) != len(obj.Params) {
 		err := customerrs.NewErrArgCount(len(obj.Params), len(args))
 

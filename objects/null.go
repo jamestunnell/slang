@@ -1,7 +1,6 @@
 package objects
 
 import (
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
 )
 
@@ -21,7 +20,7 @@ func NULL() *Null {
 	return null
 }
 
-func (obj *Null) Class() slang.Class {
+func (obj *Null) Class() Class {
 	return nullClass
 }
 
@@ -33,7 +32,7 @@ func (obj *Null) Truthy() bool {
 	return false
 }
 
-func (obj *Null) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Null) Send(methodName string, args ...Object) (Object, error) {
 	// I guess we could add instance methods to the null class?
 	if m, found := nullClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)

@@ -5,15 +5,16 @@ type StatementType int
 type Statement interface {
 	Type() StatementType
 	Equal(Statement) bool
-	Eval(env *Environment) (Object, error)
+	// Eval(env *objecsts.Environment) (objects.Object, error)
 }
 
 const (
 	StatementASSIGN StatementType = iota
 	StatementBLOCK
-	StatementRETURN
-	StatementFUNC
 	StatementEXPRESSION
+	StatementFUNC
+	StatementRETURN
+	StatementUSE
 )
 
 func (st StatementType) String() string {
@@ -30,6 +31,8 @@ func (st StatementType) String() string {
 		str = "FUNC"
 	case StatementRETURN:
 		str = "RETURN"
+	case StatementUSE:
+		str = "USE"
 	}
 
 	return str

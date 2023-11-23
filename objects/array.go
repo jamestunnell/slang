@@ -8,7 +8,7 @@ import (
 )
 
 type Array struct {
-	Elements []slang.Object
+	Elements []Object
 }
 
 const ClassARRAY = "Array"
@@ -18,11 +18,11 @@ var (
 	aryClass      = NewBuiltInClass(ClassARRAY)
 )
 
-func NewArray(vals ...slang.Object) slang.Object {
+func NewArray(vals ...Object) Object {
 	return &Array{Elements: vals}
 }
 
-func (obj *Array) Class() slang.Class {
+func (obj *Array) Class() Class {
 	return aryClass
 }
 
@@ -34,7 +34,7 @@ func (obj *Array) Truthy() bool {
 	return true
 }
 
-func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Array) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := aryClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -71,7 +71,7 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 	return nil, err
 }
 
-func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
+func (obj *Array) Index(arg Object) (Object, error) {
 	idx, ok := arg.(*Integer)
 	if !ok {
 		return nil, customerrs.NewErrArgType(ClassINTEGER, arg.Class().Name())

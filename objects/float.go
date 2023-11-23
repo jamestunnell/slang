@@ -20,7 +20,7 @@ func NewFloat(val float64) *Float {
 	return &Float{Value: val}
 }
 
-func (obj *Float) Class() slang.Class {
+func (obj *Float) Class() Class {
 	return fltClass
 }
 
@@ -32,7 +32,7 @@ func (obj *Float) Truthy() bool {
 	return true
 }
 
-func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Float) Send(methodName string, args ...Object) (Object, error) {
 	// an added instance method would override a standard one
 	if m, found := fltClass.GetInstanceMethod(methodName); found {
 		return m.Run(args)
@@ -58,13 +58,13 @@ func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, e
 	return nil, err
 }
 
-func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
+func (obj *Float) sendOne(method string, arg Object) (Object, error) {
 	flt, ok := arg.(*Float)
 	if !ok {
 		return nil, customerrs.NewErrArgType(ClassFLOAT, arg.Class().Name())
 	}
 
-	var ret slang.Object
+	var ret Object
 
 	switch method {
 	case slang.MethodADD:

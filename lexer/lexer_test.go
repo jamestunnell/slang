@@ -92,12 +92,12 @@ func TestLexer_Use(t *testing.T) {
 }
 
 func TestLexer_StructBlock(t *testing.T) {
-	const str = `struct X {
+	const str = `class X {
 		Y string
 	}`
 
 	expected := []*slang.Token{
-		tok(tokens.STRUCT(), 1, 1),
+		tok(tokens.CLASS(), 1, 1),
 		tok(tokens.SYMBOL("X"), 1, 8),
 		tok(tokens.LBRACE(), 1, 10),
 		tok(tokens.NEWLINE(), 1, 11),
