@@ -4,40 +4,32 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type BinaryOperator int
-
 type BinaryOperation struct {
-	Left, Right slang.Expression
-	Operator    BinaryOperator
+	*Base
+
+	Left  slang.Expression `json:"left"`
+	Right slang.Expression `json:"right"`
 }
 
-const (
-	AddOperator BinaryOperator = iota
-	SubtractOperator
-	MultiplyOperator
-	DivideOperator
-	EqualOperator
-	NotEqualOperator
-	LessOperator
-	LessEqualOperator
-	GreaterOperator
-	GreaterEqualOperator
-)
-
-func NewBinaryOperation(op BinaryOperator, Left, Right slang.Expression) *BinaryOperation {
+func NewBinaryOperation(typ slang.ExprType, Left, Right slang.Expression) *BinaryOperation {
 	return &BinaryOperation{
-		Operator: op,
-		Left:     Left,
-		Right:    Right,
+		Base:  NewBase(typ),
+		Left:  Left,
+		Right: Right,
 	}
 }
 
-func (bo *BinaryOperation) Equal(other *BinaryOperation) bool {
-	if other.Operator != bo.Operator {
+func (binop *BinaryOperation) Equal(other slang.Expression) bool {
+	binop2, ok := other.(*BinaryOperation)
+	if !ok {
 		return false
 	}
 
-	return other.Left.Equal(bo.Left) && other.Right.Equal(bo.Right)
+	if binop.ExprType != binop2.ExprType {
+		return false
+	}
+
+	return binop.Left.Equal(binop2.Left) && binop.Right.Equal(binop2.Right)
 }
 
 // func (bo *BinaryOperation) Eval(env *slang.Environment) (slang.Object, error) {

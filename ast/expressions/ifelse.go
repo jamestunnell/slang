@@ -5,19 +5,19 @@ import (
 )
 
 type IfElse struct {
-	*If
+	*Base
 
-	Alternatives []slang.Statement
+	Condition    slang.Expression  `json:"condition"`
+	Consequences []slang.Statement `json:"consequences"`
+	Alternatives []slang.Statement `json:"alternatives"`
 }
 
 func NewIfElse(cond slang.Expression, conseqs, alterns []slang.Statement) *IfElse {
 	return &IfElse{
-		If:           NewIf(cond, conseqs),
+		Base:         NewBase(slang.ExprIFELSE),
 		Alternatives: alterns,
 	}
 }
-
-func (i *IfElse) Type() slang.ExprType { return slang.ExprIFELSE }
 
 func (i *IfElse) Equal(other slang.Expression) bool {
 	i2, ok := other.(*IfElse)
@@ -25,17 +25,15 @@ func (i *IfElse) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if len(i.Alternatives) != len(i2.Alternatives) {
+	if !i.Condition.Equal(i2.Condition) {
 		return false
 	}
 
-	for idx, stmt := range i.Alternatives {
-		if !stmt.Equal(i2.Alternatives[idx]) {
-			return false
-		}
+	if !statementsEqual(i.Consequences, i2.Consequences) {
+		return false
 	}
 
-	return i.If.Equal(i2.If)
+	return statementsEqual(i.Alternatives, i2.Alternatives)
 }
 
 // func (expr *IfElse) Eval(env *slang.Environment) (slang.Object, error) {

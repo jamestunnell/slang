@@ -5,14 +5,17 @@ import (
 )
 
 type String struct {
-	Value string
+	*Base
+
+	Value string `json:"value"`
 }
 
 func NewString(val string) *String {
-	return &String{Value: val}
+	return &String{
+		Base:  NewBase(slang.ExprSTRING),
+		Value: val,
+	}
 }
-
-func (i *String) Type() slang.ExprType { return slang.ExprSTRING }
 
 func (i *String) Equal(other slang.Expression) bool {
 	i2, ok := other.(*String)

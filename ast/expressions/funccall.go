@@ -7,19 +7,18 @@ import (
 )
 
 type FuncCall struct {
-	Function  slang.Expression // Identifier or FunctionLiteral
-	Arguments []slang.Expression
+	*Base
+
+	Function  slang.Expression   `json:"function"`
+	Arguments []slang.Expression `json:"args"`
 }
 
 func NewFuncCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
 	return &FuncCall{
+		Base:      NewBase(slang.ExprFUNCCALL),
 		Function:  fn,
 		Arguments: args,
 	}
-}
-
-func (c *FuncCall) Type() slang.ExprType {
-	return slang.ExprFUNCCALL
 }
 
 func (c *FuncCall) Equal(other slang.Expression) bool {

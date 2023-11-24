@@ -5,14 +5,17 @@ import (
 )
 
 type Negative struct {
-	Value slang.Expression
+	*Base
+
+	Value slang.Expression `json:"value"`
 }
 
 func NewNegative(val slang.Expression) slang.Expression {
-	return &Negative{Value: val}
+	return &Negative{
+		Base:  NewBase(slang.ExprNEGATIVE),
+		Value: val,
+	}
 }
-
-func (b *Negative) Type() slang.ExprType { return slang.ExprNEGATIVE }
 
 func (b *Negative) Equal(other slang.Expression) bool {
 	b2, ok := other.(*Negative)

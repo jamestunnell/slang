@@ -5,14 +5,17 @@ import (
 )
 
 type Identifier struct {
-	Name string
+	*Base
+
+	Name string `json:"name"`
 }
 
 func NewIdentifier(name string) *Identifier {
-	return &Identifier{Name: name}
+	return &Identifier{
+		Base: NewBase(slang.ExprIDENTIFIER),
+		Name: name,
+	}
 }
-
-func (i *Identifier) Type() slang.ExprType { return slang.ExprIDENTIFIER }
 
 func (i *Identifier) Equal(other slang.Expression) bool {
 	i2, ok := other.(*Identifier)

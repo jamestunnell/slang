@@ -5,14 +5,17 @@ import (
 )
 
 type Not struct {
-	Value slang.Expression
+	*Base
+
+	Value slang.Expression `json:"value"`
 }
 
 func NewNot(val slang.Expression) slang.Expression {
-	return &Not{Value: val}
+	return &Not{
+		Base:  NewBase(slang.ExprNOT),
+		Value: val,
+	}
 }
-
-func (b *Not) Type() slang.ExprType { return slang.ExprNOT }
 
 func (b *Not) Equal(other slang.Expression) bool {
 	b2, ok := other.(*Not)

@@ -5,7 +5,7 @@ import (
 )
 
 type Integer struct {
-	Value int64
+	Value int64 `json:"value"`
 }
 
 func NewInteger(val int64) *Integer {

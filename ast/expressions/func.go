@@ -6,15 +6,15 @@ import (
 )
 
 type Func struct {
+	*Base
 	*ast.Function
 }
 
 func NewFunc(fn *ast.Function) *Func {
-	return &Func{Function: fn}
-}
-
-func (f *Func) Type() slang.ExprType {
-	return slang.ExprFUNC
+	return &Func{
+		Base:     NewBase(slang.ExprFUNC),
+		Function: fn,
+	}
 }
 
 func (f *Func) Equal(other slang.Expression) bool {

@@ -6,17 +6,16 @@ import (
 )
 
 type Array struct {
-	Elements []slang.Expression
+	*Base
+
+	Elements []slang.Expression `json:"elements"`
 }
 
 func NewArray(elems ...slang.Expression) slang.Expression {
 	return &Array{
+		Base:     NewBase(slang.ExprARRAY),
 		Elements: elems,
 	}
-}
-
-func (c *Array) Type() slang.ExprType {
-	return slang.ExprARRAY
 }
 
 func (c *Array) Equal(other slang.Expression) bool {

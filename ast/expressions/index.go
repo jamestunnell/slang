@@ -5,8 +5,8 @@ import (
 )
 
 type Index struct {
-	Array slang.Expression
-	Index slang.Expression
+	Array slang.Expression `json:"container"`
+	Index slang.Expression `json:"index"`
 }
 
 func NewIndex(ary, idx slang.Expression) slang.Expression {

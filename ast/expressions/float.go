@@ -5,14 +5,17 @@ import (
 )
 
 type Float struct {
-	Value float64
+	*Base
+
+	Value float64 `json:"value"`
 }
 
 func NewFloat(val float64) *Float {
-	return &Float{Value: val}
+	return &Float{
+		Base:  NewBase(slang.ExprFLOAT),
+		Value: val,
+	}
 }
-
-func (f *Float) Type() slang.ExprType { return slang.ExprFLOAT }
 
 func (f *Float) Equal(other slang.Expression) bool {
 	f2, ok := other.(*Float)

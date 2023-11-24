@@ -8,17 +8,6 @@ type Multiply struct {
 
 func NewMultiply(left, right slang.Expression) slang.Expression {
 	return &Multiply{
-		BinaryOperation: NewBinaryOperation(MultiplyOperator, left, right),
+		BinaryOperation: NewBinaryOperation(slang.ExprMULTIPLY, left, right),
 	}
-}
-
-func (m *Multiply) Type() slang.ExprType { return slang.ExprMULTIPLY }
-
-func (m *Multiply) Equal(other slang.Expression) bool {
-	m2, ok := other.(*Multiply)
-	if !ok {
-		return false
-	}
-
-	return m.BinaryOperation.Equal(m2.BinaryOperation)
 }

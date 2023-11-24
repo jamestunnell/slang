@@ -7,24 +7,23 @@ import (
 )
 
 type MethodCall struct {
-	Object     slang.Expression
-	MethodName *Identifier
-	Arguments  []slang.Expression
+	*Base
+
+	Subject   slang.Expression   `json:"subject"`
+	Method    string             `json:"method"`
+	Arguments []slang.Expression `json:"args"`
 }
 
 func NewMethodCall(
-	obj slang.Expression,
-	mname *Identifier,
+	subject slang.Expression,
+	method string,
 	args ...slang.Expression) slang.Expression {
 	return &MethodCall{
-		Object:     obj,
-		MethodName: mname,
-		Arguments:  args,
+		Base:      NewBase(slang.ExprMETHODCALL),
+		Subject:   subject,
+		Method:    method,
+		Arguments: args,
 	}
-}
-
-func (c *MethodCall) Type() slang.ExprType {
-	return slang.ExprMETHODCALL
 }
 
 func (c *MethodCall) Equal(other slang.Expression) bool {
@@ -33,8 +32,8 @@ func (c *MethodCall) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return c2.Object.Equal(c.Object) &&
-		c2.MethodName.Equal(c.MethodName) &&
+	return c2.Subject.Equal(c.Subject) &&
+		c2.Method == c.Method &&
 		slices.EqualFunc(c.Arguments, c2.Arguments, expressionsEqual)
 }
 

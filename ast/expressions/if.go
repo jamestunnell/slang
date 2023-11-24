@@ -5,18 +5,19 @@ import (
 )
 
 type If struct {
-	Condition    slang.Expression
-	Consequences []slang.Statement
+	*Base
+
+	Condition    slang.Expression  `json:"condition"`
+	Consequences []slang.Statement `json:"consequences"`
 }
 
 func NewIf(cond slang.Expression, conseqs []slang.Statement) *If {
 	return &If{
+		Base:         NewBase(slang.ExprIF),
 		Condition:    cond,
 		Consequences: conseqs,
 	}
 }
-
-func (i *If) Type() slang.ExprType { return slang.ExprIF }
 
 func (i *If) Equal(other slang.Expression) bool {
 	i2, ok := other.(*If)
@@ -24,17 +25,25 @@ func (i *If) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if len(i.Consequences) != len(i2.Consequences) {
+	if !i.Condition.Equal(i2.Condition) {
 		return false
 	}
 
-	for idx, stmt := range i.Consequences {
-		if !stmt.Equal(i2.Consequences[idx]) {
+	return statementsEqual(i.Consequences, i2.Consequences)
+}
+
+func statementsEqual(a, b []slang.Statement) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for idx, stmt := range a {
+		if !stmt.Equal(b[idx]) {
 			return false
 		}
 	}
 
-	return i2.Condition.Equal(i.Condition)
+	return true
 }
 
 // func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {
