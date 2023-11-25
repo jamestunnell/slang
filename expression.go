@@ -1,5 +1,7 @@
 package slang
 
+import "encoding/json"
+
 type ExprType int
 
 type Expression interface {
@@ -35,6 +37,10 @@ const (
 	ExprSUBTRACT
 	ExprSTRING
 )
+
+func (st ExprType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(st.String())
+}
 
 func (st ExprType) String() string {
 	var str string

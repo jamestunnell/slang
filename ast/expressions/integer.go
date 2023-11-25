@@ -5,18 +5,17 @@ import (
 )
 
 type Integer struct {
+	*Base
+
 	Value int64 `json:"value"`
 }
 
 func NewInteger(val int64) *Integer {
-	return &Integer{Value: val}
+	return &Integer{
+		Base:  NewBase(slang.ExprINTEGER),
+		Value: val,
+	}
 }
-
-// func (i *Integer) String() string {
-// 	return strconv.FormatInt(i.Value, 10)
-// }
-
-func (i *Integer) Type() slang.ExprType { return slang.ExprINTEGER }
 
 func (i *Integer) Equal(other slang.Expression) bool {
 	i2, ok := other.(*Integer)
