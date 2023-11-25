@@ -54,21 +54,21 @@ func (p *BodyParser) ParseReturn(toks slang.TokenSeq) bool {
 }
 
 func (p *BodyParser) ParseAssign(toks slang.TokenSeq) bool {
-	names := []string{toks.Current().Value()}
+	name := toks.Current().Value()
 
 	toks.Advance()
 
-	for toks.Current().Is(slang.TokenCOMMA) {
-		toks.Advance()
+	// for toks.Current().Is(slang.TokenCOMMA) {
+	// 	toks.Advance()
 
-		if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-			return false
-		}
+	// 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+	// 		return false
+	// 	}
 
-		names = append(names, toks.Current().Value())
+	// 	names = append(names, toks.Current().Value())
 
-		toks.Advance()
-	}
+	// 	toks.Advance()
+	// }
 
 	if !p.ExpectToken(toks.Current(), slang.TokenASSIGN) {
 		return false
@@ -79,7 +79,7 @@ func (p *BodyParser) ParseAssign(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	p.Statements = append(p.Statements, statements.NewAssign(exprParser.Expr, names...))
+	p.Statements = append(p.Statements, statements.NewAssign(name, exprParser.Expr))
 
 	return true
 }

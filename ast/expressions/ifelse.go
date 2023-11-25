@@ -29,11 +29,11 @@ func (i *IfElse) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if !statementsEqual(i.Consequences, i2.Consequences) {
+	if !slang.StatementsEqual(i.Consequences, i2.Consequences) {
 		return false
 	}
 
-	return statementsEqual(i.Alternatives, i2.Alternatives)
+	return slang.StatementsEqual(i.Alternatives, i2.Alternatives)
 }
 
 // func (expr *IfElse) Eval(env *slang.Environment) (slang.Object, error) {

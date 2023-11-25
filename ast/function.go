@@ -8,14 +8,14 @@ type Function struct {
 	Comment     string            `json:"comment"`
 	Params      []*Param          `json:"params"`
 	ReturnTypes []string          `json:"returnTypes"`
-	Body        []slang.Statement `json:"body"`
+	Statements  []slang.Statement `json:"statements"`
 }
 
 func NewFunction(params []*Param, returnTypes []string, body ...slang.Statement) *Function {
 	return &Function{
 		Params:      params,
 		ReturnTypes: returnTypes,
-		Body:        body,
+		Statements:  body,
 	}
 }
 
@@ -44,12 +44,12 @@ func (fn *Function) Equal(other *Function) bool {
 		}
 	}
 
-	if len(fn.Body) != len(other.Body) {
+	if len(fn.Statements) != len(other.Statements) {
 		return false
 	}
 
-	for i, stmt := range fn.Body {
-		if !stmt.Equal(other.Body[i]) {
+	for i, stmt := range fn.Statements {
+		if !stmt.Equal(other.Statements[i]) {
 			return false
 		}
 	}

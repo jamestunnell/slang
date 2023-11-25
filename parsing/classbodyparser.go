@@ -3,12 +3,13 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/statements"
 )
 
 type ClassBodyParser struct {
 	*ParserBase
 
-	cls *ast.Class
+	Statements []slang.Statement
 }
 
 func NewClassBodyParser() *ClassBodyParser {
@@ -18,18 +19,14 @@ func NewClassBodyParser() *ClassBodyParser {
 	}
 }
 
-func (p *ClassBodyParser) Class() *ast.Class {
-	return p.cls
-}
-
 func (p *ClassBodyParser) Run(toks slang.TokenSeq) {
+	p.Statements = []slang.Statement{}
+
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
 		return
 	}
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
-
-	p.cls = ast.NewClass()
 
 	for !toks.Current().Is(slang.TokenRBRACE) {
 		if !p.parseMember(toks) {
@@ -58,7 +55,7 @@ func (p *ClassBodyParser) parseMember(toks slang.TokenSeq) bool {
 			return false
 		}
 
-		p.cls.Fields = append(p.cls.Fields, ast.NewParam(name, typ))
+		p.Statements = append(p.Statements, statements.NewField(name, typ))
 	case slang.TokenMETHOD:
 		if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
 			return false
@@ -78,8 +75,9 @@ func (p *ClassBodyParser) parseMember(toks slang.TokenSeq) bool {
 			return false
 		}
 
-		p.cls.Methods[name] = ast.NewFunction(
+		fn := ast.NewFunction(
 			sigParser.Params, sigParser.ReturnTypes, bodyParser.Statements...)
+		p.Statements = append(p.Statements, statements.NewMethod(name, fn))
 	}
 
 	return true

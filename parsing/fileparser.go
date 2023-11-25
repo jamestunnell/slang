@@ -119,7 +119,7 @@ func (p *FileParser) parseClass(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	p.Statements = append(p.Statements, statements.NewClass(name, classParser.Class()))
+	p.Statements = append(p.Statements, statements.NewClass(name, "", classParser.Statements...))
 
 	return true
 }

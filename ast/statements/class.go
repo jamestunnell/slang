@@ -2,21 +2,22 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 )
 
 type Class struct {
 	*Base
 
-	Name  string     `json:"name"`
-	Class *ast.Class `json:"class"`
+	Name       string            `json:"name"`
+	Comment    string            `json:"comment"`
+	Statements []slang.Statement `json:"statements"`
 }
 
-func NewClass(name string, c *ast.Class) *Class {
+func NewClass(name, comment string, stmts ...slang.Statement) *Class {
 	return &Class{
-		Base:  NewBase(slang.StatementFUNC),
-		Name:  name,
-		Class: c,
+		Base:       NewBase(slang.StatementCLASS),
+		Name:       name,
+		Comment:    comment,
+		Statements: stmts,
 	}
 }
 
@@ -26,5 +27,5 @@ func (c *Class) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return c.Name == c2.Name && c.Class.Equal(c2.Class)
+	return c.Name == c2.Name && slang.StatementsEqual(c.Statements, c2.Statements)
 }

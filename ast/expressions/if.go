@@ -29,21 +29,7 @@ func (i *If) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return statementsEqual(i.Consequences, i2.Consequences)
-}
-
-func statementsEqual(a, b []slang.Statement) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for idx, stmt := range a {
-		if !stmt.Equal(b[idx]) {
-			return false
-		}
-	}
-
-	return true
+	return slang.StatementsEqual(i.Consequences, i2.Consequences)
 }
 
 // func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {
