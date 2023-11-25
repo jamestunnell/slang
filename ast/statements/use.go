@@ -5,15 +5,16 @@ import (
 )
 
 type Use struct {
+	*Base
+
 	Path string `json:"path"`
 }
 
 func NewUse(path string) *Use {
-	return &Use{Path: path}
-}
-
-func (u *Use) Type() slang.StatementType {
-	return slang.StatementUSE
+	return &Use{
+		Base: NewBase(slang.StatementUSE),
+		Path: path,
+	}
 }
 
 func (u *Use) Equal(other slang.Statement) bool {

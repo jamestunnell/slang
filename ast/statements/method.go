@@ -5,26 +5,26 @@ import (
 	"github.com/jamestunnell/slang/ast"
 )
 
-type Func struct {
+type Method struct {
 	*Base
 
 	Name     string        `json:"name"`
 	Function *ast.Function `json:"function"`
 }
 
-func NewFunc(name string, f *ast.Function) *Func {
-	return &Func{
-		Base:     NewBase(slang.StatementFUNC),
+func NewMethod(name string, f *ast.Function) *Method {
+	return &Method{
+		Base:     NewBase(slang.StatementMETHOD),
 		Name:     name,
 		Function: f,
 	}
 }
 
-func (f *Func) Equal(other slang.Statement) bool {
-	f2, ok := other.(*Func)
+func (m *Method) Equal(other slang.Statement) bool {
+	m2, ok := other.(*Func)
 	if !ok {
 		return false
 	}
 
-	return f.Name == f2.Name && f.Function.Equal(f2.Function)
+	return m.Name == m2.Name && m.Function.Equal(m2.Function)
 }

@@ -38,14 +38,14 @@ const (
 	ExprSTRING
 )
 
-func (st ExprType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(st.String())
+func (et ExprType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(et.String())
 }
 
-func (st ExprType) String() string {
+func (et ExprType) String() string {
 	var str string
 
-	switch st {
+	switch et {
 	case ExprADD:
 		str = "ADD"
 	case ExprARRAY:

@@ -5,15 +5,16 @@ import (
 )
 
 type Expression struct {
+	*Base
+
 	Value slang.Expression `json:"value"`
 }
 
 func NewExpression(val slang.Expression) *Expression {
-	return &Expression{Value: val}
-}
-
-func (e *Expression) Type() slang.StatementType {
-	return slang.StatementEXPRESSION
+	return &Expression{
+		Base:  NewBase(slang.StatementEXPRESSION),
+		Value: val,
+	}
 }
 
 func (e *Expression) Equal(other slang.Statement) bool {

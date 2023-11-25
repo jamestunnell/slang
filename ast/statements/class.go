@@ -6,16 +6,18 @@ import (
 )
 
 type Class struct {
+	*Base
+
 	Name  string     `json:"name"`
 	Class *ast.Class `json:"class"`
 }
 
 func NewClass(name string, c *ast.Class) *Class {
-	return &Class{Name: name, Class: c}
-}
-
-func (c *Class) Type() slang.StatementType {
-	return slang.StatementFUNC
+	return &Class{
+		Base:  NewBase(slang.StatementFUNC),
+		Name:  name,
+		Class: c,
+	}
 }
 
 func (c *Class) Equal(other slang.Statement) bool {
