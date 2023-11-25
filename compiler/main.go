@@ -2,12 +2,12 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
 )
@@ -30,7 +30,7 @@ func main() {
 		}
 
 		for _, stmt := range p.Statements {
-			d, err := statements.MarshalJSON(stmt)
+			d, err := json.Marshal(stmt)
 
 			if err != nil {
 				log.Warn().Err(err).Msg("failed to marshal statement")
