@@ -20,6 +20,10 @@ func NewBodyParser(parseStatement func(slang.TokenSeq) bool) *BodyParser {
 	}
 }
 
+func (p *BodyParser) GetStatements() []slang.Statement {
+	return p.Statements
+}
+
 func (p *BodyParser) Run(toks slang.TokenSeq) {
 	p.Statements = []slang.Statement{}
 
@@ -44,7 +48,7 @@ func (p *BodyParser) Run(toks slang.TokenSeq) {
 	toks.Advance()
 }
 
-func (p *BodyParser) ParseReturn(toks slang.TokenSeq) bool {
+func (p *BodyParser) ParseReturnStatment(toks slang.TokenSeq) bool {
 	toks.Advance()
 
 	exprParser := NewExprParser(PrecedenceLOWEST)
@@ -57,44 +61,24 @@ func (p *BodyParser) ParseReturn(toks slang.TokenSeq) bool {
 	return true
 }
 
-func (p *BodyParser) ParseAssign(toks slang.TokenSeq) bool {
-	name := toks.Current().Value()
-
-	toks.Advance()
-
-	// for toks.Current().Is(slang.TokenCOMMA) {
-	// 	toks.Advance()
-
-	// 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-	// 		return false
-	// 	}
-
-	// 	names = append(names, toks.Current().Value())
-
-	// 	toks.Advance()
-	// }
-
-	if !p.ExpectToken(toks.Current(), slang.TokenASSIGN) {
-		return false
-	}
-
+func (p *BodyParser) ParseExpressionOrAssignStatement(toks slang.TokenSeq) bool {
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
 	}
 
-	p.Statements = append(p.Statements, statements.NewAssign(name, exprParser.Expr))
+	if toks.Current().Is(slang.TokenASSIGN) {
+		toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	return true
-}
+		valueParser := NewExprParser(PrecedenceLOWEST)
+		if !p.RunSubParser(toks, valueParser) {
+			return false
+		}
 
-func (p *BodyParser) ParseExpression(toks slang.TokenSeq) bool {
-	exprParser := NewExprParser(PrecedenceLOWEST)
-	if !p.RunSubParser(toks, exprParser) {
-		return false
+		p.Statements = append(p.Statements, statements.NewAssign(exprParser.Expr, valueParser.Expr))
+	} else {
+		p.Statements = append(p.Statements, statements.NewExpression(exprParser.Expr))
 	}
-
-	p.Statements = append(p.Statements, statements.NewExpression(exprParser.Expr))
 
 	return true
 }

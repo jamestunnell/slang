@@ -13,7 +13,7 @@ import (
 	"github.com/jamestunnell/slang/parsing"
 )
 
-type classParserSuccessTest struct {
+type bodyParserSuccessTest struct {
 	TestName   string
 	Input      string
 	Statements []slang.Statement
@@ -24,7 +24,7 @@ func TestClassBodyParserFailure(t *testing.T) {
 }
 
 func TestClassBodyParserSuccess(t *testing.T) {
-	tests := []*classParserSuccessTest{
+	tests := []*bodyParserSuccessTest{
 		{
 			TestName:   "empty",
 			Input:      `{}`,
@@ -74,21 +74,30 @@ func TestClassBodyParserSuccess(t *testing.T) {
 	}
 }
 
-func testClassBodyParserSuccess(t *testing.T, test *classParserSuccessTest) {
+func testClassBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
+	newParser := func() parsing.StatementParser { return parsing.NewClassBodyParser() }
+
+	testBodyParserSuccess(t, test, newParser)
+}
+
+func testBodyParserSuccess(
+	t *testing.T,
+	test *bodyParserSuccessTest,
+	newParser func() parsing.StatementParser) {
 	t.Run(test.TestName, func(t *testing.T) {
-		p := parsing.NewClassBodyParser()
+		p := newParser()
 		l := lexer.New(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
 		p.Run(seq)
 
-		if !assert.Empty(t, p.Errors()) {
-			logParseErrs(t, p.Errors())
+		if !assert.Empty(t, p.GetErrors()) {
+			logParseErrs(t, p.GetErrors())
 
 			return
 		}
 
-		verifyStatemnts(t, test.Statements, p.Statements)
+		verifyStatemnts(t, test.Statements, p.GetStatements())
 	})
 }
 
@@ -100,6 +109,6 @@ func testClassBodyParserFail(t *testing.T, testName, input string) {
 
 		p.Run(seq)
 
-		assert.NotEmpty(t, p.Errors)
+		assert.NotEmpty(t, p.GetErrors)
 	})
 }

@@ -77,10 +77,8 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 
 		p.Run(seq)
 
-		if !assert.Empty(t, p.Errors()) {
-			for _, parseErr := range p.Errors() {
-				t.Logf("unxpected parse err at %s: %v", parseErr.Token.Location, parseErr.Error)
-			}
+		if !assert.Empty(t, p.GetErrors()) {
+			logParseErrs(t, p.GetErrors())
 
 			t.FailNow()
 		}
@@ -100,7 +98,7 @@ func testFuncSignatureParserFail(t *testing.T, testName, input string) {
 
 		p.Run(seq)
 
-		assert.NotEmpty(t, p.Errors)
+		assert.NotEmpty(t, p.GetErrors)
 	})
 }
 

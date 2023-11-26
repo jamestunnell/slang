@@ -85,7 +85,7 @@ func (p *ExprParser) findInfixParseFn(
 	case slang.TokenGREATEREQUAL:
 		infixParse = p.parseGreaterEqual
 	case slang.TokenDOT:
-		infixParse = p.parseMethodCall
+		infixParse = p.parseMemberAccess
 	case slang.TokenLPAREN:
 		infixParse = p.parseFunctionCall
 	case slang.TokenLBRACKET:

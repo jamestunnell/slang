@@ -193,27 +193,18 @@ func (p *ExprParser) parseFloat(toks slang.TokenSeq) slang.Expression {
 	return expressions.NewFloat(f)
 }
 
-func (p *ExprParser) parseMethodCall(toks slang.TokenSeq, subject slang.Expression) slang.Expression {
+func (p *ExprParser) parseMemberAccess(toks slang.TokenSeq, object slang.Expression) slang.Expression {
 	toks.Advance() // past the DOT
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
 		return nil
 	}
 
-	methodName := toks.Current().Value()
+	member := toks.Current().Value()
 
 	toks.Advance()
 
-	if !toks.Current().Is(slang.TokenLPAREN) {
-		return expressions.NewMethodCall(subject, methodName)
-	}
-
-	args, ok := p.parseCallArgs(toks)
-	if !ok {
-		return nil
-	}
-
-	return expressions.NewMethodCall(subject, methodName, args...)
+	return expressions.NewMemberAccess(object, member)
 }
 
 func (p *ExprParser) parseFunctionCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {

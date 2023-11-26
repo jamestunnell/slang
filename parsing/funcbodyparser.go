@@ -21,12 +21,8 @@ func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	// case slang.TokenFUNC:
 	// case slang.TokenCLASS:
 	case slang.TokenRETURN:
-		return p.ParseReturn(toks)
-	case slang.TokenSYMBOL:
-		if toks.Next().Is(slang.TokenCOMMA, slang.TokenASSIGN) {
-			return p.ParseAssign(toks)
-		}
+		return p.ParseReturnStatment(toks)
 	}
 
-	return p.ParseExpression(toks)
+	return p.ParseExpressionOrAssignStatement(toks)
 }

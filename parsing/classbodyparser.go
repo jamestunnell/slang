@@ -13,10 +13,13 @@ type ClassBodyParser struct {
 }
 
 func NewClassBodyParser() *ClassBodyParser {
-
 	return &ClassBodyParser{
 		ParserBase: NewParserBase(),
 	}
+}
+
+func (p *ClassBodyParser) GetStatements() []slang.Statement {
+	return p.Statements
 }
 
 func (p *ClassBodyParser) Run(toks slang.TokenSeq) {

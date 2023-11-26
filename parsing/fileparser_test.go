@@ -26,6 +26,10 @@ func TestFileParser(t *testing.T) {
 			method AddAmount(x float) float {
 				return this.Amount + x
 			}
+
+			method ChangeAmount(amt float) {
+				this.Amount = amt
+			}
 		}
 	`)
 	expected := []slang.Statement{
@@ -41,12 +45,22 @@ func TestFileParser(t *testing.T) {
 					[]string{"float"},
 					statements.NewReturn(
 						expressions.NewAdd(
-							expressions.NewMethodCall(
-								expressions.NewIdentifier("this"),
-								"Amount",
-							),
+							expressions.NewMemberAccess(
+								expressions.NewIdentifier("this"), "Amount"),
 							expressions.NewIdentifier("x"),
 						),
+					),
+				),
+			),
+			statements.NewMethod(
+				"ChangeAmount",
+				ast.NewFunction(
+					[]*ast.Param{ast.NewParam("amt", "float")},
+					[]string{},
+					statements.NewAssign(
+						expressions.NewMemberAccess(
+							expressions.NewIdentifier("this"), "Amount"),
+						expressions.NewIdentifier("amt"),
 					),
 				),
 			),

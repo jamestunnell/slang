@@ -37,7 +37,7 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, expressions.NewInteger(0))
 	testMarshalJSON(t, expressions.NewLess(a, b))
 	testMarshalJSON(t, expressions.NewLessEqual(a, b))
-	testMarshalJSON(t, expressions.NewMethodCall(a, "help", b))
+	testMarshalJSON(t, expressions.NewMemberAccess(a, "myMember"))
 	testMarshalJSON(t, expressions.NewMultiply(a, b))
 	testMarshalJSON(t, expressions.NewNegative(a))
 	testMarshalJSON(t, expressions.NewNot(a))

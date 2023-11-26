@@ -7,11 +7,11 @@ import (
 type Assign struct {
 	*Base
 
-	Target string           `json:"target"`
+	Target slang.Expression `json:"target"`
 	Value  slang.Expression `json:"value"`
 }
 
-func NewAssign(Target string, val slang.Expression) slang.Statement {
+func NewAssign(Target slang.Expression, val slang.Expression) slang.Statement {
 	return &Assign{
 		Base:   NewBase(slang.StatementASSIGN),
 		Target: Target,
@@ -25,7 +25,7 @@ func (a *Assign) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return a.Target == a2.Target && a2.Value.Equal(a.Value)
+	return a.Target.Equal(a2.Target) && a2.Value.Equal(a.Value)
 }
 
 // func (st *Assign) Eval(env *slang.Environment) (slang.Object, error) {

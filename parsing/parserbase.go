@@ -17,7 +17,7 @@ func NewParserBase() *ParserBase {
 	}
 }
 
-func (p *ParserBase) Errors() []*ParseErr {
+func (p *ParserBase) GetErrors() []*ParseErr {
 	return p.errors
 }
 
@@ -43,8 +43,8 @@ func (p *ParserBase) TokenErr(tok *slang.Token, expectedTypes ...slang.TokenType
 func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
 	sub.Run(toks)
 
-	if len(sub.Errors()) > 0 {
-		p.errors = append(p.errors, sub.Errors()...)
+	if len(sub.GetErrors()) > 0 {
+		p.errors = append(p.errors, sub.GetErrors()...)
 
 		return false
 	}

@@ -98,13 +98,27 @@ func TestLexer_StructBlock(t *testing.T) {
 
 	expected := []*slang.Token{
 		tok(tokens.CLASS(), 1, 1),
-		tok(tokens.SYMBOL("X"), 1, 8),
-		tok(tokens.LBRACE(), 1, 10),
-		tok(tokens.NEWLINE(), 1, 11),
+		tok(tokens.SYMBOL("X"), 1, 7),
+		tok(tokens.LBRACE(), 1, 9),
+		tok(tokens.NEWLINE(), 1, 10),
 		tok(tokens.SYMBOL("Y"), 2, 3),
 		tok(tokens.SYMBOL("string"), 2, 5),
 		tok(tokens.NEWLINE(), 2, 11),
 		tok(tokens.RBRACE(), 3, 2),
+	}
+
+	testLexer(t, str, expected...)
+}
+
+func TestLexer_AssignClassField(t *testing.T) {
+	const str = `this.MyField = 7`
+
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("this"), 1, 1),
+		tok(tokens.DOT(), 1, 5),
+		tok(tokens.SYMBOL("MyField"), 1, 6),
+		tok(tokens.ASSIGN(), 1, 14),
+		tok(tokens.INT("7"), 1, 16),
 	}
 
 	testLexer(t, str, expected...)

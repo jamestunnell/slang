@@ -52,11 +52,11 @@ func (loc SourceLocation) String() string {
 const (
 	TokenASSIGN TokenType = iota
 	TokenBANG
+	TokenCLASS
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
 	TokenDOT
-	TokenIF
 	TokenELSE
 	TokenEOF
 	TokenEQUAL
@@ -66,6 +66,7 @@ const (
 	TokenFUNC
 	TokenGREATER
 	TokenGREATEREQUAL
+	TokenIF
 	TokenILLEGAL
 	TokenINT
 	TokenLBRACE
@@ -93,7 +94,6 @@ const (
 	TokenSTAR
 	TokenSTAREQUAL
 	TokenSTRING
-	TokenCLASS
 	TokenSYMBOL
 	TokenTRUE
 	TokenUSE

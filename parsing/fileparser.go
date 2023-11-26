@@ -30,7 +30,7 @@ func ParseFile(r io.Reader) ([]slang.Statement, []*ParseErr) {
 
 	p.Run(toks)
 
-	return p.Statements, p.Errors()
+	return p.Statements, p.GetErrors()
 }
 
 func (p *FileParser) Run(toks slang.TokenSeq) {

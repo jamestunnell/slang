@@ -77,10 +77,8 @@ func testExprParser(t *testing.T, input string, expected slang.Expression) {
 
 		p.Run(toks)
 
-		if !assert.Empty(t, p.Errors()) {
-			for _, parseErr := range p.Errors() {
-				t.Logf("unxpected parse err at %s: %v", parseErr.Token.Location, parseErr.Error)
-			}
+		if !assert.Empty(t, p.GetErrors()) {
+			logParseErrs(t, p.GetErrors())
 
 			t.FailNow()
 		}
