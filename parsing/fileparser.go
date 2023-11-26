@@ -37,6 +37,8 @@ func (p *FileParser) Run(toks slang.TokenSeq) {
 	p.Statements = []slang.Statement{}
 
 	for !toks.Current().Is(slang.TokenEOF) {
+		toks.Skip(slang.TokenNEWLINE)
+
 		if !p.parseStatement(toks) {
 			return
 		}

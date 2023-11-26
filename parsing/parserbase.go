@@ -34,7 +34,7 @@ func (p *ParserBase) ExpectToken(
 }
 
 func (p *ParserBase) TokenErr(tok *slang.Token, expectedTypes ...slang.TokenType) {
-	err := customerrs.NewErrWrongTokenType(tok.Type(), expectedTypes)
+	err := customerrs.NewErrWrongTokenType(tok, expectedTypes)
 	parseErr := NewParseError(err, tok)
 
 	p.errors = append(p.errors, parseErr)

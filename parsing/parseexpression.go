@@ -201,11 +201,12 @@ func (p *ExprParser) parseMethodCall(toks slang.TokenSeq, subject slang.Expressi
 	}
 
 	methodName := toks.Current().Value()
-	if !toks.Next().Is(slang.TokenLPAREN) {
+
+	toks.Advance()
+
+	if !toks.Current().Is(slang.TokenLPAREN) {
 		return expressions.NewMethodCall(subject, methodName)
 	}
-
-	toks.Advance() // past the LPAREN
 
 	args, ok := p.parseCallArgs(toks)
 	if !ok {

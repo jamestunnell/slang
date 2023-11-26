@@ -21,7 +21,7 @@ func NewMethod(name string, f *ast.Function) *Method {
 }
 
 func (m *Method) Equal(other slang.Statement) bool {
-	m2, ok := other.(*Func)
+	m2, ok := other.(*Method)
 	if !ok {
 		return false
 	}

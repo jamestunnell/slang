@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/maps"
 
+	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexer"
@@ -15,10 +14,9 @@ import (
 )
 
 type classParserSuccessTest struct {
-	TestName string
-	Input    string
-	Fields   map[string]string
-	Methods  map[string]*ast.Function
+	TestName   string
+	Input      string
+	Statements []slang.Statement
 }
 
 func TestClassBodyParserFailure(t *testing.T) {
@@ -28,10 +26,9 @@ func TestClassBodyParserFailure(t *testing.T) {
 func TestClassBodyParserSuccess(t *testing.T) {
 	tests := []*classParserSuccessTest{
 		{
-			TestName: "empty",
-			Input:    `{}`,
-			Fields:   map[string]string{},
-			Methods:  map[string]*ast.Function{},
+			TestName:   "empty",
+			Input:      `{}`,
+			Statements: []slang.Statement{},
 		},
 		{
 			TestName: "with fields",
@@ -39,11 +36,10 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				field X myMod.myType
 				field Y float
 			}`,
-			Fields: map[string]string{
-				"X": "myMod.myType",
-				"Y": "float",
+			Statements: []slang.Statement{
+				statements.NewField("X", "myMod.myType"),
+				statements.NewField("Y", "float"),
 			},
-			Methods: map[string]*ast.Function{},
 		},
 		{
 			TestName: "with empty methods",
@@ -51,10 +47,9 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				method X(){}
 				method Y(a int){}
 			}`,
-			Fields: map[string]string{},
-			Methods: map[string]*ast.Function{
-				"X": ast.NewFunction([]*ast.Param{}, []string{}),
-				"Y": ast.NewFunction([]*ast.Param{ast.NewParam("a", "int")}, []string{}),
+			Statements: []slang.Statement{
+				statements.NewMethod("X", ast.NewFunction([]*ast.Param{}, []string{})),
+				statements.NewMethod("Y", ast.NewFunction([]*ast.Param{ast.NewParam("a", "int")}, []string{})),
 			},
 		},
 		{
@@ -64,13 +59,12 @@ func TestClassBodyParserSuccess(t *testing.T) {
 					return x - y
 				}
 			}`,
-			Fields: map[string]string{},
-			Methods: map[string]*ast.Function{
-				"sub": ast.NewFunction(
+			Statements: []slang.Statement{
+				statements.NewMethod("sub", ast.NewFunction(
 					[]*ast.Param{{Name: "x", Type: "int"}, {Name: "y", Type: "int"}},
 					[]string{"int"},
 					statements.NewReturn(sub(id("x"), id("y"))),
-				),
+				)),
 			},
 		},
 	}
@@ -89,42 +83,12 @@ func testClassBodyParserSuccess(t *testing.T, test *classParserSuccessTest) {
 		p.Run(seq)
 
 		if !assert.Empty(t, p.Errors()) {
-			for _, parseErr := range p.Errors() {
-				t.Logf("unxpected parse err at %s: %v", parseErr.Token.Location, parseErr.Error)
-			}
+			logParseErrs(t, p.Errors())
 
-			t.FailNow()
+			return
 		}
 
-		cls := p.Class()
-
-		require.NotNil(t, cls)
-		require.ElementsMatch(t, maps.Keys(test.Fields), cls.GetFieldNames())
-		require.ElementsMatch(t, maps.Keys(test.Methods), cls.GetMethodNames())
-
-		for name, expectedType := range test.Fields {
-			actual, ok := cls.GetFieldType(name)
-
-			if !assert.True(t, ok) {
-				t.Logf("no type found for field %s", name)
-
-				continue
-			}
-
-			assert.Equal(t, expectedType, actual)
-		}
-
-		for name, expectedMethod := range test.Methods {
-			actual, ok := cls.GetMethod(name)
-
-			if !assert.True(t, ok) {
-				t.Logf("method %s not found", name)
-
-				continue
-			}
-
-			verifyFunc(t, expectedMethod, actual)
-		}
+		verifyStatemnts(t, test.Statements, p.Statements)
 	})
 }
 

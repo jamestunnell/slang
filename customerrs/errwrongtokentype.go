@@ -8,25 +8,25 @@ import (
 )
 
 type ErrWrongTokenType struct {
-	actualType    slang.TokenType
+	token         *slang.Token
 	expectedTypes []slang.TokenType
 }
 
 func NewErrWrongTokenType(
-	actualType slang.TokenType,
+	tok *slang.Token,
 	expectedTypes []slang.TokenType,
 ) *ErrWrongTokenType {
 	return &ErrWrongTokenType{
-		actualType:    actualType,
+		token:         tok,
 		expectedTypes: expectedTypes,
 	}
 }
 
 func (err *ErrWrongTokenType) Error() string {
-	const fmtStr = "token type %s did not match any expected types %s"
+	const fmtStr = "%s token %s did not match any expected types %s"
 	expectedStr := slice.Map(err.expectedTypes, func(tokType slang.TokenType) string {
 		return tokType.String()
 	})
 
-	return fmt.Sprintf(fmtStr, err.actualType.String(), expectedStr)
+	return fmt.Sprintf(fmtStr, err.token.Type(), err.token.Value(), expectedStr)
 }
