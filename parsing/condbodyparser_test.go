@@ -46,6 +46,27 @@ func TestCondBodyParser(t *testing.T) {
 				),
 			},
 		},
+		{
+			TestName: "member access/method call",
+			Input: `{
+				a.b(x, y).c
+			}`,
+			Statements: []slang.Statement{
+				statements.NewExpression(
+					expressions.NewMemberAccess(
+						expressions.NewFuncCall(
+							expressions.NewMemberAccess(
+								expressions.NewIdentifier("a"),
+								"b",
+							),
+							expressions.NewIdentifier("x"),
+							expressions.NewIdentifier("y"),
+						),
+						"c",
+					),
+				),
+			},
+		},
 	}
 
 	for _, test := range tests {
