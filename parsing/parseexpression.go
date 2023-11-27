@@ -169,6 +169,25 @@ func (p *ExprParser) parseInteger(toks slang.TokenSeq) slang.Expression {
 }
 
 func (p *ExprParser) parseString(toks slang.TokenSeq) slang.Expression {
+	tok := toks.Current()
+
+	toks.Advance()
+
+	strExprs, err := ParseString(tok.Value())
+	if err != nil {
+		p.errors = append(p.errors, NewParseError(err, tok))
+
+		return nil
+	}
+
+	if len(strExprs) == 1 {
+		return strExprs[0]
+	}
+
+	return expressions.NewConcat(strExprs)
+}
+
+func (p *ExprParser) parseVerbatimString(toks slang.TokenSeq) slang.Expression {
 	val := toks.Current().Value()
 
 	toks.Advance()
@@ -207,7 +226,7 @@ func (p *ExprParser) parseMemberAccess(toks slang.TokenSeq, object slang.Express
 	return expressions.NewMemberAccess(object, member)
 }
 
-func (p *ExprParser) parseFunctionCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {
+func (p *ExprParser) parseCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {
 	toks.Advance() // past the LPAREN
 
 	args, ok := p.parseCallArgs(toks)
@@ -215,7 +234,7 @@ func (p *ExprParser) parseFunctionCall(toks slang.TokenSeq, fn slang.Expression)
 		return nil
 	}
 
-	return expressions.NewFuncCall(fn, args...)
+	return expressions.NewCall(fn, args...)
 }
 
 func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang.Expression {

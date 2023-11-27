@@ -25,7 +25,7 @@ func main() {
 
 		p.Run(toks)
 
-		for _, parseErr := range p.Errors() {
+		for _, parseErr := range p.GetErrors() {
 			fmt.Printf("%s %s: %v\n", file, parseErr.Token.Location, parseErr.Error)
 		}
 

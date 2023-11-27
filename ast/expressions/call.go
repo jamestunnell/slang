@@ -6,23 +6,23 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type FuncCall struct {
+type Call struct {
 	*Base
 
 	Function  slang.Expression   `json:"function"`
 	Arguments []slang.Expression `json:"args"`
 }
 
-func NewFuncCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
-	return &FuncCall{
-		Base:      NewBase(slang.ExprFUNCCALL),
+func NewCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
+	return &Call{
+		Base:      NewBase(slang.ExprCALL),
 		Function:  fn,
 		Arguments: args,
 	}
 }
 
-func (c *FuncCall) Equal(other slang.Expression) bool {
-	c2, ok := other.(*FuncCall)
+func (c *Call) Equal(other slang.Expression) bool {
+	c2, ok := other.(*Call)
 	if !ok {
 		return false
 	}
@@ -34,7 +34,7 @@ func (c *FuncCall) Equal(other slang.Expression) bool {
 	return slices.EqualFunc(c.Arguments, c2.Arguments, expressionsEqual)
 }
 
-// func (expr *FuncCall) Eval(env *slang.Environment) (slang.Object, error) {
+// func (expr *Call) Eval(env *slang.Environment) (slang.Object, error) {
 // 	obj, err := expr.Function.Eval(env)
 // 	if err != nil {
 // 		return objects.NULL(), err

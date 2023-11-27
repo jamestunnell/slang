@@ -96,6 +96,7 @@ const (
 	TokenSTRING
 	TokenSYMBOL
 	TokenTRUE
+	TokenVERBATIMSTRING
 	TokenUSE
 )
 
@@ -193,6 +194,10 @@ func (tt TokenType) String() string {
 		str = "SYMBOL"
 	case TokenTRUE:
 		str = "TRUE"
+	case TokenVERBATIMSTRING:
+		str = "VERBATIMSTRING"
+	case TokenUSE:
+		str = "USE"
 	}
 
 	return str

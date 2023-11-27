@@ -38,6 +38,8 @@ func (p *ExprParser) findPrefixParseFn(
 		prefixParse = p.parseFloat
 	case slang.TokenSTRING:
 		prefixParse = p.parseString
+	case slang.TokenVERBATIMSTRING:
+		prefixParse = p.parseVerbatimString
 	case slang.TokenTRUE:
 		prefixParse = p.parseTrue
 	case slang.TokenFALSE:
@@ -87,7 +89,7 @@ func (p *ExprParser) findInfixParseFn(
 	case slang.TokenDOT:
 		infixParse = p.parseMemberAccess
 	case slang.TokenLPAREN:
-		infixParse = p.parseFunctionCall
+		infixParse = p.parseCall
 	case slang.TokenLBRACKET:
 		infixParse = p.parseIndex
 	}

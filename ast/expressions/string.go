@@ -17,13 +17,13 @@ func NewString(val string) *String {
 	}
 }
 
-func (i *String) Equal(other slang.Expression) bool {
-	i2, ok := other.(*String)
+func (s *String) Equal(other slang.Expression) bool {
+	s2, ok := other.(*String)
 	if !ok {
 		return false
 	}
 
-	return i2.Value == i.Value
+	return s2.Value == s.Value
 }
 
 // func (expr *String) Eval(env *slang.Environment) (slang.Object, error) {

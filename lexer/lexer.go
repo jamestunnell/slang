@@ -58,6 +58,8 @@ func (l *Lexer) NextToken() *slang.Token {
 		tokInfo = tokens.EOF()
 	case l.cur == '"':
 		tokInfo = l.readString()
+	case l.cur == '`':
+		tokInfo = l.readVerbatimString()
 	case isLetterOrUnderscore(l.cur):
 		tokInfo = l.readSymbolOrKeyword()
 	case unicode.IsDigit(l.cur):
@@ -263,17 +265,35 @@ func (l *Lexer) readString() slang.TokenInfo {
 
 	runes := []rune{}
 
-	for l.cur != 0 && l.cur != '"' {
+	for l.cur != eof && l.cur != '"' {
 		runes = append(runes, l.cur)
 
 		l.advance()
 	}
 
-	if l.cur == 0 {
+	if l.cur == eof {
 		return tokens.ILLEGAL(l.cur)
 	}
 
 	return tokens.STRING(string(runes))
+}
+
+func (l *Lexer) readVerbatimString() slang.TokenInfo {
+	l.advance()
+
+	runes := []rune{}
+
+	for l.cur != eof && l.cur != '`' {
+		runes = append(runes, l.cur)
+
+		l.advance()
+	}
+
+	if l.cur == eof {
+		return tokens.ILLEGAL(l.cur)
+	}
+
+	return tokens.VERBATIMSTRING(string(runes))
 }
 
 func (l *Lexer) readSymbolOrKeyword() slang.TokenInfo {

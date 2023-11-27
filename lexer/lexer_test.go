@@ -35,6 +35,16 @@ func TestLexer_StringPlusString(t *testing.T) {
 	testLexer(t, `"foo bar"`, expected...)
 }
 
+func TestLexer_AssignVerbatimString(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("myvar"), 1, 1),
+		tok(tokens.ASSIGN(), 1, 7),
+		tok(tokens.VERBATIMSTRING("a verbatim string"), 1, 9),
+	}
+
+	testLexer(t, "myvar = `a verbatim string`", expected...)
+}
+
 func TestLexer_WholeLineComment(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.COMMENT("# not gonna lie..."), 1, 3),
@@ -198,6 +208,6 @@ func testTokensEqual(t *testing.T, exp, act *slang.Token) {
 		assert.Equal(t, exp.Location.Column, act.Location.Column)
 
 	if !result {
-		t.Errorf("expected token %v does not equal actual %v", exp, act)
+		t.Errorf("expected token %#v does not equal actual %#v", exp, act)
 	}
 }

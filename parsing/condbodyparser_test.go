@@ -41,7 +41,7 @@ func TestCondBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewExpression(
-					expressions.NewFuncCall(
+					expressions.NewCall(
 						expressions.NewMemberAccess(expressions.NewIdentifier("this"), "MyMethod")),
 				),
 			},
@@ -54,7 +54,7 @@ func TestCondBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewExpression(
 					expressions.NewMemberAccess(
-						expressions.NewFuncCall(
+						expressions.NewCall(
 							expressions.NewMemberAccess(
 								expressions.NewIdentifier("a"),
 								"b",

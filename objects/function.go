@@ -5,14 +5,15 @@ import (
 	"strings"
 
 	"github.com/akrennmair/slice"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Function struct {
-	Params []*slang.Param
+	Params []slang.Param
 	Body   slang.Statement
-	Env    *slang.Environment
+	Env    *Environment
 }
 
 const ClassFUNCTION = "Function"
@@ -20,7 +21,7 @@ const ClassFUNCTION = "Function"
 var funClass = NewBuiltInClass(ClassFUNCTION)
 
 func NewFunction(
-	params []*slang.Param, body slang.Statement, env *slang.Environment) *Function {
+	params []slang.Param, body slang.Statement, env *Environment) *Function {
 	return &Function{
 		Params: params,
 		Body:   body,
@@ -33,7 +34,7 @@ func (obj *Function) Class() Class {
 }
 
 func (obj *Function) Inspect() string {
-	paramStrings := slice.Map(obj.Params, paramToString)
+	paramStrings := slice.Map(obj.Params, slang.ParamString)
 	paramsStr := strings.Join(paramStrings, ", ")
 
 	return fmt.Sprintf("func(%s){...}", paramsStr)
@@ -66,15 +67,13 @@ func (obj *Function) call(args []Object) (Object, error) {
 		return NULL(), err
 	}
 
-	newEnv := slang.NewEnvironment(obj.Env)
+	newEnv := NewEnvironment(obj.Env)
 
 	for i, param := range obj.Params {
-		newEnv.Set(param.Name, args[i])
+		newEnv.Set(param.GetName(), args[i])
 	}
 
-	return obj.Body.Eval(newEnv)
-}
+	// return obj.Body.Eval(newEnv)
 
-func paramToString(p *slang.Param) string {
-	return p.String()
+	return NULL(), customerrs.NewErrNotImplemented("Function")
 }

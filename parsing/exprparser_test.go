@@ -124,7 +124,7 @@ func str(val string) slang.Expression {
 }
 
 func fncall(fn slang.Expression, args ...slang.Expression) slang.Expression {
-	return expressions.NewFuncCall(fn, args...)
+	return expressions.NewCall(fn, args...)
 }
 
 func gt(left, right slang.Expression) slang.Expression {

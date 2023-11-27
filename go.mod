@@ -7,7 +7,6 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.14.2
-	github.com/tidwall/sjson v1.2.5
 	golang.org/x/exp v0.0.0-20221215174704-0915cd710c24
 )
 

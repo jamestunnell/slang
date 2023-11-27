@@ -15,11 +15,11 @@ const (
 	ExprARRAY
 	ExprBOOL
 	ExprCALL
+	ExprCONCAT
 	ExprDIVIDE
 	ExprEQUAL
 	ExprFLOAT
 	ExprFUNC
-	ExprFUNCCALL
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
@@ -38,6 +38,20 @@ const (
 	ExprSTRING
 )
 
+func ExpressionsEqual(a, b []Expression) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for idx, expr := range a {
+		if !expr.Equal(b[idx]) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (et ExprType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(et.String())
 }
@@ -52,6 +66,10 @@ func (et ExprType) String() string {
 		str = "ARRAY"
 	case ExprBOOL:
 		str = "BOOL"
+	case ExprCALL:
+		str = "CALL"
+	case ExprCONCAT:
+		str = "CONCAT"
 	case ExprDIVIDE:
 		str = "DIVIDE"
 	case ExprEQUAL:
@@ -60,8 +78,6 @@ func (et ExprType) String() string {
 		str = "FLOAT"
 	case ExprFUNC:
 		str = "FUNC"
-	case ExprFUNCCALL:
-		str = "FUNCCALL"
 	case ExprGREATER:
 		str = "GREATER"
 	case ExprGREATEREQUAL:
