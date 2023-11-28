@@ -31,6 +31,16 @@ func TestFileParser(t *testing.T) {
 				this.Amount = amt
 			}
 		}
+
+		func TestAmountAdder(t test.Test) {
+			aa = AmountAdder.New()
+
+			aa.ChangeAmount(2.5)
+
+			result = aa.AddAmount(12.0)
+
+			t.AssertAlmostEq(result, 14.5)
+		}
 	`)
 	expected := []slang.Statement{
 		statements.NewUse("first/path"),
@@ -65,6 +75,35 @@ func TestFileParser(t *testing.T) {
 				),
 			),
 		),
+		statements.NewFunc("TestAmountAdder", ast.NewFunction(
+			[]*ast.Param{ast.NewParam("t", "test.Test")},
+			[]string{},
+			statements.NewAssign(
+				expressions.NewIdentifier("aa"),
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("AmountAdder"), "New")),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "ChangeAmount"),
+					expressions.NewFloat(2.5),
+				),
+			),
+			statements.NewAssign(
+				expressions.NewIdentifier("result"),
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "AddAmount"),
+					expressions.NewFloat(12.0),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewIdentifier("result"),
+					expressions.NewFloat(14.5),
+				),
+			),
+		)),
 	}
 	testFileParserSuccess(t, "just a class statement", file, expected)
 }

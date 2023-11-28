@@ -89,6 +89,8 @@ func (p *FileParser) parseFunc(toks slang.TokenSeq) bool {
 
 	name := toks.Current().Value()
 
+	toks.Advance()
+
 	sigParser := NewFuncSignatureParser()
 	if !p.RunSubParser(toks, sigParser) {
 		return false
