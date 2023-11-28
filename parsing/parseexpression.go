@@ -86,7 +86,7 @@ func (p *ExprParser) parseIfExpression(toks slang.TokenSeq) slang.Expression {
 		return nil
 	}
 
-	if !toks.Next().Is(slang.TokenELSE) {
+	if !toks.Current().Is(slang.TokenELSE) {
 		return expressions.NewIf(cond, conseqParser.Statements)
 	}
 
@@ -169,22 +169,40 @@ func (p *ExprParser) parseInteger(toks slang.TokenSeq) slang.Expression {
 }
 
 func (p *ExprParser) parseString(toks slang.TokenSeq) slang.Expression {
-	tok := toks.Current()
+	strExprs := []slang.Expression{expressions.NewString(toks.Current().Value())}
 
 	toks.Advance()
 
-	strExprs, err := ParseString(tok.Value())
-	if err != nil {
-		p.errors = append(p.errors, NewParseError(err, tok))
+	for toks.Current().Is(slang.TokenDOLLARLBRACE) {
+		toks.AdvanceSkip(slang.TokenNEWLINE)
 
-		return nil
+		expr := p.parseExpression(toks, PrecedenceLOWEST)
+		if expr == nil {
+			return nil
+		}
+
+		strExprs = append(strExprs, expr)
+
+		if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
+			return nil
+		}
+
+		toks.Advance()
+
+		if !p.ExpectToken(toks.Current(), slang.TokenSTRING) {
+			return nil
+		}
+
+		strExprs = append(strExprs, expressions.NewString(toks.Current().Value()))
+
+		toks.Advance()
 	}
 
 	if len(strExprs) == 1 {
 		return strExprs[0]
 	}
 
-	return expressions.NewConcat(strExprs)
+	return expressions.NewConcat(strExprs...)
 }
 
 func (p *ExprParser) parseVerbatimString(toks slang.TokenSeq) slang.Expression {

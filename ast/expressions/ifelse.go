@@ -15,6 +15,8 @@ type IfElse struct {
 func NewIfElse(cond slang.Expression, conseqs, alterns []slang.Statement) *IfElse {
 	return &IfElse{
 		Base:         NewBase(slang.ExprIFELSE),
+		Condition:    cond,
+		Consequences: conseqs,
 		Alternatives: alterns,
 	}
 }

@@ -45,6 +45,42 @@ func TestLexer_AssignVerbatimString(t *testing.T) {
 	testLexer(t, "myvar = `a verbatim string`", expected...)
 }
 
+func TestLexer_SimpleStringInterp(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.STRING("this string has a "), 1, 1),
+		tok(tokens.DOLLARLBRACE(), 1, 20),
+		tok(tokens.INT("5"), 1, 22),
+		tok(tokens.RBRACE(), 1, 23),
+		tok(tokens.STRING(" in it"), 1, 24),
+	}
+
+	testLexer(t, `"this string has a ${5} in it"`, expected...)
+}
+
+func TestLexer_AssignNestedStringInterp(t *testing.T) {
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("myVar"), 1, 1),
+		tok(tokens.ASSIGN(), 1, 7),
+		tok(tokens.STRING("a "), 1, 9),
+		tok(tokens.DOLLARLBRACE(), 1, 12),
+		tok(tokens.IF(), 1, 14),
+		tok(tokens.SYMBOL("x"), 1, 17),
+		tok(tokens.GREATER(), 1, 19),
+		tok(tokens.INT("3"), 1, 21),
+		tok(tokens.LBRACE(), 1, 23),
+		tok(tokens.STRING("small"), 1, 24),
+		tok(tokens.RBRACE(), 1, 31),
+		tok(tokens.ELSE(), 1, 33),
+		tok(tokens.LBRACE(), 1, 38),
+		tok(tokens.STRING("med"), 1, 39),
+		tok(tokens.RBRACE(), 1, 44),
+		tok(tokens.RBRACE(), 1, 45),
+		tok(tokens.STRING(" word"), 1, 46),
+	}
+
+	testLexer(t, `myVar = "a ${if x > 3 {"small"} else {"med"}} word"`, expected...)
+}
+
 func TestLexer_WholeLineComment(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.COMMENT("# not gonna lie..."), 1, 3),

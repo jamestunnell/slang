@@ -5,6 +5,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/oleiade/lane/v2"
 	"github.com/rs/zerolog/log"
 
 	"github.com/jamestunnell/slang"
@@ -12,25 +13,27 @@ import (
 )
 
 type Lexer struct {
-	scanner             io.RuneScanner
-	cur, next, nextNext rune
-	line, col           int
+	scanner       io.RuneScanner
+	cur, next     rune
+	line, col     int
+	interpContext *lane.Stack[slang.TokenType]
+	tokens        *lane.Queue[*slang.Token]
 }
 
 const eof = 0
 
 func New(scanner io.RuneScanner) slang.Lexer {
 	l := &Lexer{
-		scanner:  scanner,
-		cur:      0,
-		next:     0,
-		nextNext: 0,
-		line:     1,
-		col:      -2, //will be 1 after advancing thrice
+		scanner:       scanner,
+		cur:           0,
+		next:          0,
+		line:          1,
+		col:           -1, //will be 1 after advancing twice
+		interpContext: lane.NewStack[slang.TokenType](),
+		tokens:        lane.NewQueue[*slang.Token](),
 	}
 
-	// read runes for cur, next, and nextNext
-	l.advance()
+	// read runes for cur and next
 	l.advance()
 	l.advance()
 
@@ -38,39 +41,50 @@ func New(scanner io.RuneScanner) slang.Lexer {
 }
 
 func (l *Lexer) NextToken() *slang.Token {
-	var tokInfo slang.TokenInfo
+	if tok, ok := l.tokens.Dequeue(); ok {
+		return tok
+	}
 
 	l.skipWhitespace()
 
-	loc := slang.SourceLocation{
-		Line:   l.line,
-		Column: l.col,
-	}
+	loc := l.curLoc()
 
 	switch {
 	case l.cur == '#':
-		tokInfo = l.readComment()
+		l.readComment(loc)
 	case l.cur == '\n':
-		tokInfo = l.readNewline()
-	case isSymbol(l.cur):
-		tokInfo = l.readSymbol()
-	case l.cur == eof:
-		tokInfo = tokens.EOF()
+		l.readNewline(loc)
 	case l.cur == '"':
-		tokInfo = l.readString()
+		l.advance()
+
+		l.readString(loc)
 	case l.cur == '`':
-		tokInfo = l.readVerbatimString()
+		l.readVerbatimString(loc)
+	case isSymbol(l.cur):
+		l.readSymbol(loc)
+	case l.cur == eof:
+		l.emit(tokens.EOF(), loc)
 	case isLetterOrUnderscore(l.cur):
-		tokInfo = l.readSymbolOrKeyword()
+		l.readNameOrKeyword(loc)
 	case unicode.IsDigit(l.cur):
-		tokInfo = l.readNumber()
+		l.readNumber(loc)
 	default:
-		tokInfo = tokens.ILLEGAL(l.cur)
+		l.emit(tokens.ILLEGAL(l.cur), loc)
+
+		l.advance()
 	}
 
-	l.advance()
+	if next, ok := l.tokens.Dequeue(); ok {
+		return next
+	}
 
-	return slang.NewToken(tokInfo, loc)
+	log.Fatal().Msg("no token to ")
+
+	return nil
+}
+
+func (l *Lexer) emit(info slang.TokenInfo, loc slang.SourceLocation) {
+	l.tokens.Enqueue(slang.NewToken(info, loc))
 }
 
 func (l *Lexer) advance() {
@@ -79,8 +93,7 @@ func (l *Lexer) advance() {
 	l.col++
 
 	l.cur = l.next
-	l.next = l.nextNext
-	l.nextNext = r
+	l.next = r
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -98,7 +111,7 @@ func isSymbol(r rune) bool {
 	return false
 }
 
-func (l *Lexer) readComment() slang.TokenInfo {
+func (l *Lexer) readComment(loc slang.SourceLocation) {
 	var b strings.Builder
 
 	b.WriteRune('#')
@@ -111,17 +124,25 @@ func (l *Lexer) readComment() slang.TokenInfo {
 		l.advance()
 	}
 
-	return tokens.COMMENT(b.String())
+	l.advance()
+
+	l.emit(tokens.COMMENT(b.String()), loc)
 }
 
-func (l *Lexer) readNewline() slang.TokenInfo {
+func (l *Lexer) advanceLine() {
 	l.line++
 	l.col = 0
 
-	return tokens.NEWLINE()
+	l.advance()
 }
 
-func (l *Lexer) readSymbol() slang.TokenInfo {
+func (l *Lexer) readNewline(loc slang.SourceLocation) {
+	l.advanceLine()
+
+	l.emit(tokens.NEWLINE(), loc)
+}
+
+func (l *Lexer) readSymbol(loc slang.SourceLocation) {
 	var tok slang.TokenInfo
 
 	switch l.cur {
@@ -167,7 +188,29 @@ func (l *Lexer) readSymbol() slang.TokenInfo {
 			Msg("unexpected symbol rune")
 	}
 
-	return tok
+	l.emit(tok, loc)
+
+	l.advance()
+
+	if l.interpContext.Size() == 0 {
+		return
+	}
+
+	if tok.Type() == slang.TokenLBRACE {
+		l.interpContext.Push(slang.TokenLBRACE)
+
+		return
+	}
+
+	if tok.Type() != slang.TokenRBRACE {
+		return
+	}
+
+	contextType, _ := l.interpContext.Pop()
+	if contextType == slang.TokenDOLLARLBRACE {
+		// completed a string interpolation expression, now resume reading string until "
+		l.readString(l.curLoc())
+	}
 }
 
 func (l *Lexer) readNot() slang.TokenInfo {
@@ -260,107 +303,143 @@ func (l *Lexer) readSlash() slang.TokenInfo {
 	return tokens.SLASH()
 }
 
-func (l *Lexer) readString() slang.TokenInfo {
-	l.advance()
+func (l *Lexer) curLoc() slang.SourceLocation {
+	return slang.SourceLocation{
+		Line:   l.line,
+		Column: l.col,
+	}
+}
 
-	runes := []rune{}
+func (l *Lexer) readString(loc slang.SourceLocation) {
+	var b strings.Builder
 
-	for l.cur != eof && l.cur != '"' {
-		runes = append(runes, l.cur)
+	for l.cur != '\n' && l.cur != eof && l.cur != '"' {
+		if l.cur == '$' && l.next == '{' {
+			l.emit(tokens.STRING(b.String()), loc)
+			l.emit(tokens.DOLLARLBRACE(), l.curLoc())
+
+			l.advance()
+			l.advance()
+
+			l.interpContext.Push(slang.TokenDOLLARLBRACE)
+
+			return
+		}
+
+		b.WriteRune(l.cur)
 
 		l.advance()
 	}
 
-	if l.cur == eof {
-		return tokens.ILLEGAL(l.cur)
+	if l.cur == eof || l.cur == '\n' {
+		l.emit(tokens.ILLEGAL(l.cur), l.curLoc())
 	}
 
-	return tokens.STRING(string(runes))
-}
-
-func (l *Lexer) readVerbatimString() slang.TokenInfo {
 	l.advance()
 
-	runes := []rune{}
+	l.emit(tokens.STRING(b.String()), loc)
+}
+
+func (l *Lexer) readVerbatimString(loc slang.SourceLocation) {
+	l.advance()
+
+	var b strings.Builder
 
 	for l.cur != eof && l.cur != '`' {
-		runes = append(runes, l.cur)
+		b.WriteRune(l.cur)
 
-		l.advance()
+		// check for newline in string
+		if l.cur == '\n' {
+			l.advanceLine()
+		} else {
+			l.advance()
+		}
 	}
 
 	if l.cur == eof {
-		return tokens.ILLEGAL(l.cur)
+		l.emit(tokens.ILLEGAL(l.cur), l.curLoc())
+
+		return
 	}
 
-	return tokens.VERBATIMSTRING(string(runes))
+	l.advance()
+
+	tokens.VERBATIMSTRING(b.String())
 }
 
-func (l *Lexer) readSymbolOrKeyword() slang.TokenInfo {
-	runes := []rune{l.cur}
+func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
+	var b strings.Builder
+
+	b.WriteRune(l.cur)
 
 	for unicode.IsDigit(l.next) || isLetterOrUnderscore(l.next) {
 		l.advance()
 
-		runes = append(runes, l.cur)
+		b.WriteRune(l.cur)
 	}
 
-	str := string(runes)
+	l.advance()
+
+	str := b.String()
 
 	switch str {
 	case tokens.StrCLASS:
-		return tokens.CLASS()
+		l.emit(tokens.CLASS(), loc)
 	case tokens.StrELSE:
-		return tokens.ELSE()
+		l.emit(tokens.ELSE(), loc)
 	case tokens.StrFALSE:
-		return tokens.FALSE()
+		l.emit(tokens.FALSE(), loc)
 	case tokens.StrFIELD:
-		return tokens.FIELD()
+		l.emit(tokens.FIELD(), loc)
 	case tokens.StrFUNC:
-		return tokens.FUNC()
+		l.emit(tokens.FUNC(), loc)
 	case tokens.StrIF:
-		return tokens.IF()
+		l.emit(tokens.IF(), loc)
 	case tokens.StrMETHOD:
-		return tokens.METHOD()
+		l.emit(tokens.METHOD(), loc)
 	case tokens.StrRETURN:
-		return tokens.RETURN()
+		l.emit(tokens.RETURN(), loc)
 	case tokens.StrTRUE:
-		return tokens.TRUE()
+		l.emit(tokens.TRUE(), loc)
 	case tokens.StrUSE:
-		return tokens.USE()
+		l.emit(tokens.USE(), loc)
+	default:
+		l.emit(tokens.SYMBOL(str), loc)
 	}
-
-	return tokens.SYMBOL(str)
 }
 
-func (l *Lexer) readNumber() slang.TokenInfo {
-	preDotDigits := []rune{l.cur}
+func (l *Lexer) readNumber(loc slang.SourceLocation) {
+	var b strings.Builder
+
+	b.WriteRune(l.cur)
 
 	for unicode.IsDigit(l.next) {
 		l.advance()
 
-		preDotDigits = append(preDotDigits, l.cur)
+		b.WriteRune(l.cur)
 	}
 
-	if l.next != '.' || !unicode.IsDigit(l.nextNext) {
-		return tokens.INT(string(preDotDigits))
+	dotFound := l.next == '.'
+
+	l.advance()
+
+	if !dotFound {
+		l.emit(tokens.INT(b.String()), loc)
+
+		return
 	}
 
-	l.advance()
-	l.advance()
+	b.WriteRune('.')
 
-	postDotDigits := []rune{l.cur}
-
-	if unicode.IsDigit(l.next) {
+	for unicode.IsDigit(l.next) {
 		l.advance()
 
-		postDotDigits = append(postDotDigits, l.cur)
+		b.WriteRune(l.cur)
 	}
 
-	runes := append(preDotDigits, '.')
-	runes = append(runes, postDotDigits...)
+	l.advance()
 
-	return tokens.FLOAT(string(runes))
+	l.emit(tokens.FLOAT(b.String()), loc)
 }
 
 func isLetterOrUnderscore(r rune) bool {

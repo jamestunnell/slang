@@ -56,6 +56,7 @@ const (
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
+	TokenDOLLARLBRACE
 	TokenDOT
 	TokenELSE
 	TokenEOF

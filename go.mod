@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/akrennmair/slice v0.0.0-20220105203817-49445747ab81
+	github.com/oleiade/lane/v2 v2.0.0
 	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.14.2

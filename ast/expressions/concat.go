@@ -8,7 +8,7 @@ type Concat struct {
 	StringExprs []slang.Expression `json:"stringExpressions"`
 }
 
-func NewConcat(exprs []slang.Expression) *Concat {
+func NewConcat(exprs ...slang.Expression) *Concat {
 	return &Concat{
 		Base:        NewBase(slang.ExprCONCAT),
 		StringExprs: exprs,
