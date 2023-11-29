@@ -123,8 +123,14 @@ func str(val string) slang.Expression {
 	return expressions.NewString(val)
 }
 
-func callPosArgsOnly(fn slang.Expression, args ...slang.Expression) slang.Expression {
-	return expressions.NewCall(fn, args, map[string]slang.Expression{})
+func callPosArgsOnly(fn slang.Expression, argVals ...slang.Expression) slang.Expression {
+	args := make([]*expressions.Arg, len(argVals))
+
+	for i, val := range argVals {
+		args[i] = expressions.NewPositionalArg(val)
+	}
+
+	return expressions.NewCall(fn, args...)
 }
 
 func gt(left, right slang.Expression) slang.Expression {

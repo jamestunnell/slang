@@ -36,13 +36,14 @@ func TestLexer_StringPlusString(t *testing.T) {
 }
 
 func TestLexer_AssignVerbatimString(t *testing.T) {
+	input := "myvar = `this \nis verbatim`"
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("myvar"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 7),
-		tok(tokens.VERBATIMSTRING("a verbatim string"), 1, 9),
+		tok(tokens.VERBATIMSTRING("this \nis verbatim"), 1, 9),
 	}
 
-	testLexer(t, "myvar = `a verbatim string`", expected...)
+	testLexer(t, input, expected...)
 }
 
 func TestLexer_SimpleStringInterp(t *testing.T) {
@@ -170,6 +171,17 @@ func TestLexer_AssignClassField(t *testing.T) {
 	testLexer(t, str, expected...)
 }
 
+func TestLexer_IntSymbolIsIllegal(t *testing.T) {
+	const str = "25Name"
+
+	expected := []*slang.Token{
+		tok(tokens.ILLEGAL('N'), 1, 3),
+		tok(tokens.SYMBOL("Name"), 1, 3),
+	}
+
+	testLexer(t, str, expected...)
+}
+
 func TestLexer_IntMethodCall(t *testing.T) {
 	const str = "25.add(12)"
 
@@ -180,6 +192,21 @@ func TestLexer_IntMethodCall(t *testing.T) {
 		tok(tokens.LPAREN(), 1, 7),
 		tok(tokens.INT("12"), 1, 8),
 		tok(tokens.RPAREN(), 1, 10),
+	}
+
+	testLexer(t, str, expected...)
+}
+
+func TestLexer_FloatMethodCall(t *testing.T) {
+	const str = "25.5.add(12)"
+
+	expected := []*slang.Token{
+		tok(tokens.FLOAT("25.5"), 1, 1),
+		tok(tokens.DOT(), 1, 5),
+		tok(tokens.SYMBOL("add"), 1, 6),
+		tok(tokens.LPAREN(), 1, 9),
+		tok(tokens.INT("12"), 1, 10),
+		tok(tokens.RPAREN(), 1, 12),
 	}
 
 	testLexer(t, str, expected...)

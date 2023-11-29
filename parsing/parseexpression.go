@@ -247,12 +247,12 @@ func (p *ExprParser) parseMemberAccess(toks slang.TokenSeq, object slang.Express
 func (p *ExprParser) parseCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {
 	toks.Advance() // past the LPAREN
 
-	posArgs, kwArgs, ok := p.parseCallArgs(toks)
+	args, ok := p.parseCallArgs(toks)
 	if !ok {
 		return nil
 	}
 
-	return expressions.NewCall(fn, posArgs, kwArgs)
+	return expressions.NewCall(fn, args...)
 }
 
 func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
@@ -274,15 +274,14 @@ func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang
 
 func (p *ExprParser) parseCallArgs(
 	toks slang.TokenSeq,
-) ([]slang.Expression, map[string]slang.Expression, bool) {
+) ([]*expressions.Arg, bool) {
 	if toks.Current().Is(slang.TokenRPAREN) {
 		toks.Advance()
 
-		return []slang.Expression{}, map[string]slang.Expression{}, true
+		return []*expressions.Arg{}, true
 	}
 
-	posArgs := []slang.Expression{}
-	kwArgs := map[string]slang.Expression{}
+	args := []*expressions.Arg{}
 
 	addArg := func() bool {
 		var nameTok *slang.Token
@@ -301,45 +300,37 @@ func (p *ExprParser) parseCallArgs(
 		}
 
 		if nameTok == nil {
-			posArgs = append(posArgs, argExpr)
+			args = append(args, expressions.NewPositionalArg(argExpr))
 
 			return true
 		}
 
-		name := nameTok.Value()
+		arg := expressions.NewKeywordArg(nameTok.Value(), argExpr)
 
-		if _, found := kwArgs[name]; found {
-			parseErr := NewParseError(customerrs.NewErrDuplicateName(name), nameTok)
-
-			p.errors = append(p.errors, parseErr)
-
-			return false
-		}
-
-		kwArgs[name] = argExpr
+		args = append(args, arg)
 
 		return true
 	}
 
 	if !addArg() {
-		return nil, nil, false
+		return nil, false
 	}
 
 	for toks.Current().Is(slang.TokenCOMMA) {
 		toks.Advance()
 
 		if !addArg() {
-			return nil, nil, false
+			return nil, false
 		}
 	}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
-		return nil, nil, false
+		return nil, false
 	}
 
 	toks.Advance()
 
-	return posArgs, kwArgs, true
+	return args, true
 }
 
 func (p *ExprParser) parseAdd(toks slang.TokenSeq, left slang.Expression) slang.Expression {

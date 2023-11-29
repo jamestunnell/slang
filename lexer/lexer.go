@@ -78,7 +78,7 @@ func (l *Lexer) NextToken() *slang.Token {
 		return next
 	}
 
-	log.Fatal().Msg("no token to ")
+	log.Fatal().Msg("no token to dequeue")
 
 	return nil
 }
@@ -364,7 +364,7 @@ func (l *Lexer) readVerbatimString(loc slang.SourceLocation) {
 
 	l.advance()
 
-	tokens.VERBATIMSTRING(b.String())
+	l.emit(tokens.VERBATIMSTRING(b.String()), loc)
 }
 
 func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
@@ -411,35 +411,41 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 func (l *Lexer) readNumber(loc slang.SourceLocation) {
 	var b strings.Builder
 
-	b.WriteRune(l.cur)
-
-	for unicode.IsDigit(l.next) {
-		l.advance()
-
+	for unicode.IsDigit(l.cur) {
 		b.WriteRune(l.cur)
+
+		l.advance()
 	}
 
-	dotFound := l.next == '.'
-
-	l.advance()
-
-	if !dotFound {
-		l.emit(tokens.INT(b.String()), loc)
+	if isLetterOrUnderscore(l.cur) {
+		l.emit(tokens.ILLEGAL(l.cur), l.curLoc())
 
 		return
 	}
 
-	b.WriteRune('.')
+	if l.cur == '.' {
+		if unicode.IsDigit(l.next) {
+			b.WriteRune('.')
 
-	for unicode.IsDigit(l.next) {
-		l.advance()
+			l.advance()
 
-		b.WriteRune(l.cur)
+			for unicode.IsDigit(l.cur) {
+				b.WriteRune(l.cur)
+
+				l.advance()
+			}
+
+			l.emit(tokens.FLOAT(b.String()), loc)
+
+		} else {
+			l.emit(tokens.INT(b.String()), loc)
+			l.emit(tokens.DOT(), l.curLoc())
+
+			l.advance()
+		}
+	} else {
+		l.emit(tokens.INT(b.String()), loc)
 	}
-
-	l.advance()
-
-	l.emit(tokens.FLOAT(b.String()), loc)
 }
 
 func isLetterOrUnderscore(r rune) bool {

@@ -11,5 +11,5 @@ func NewErrUnknownType(typ string) *ErrUnknownType {
 }
 
 func (err *ErrUnknownType) Error() string {
-	return fmt.Sprint("unknown type %s", err.Type)
+	return fmt.Sprintf("unknown type %s", err.Type)
 }

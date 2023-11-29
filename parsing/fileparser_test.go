@@ -81,34 +81,26 @@ func TestFileParser(t *testing.T) {
 			statements.NewAssign(
 				expressions.NewIdentifier("aa"),
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("AmountAdder"), "New"),
-					[]slang.Expression{},
-					map[string]slang.Expression{},
-				),
+					expressions.NewMemberAccess(expressions.NewIdentifier("AmountAdder"), "New")),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
 					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "ChangeAmount"),
-					[]slang.Expression{expressions.NewFloat(2.5)},
-					map[string]slang.Expression{},
+					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
 				),
 			),
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
 				expressions.NewCall(
 					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "AddAmount"),
-					[]slang.Expression{expressions.NewFloat(12.0)},
-					map[string]slang.Expression{},
+					expressions.NewPositionalArg(expressions.NewFloat(12.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
 					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
-					[]slang.Expression{
-						expressions.NewIdentifier("result"),
-						expressions.NewFloat(14.5),
-					},
-					map[string]slang.Expression{},
+					expressions.NewPositionalArg(expressions.NewIdentifier("result")),
+					expressions.NewPositionalArg(expressions.NewFloat(14.5)),
 				),
 			),
 		)),

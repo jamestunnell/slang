@@ -2,26 +2,25 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 )
 
 type FuncSignatureParser struct {
 	*ParserBase
 
-	Params      []*ast.Param
+	Params      []*slang.NameType
 	ReturnTypes []string
 }
 
 func NewFuncSignatureParser() *FuncSignatureParser {
 	return &FuncSignatureParser{
 		ParserBase:  NewParserBase(),
-		Params:      []*ast.Param{},
+		Params:      []*slang.NameType{},
 		ReturnTypes: []string{},
 	}
 }
 
 func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
-	p.Params = []*ast.Param{}
+	p.Params = []*slang.NameType{}
 	p.ReturnTypes = []string{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
@@ -30,7 +29,7 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	p.Params = []*ast.Param{}
+	p.Params = []*slang.NameType{}
 	p.ReturnTypes = []string{}
 
 	if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {
@@ -106,7 +105,7 @@ func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	p.Params = append(p.Params, &ast.Param{Name: name, Type: typ})
+	p.Params = append(p.Params, &slang.NameType{Name: name, Type: typ})
 
 	return true
 }

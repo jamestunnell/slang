@@ -42,10 +42,7 @@ func TestCondBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewExpression(
 					expressions.NewCall(
-						expressions.NewMemberAccess(expressions.NewIdentifier("this"), "MyMethod"),
-						[]slang.Expression{},
-						map[string]slang.Expression{},
-					),
+						expressions.NewMemberAccess(expressions.NewIdentifier("this"), "MyMethod")),
 				),
 			},
 		},
@@ -62,11 +59,8 @@ func TestCondBodyParser(t *testing.T) {
 								expressions.NewIdentifier("a"),
 								"b",
 							),
-							[]slang.Expression{
-								expressions.NewIdentifier("x"),
-								expressions.NewIdentifier("y"),
-							},
-							map[string]slang.Expression{},
+							expressions.NewPositionalArg(expressions.NewIdentifier("x")),
+							expressions.NewPositionalArg(expressions.NewIdentifier("y")),
 						),
 						"c",
 					),
@@ -88,10 +82,7 @@ func TestCondBodyParser(t *testing.T) {
 						expressions.NewIfElse(
 							expressions.NewLess(
 								expressions.NewCall(
-									expressions.NewMemberAccess(expressions.NewIdentifier("word"), "Size"),
-									[]slang.Expression{},
-									map[string]slang.Expression{},
-								),
+									expressions.NewMemberAccess(expressions.NewIdentifier("word"), "Size")),
 								expressions.NewInteger(10),
 							),
 							[]slang.Statement{statements.NewExpression(expressions.NewString("short"))},
