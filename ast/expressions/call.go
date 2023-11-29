@@ -1,6 +1,7 @@
 package expressions
 
 import (
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"github.com/jamestunnell/slang"
@@ -9,15 +10,21 @@ import (
 type Call struct {
 	*Base
 
-	Function  slang.Expression   `json:"function"`
-	Arguments []slang.Expression `json:"args"`
+	Function       slang.Expression            `json:"function"`
+	PositionalArgs []slang.Expression          `json:"positionalArgs"`
+	KeywordArgs    map[string]slang.Expression `json:"keywordArgs"`
 }
 
-func NewCall(fn slang.Expression, args ...slang.Expression) slang.Expression {
+func NewCall(
+	fn slang.Expression,
+	posArgs []slang.Expression,
+	kwArgs map[string]slang.Expression,
+) slang.Expression {
 	return &Call{
-		Base:      NewBase(slang.ExprCALL),
-		Function:  fn,
-		Arguments: args,
+		Base:           NewBase(slang.ExprCALL),
+		Function:       fn,
+		PositionalArgs: posArgs,
+		KeywordArgs:    kwArgs,
 	}
 }
 
@@ -31,7 +38,15 @@ func (c *Call) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return slices.EqualFunc(c.Arguments, c2.Arguments, expressionsEqual)
+	if !slices.EqualFunc(c.PositionalArgs, c2.PositionalArgs, expressionsEqual) {
+		return false
+	}
+
+	if !maps.EqualFunc(c.KeywordArgs, c2.KeywordArgs, expressionsEqual) {
+		return false
+	}
+
+	return true
 }
 
 // func (expr *Call) Eval(env *slang.Environment) (slang.Object, error) {

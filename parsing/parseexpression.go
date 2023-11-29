@@ -247,12 +247,12 @@ func (p *ExprParser) parseMemberAccess(toks slang.TokenSeq, object slang.Express
 func (p *ExprParser) parseCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {
 	toks.Advance() // past the LPAREN
 
-	args, ok := p.parseCallArgs(toks)
+	posArgs, kwArgs, ok := p.parseCallArgs(toks)
 	if !ok {
 		return nil
 	}
 
-	return expressions.NewCall(fn, args...)
+	return expressions.NewCall(fn, posArgs, kwArgs)
 }
 
 func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
@@ -272,46 +272,74 @@ func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang
 	return expressions.NewIndex(ary, indexExprParser.Expr)
 }
 
-func (p *ExprParser) parseCallArgs(toks slang.TokenSeq) ([]slang.Expression, bool) {
+func (p *ExprParser) parseCallArgs(
+	toks slang.TokenSeq,
+) ([]slang.Expression, map[string]slang.Expression, bool) {
 	if toks.Current().Is(slang.TokenRPAREN) {
 		toks.Advance()
 
-		return []slang.Expression{}, true
+		return []slang.Expression{}, map[string]slang.Expression{}, true
 	}
 
-	args := []slang.Expression{}
+	posArgs := []slang.Expression{}
+	kwArgs := map[string]slang.Expression{}
 
 	addArg := func() bool {
-		arg := p.parseExpression(toks, PrecedenceLOWEST)
+		var nameTok *slang.Token
 
-		if arg == nil {
+		if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
+			nameTok = toks.Current()
+
+			toks.Advance()
+			toks.Advance()
+		}
+
+		argExpr := p.parseExpression(toks, PrecedenceLOWEST)
+
+		if argExpr == nil {
 			return false
 		}
 
-		args = append(args, arg)
+		if nameTok == nil {
+			posArgs = append(posArgs, argExpr)
+
+			return true
+		}
+
+		name := nameTok.Value()
+
+		if _, found := kwArgs[name]; found {
+			parseErr := NewParseError(customerrs.NewErrDuplicateName(name), nameTok)
+
+			p.errors = append(p.errors, parseErr)
+
+			return false
+		}
+
+		kwArgs[name] = argExpr
 
 		return true
 	}
 
 	if !addArg() {
-		return nil, false
+		return nil, nil, false
 	}
 
 	for toks.Current().Is(slang.TokenCOMMA) {
 		toks.Advance()
 
 		if !addArg() {
-			return nil, false
+			return nil, nil, false
 		}
 	}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
-		return nil, false
+		return nil, nil, false
 	}
 
 	toks.Advance()
 
-	return args, true
+	return posArgs, kwArgs, true
 }
 
 func (p *ExprParser) parseAdd(toks slang.TokenSeq, left slang.Expression) slang.Expression {

@@ -44,8 +44,8 @@ func TestExprParser(t *testing.T) {
 		"(15 + 2) * 12": mul(add(i(15), i(2)), i(12)),
 
 		// func calls
-		"sum(1,2,3)":     fncall(id("sum"), i(1), i(2), i(3)),
-		"5 * sub(10, 5)": mul(i(5), fncall(id("sub"), i(10), i(5))),
+		"sum(1,2,3)":     callPosArgsOnly(id("sum"), i(1), i(2), i(3)),
+		"5 * sub(10, 5)": mul(i(5), callPosArgsOnly(id("sub"), i(10), i(5))),
 
 		// strings
 		`"abc" + "123"`: add(str("abc"), str("123")),
@@ -123,8 +123,8 @@ func str(val string) slang.Expression {
 	return expressions.NewString(val)
 }
 
-func fncall(fn slang.Expression, args ...slang.Expression) slang.Expression {
-	return expressions.NewCall(fn, args...)
+func callPosArgsOnly(fn slang.Expression, args ...slang.Expression) slang.Expression {
+	return expressions.NewCall(fn, args, map[string]slang.Expression{})
 }
 
 func gt(left, right slang.Expression) slang.Expression {
