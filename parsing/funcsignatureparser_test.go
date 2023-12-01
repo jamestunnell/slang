@@ -15,7 +15,7 @@ import (
 type funcSigParserSuccessTest struct {
 	TestName    string
 	Input       string
-	Params      []*slang.NameType
+	Params      []*ast.Param
 	ReturnTypes []string
 }
 
@@ -28,13 +28,13 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName:    "empty sig",
 			Input:       `()`,
-			Params:      []*slang.NameType{},
+			Params:      []*ast.Param{},
 			ReturnTypes: []string{},
 		},
 		{
 			TestName: "one param",
 			Input:    `(x float)`,
-			Params: []*slang.NameType{
+			Params: []*ast.Param{
 				{Name: "x", Type: "float"},
 			},
 			ReturnTypes: []string{},
@@ -42,7 +42,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName: "two params",
 			Input:    `(a int, b mymodule.MyType)`,
-			Params: []*slang.NameType{
+			Params: []*ast.Param{
 				{Name: "a", Type: "int"},
 				{Name: "b", Type: "mymodule.MyType"},
 			},
@@ -51,7 +51,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName: "one param, one return type",
 			Input:    `(a int) int`,
-			Params: []*slang.NameType{
+			Params: []*ast.Param{
 				{Name: "a", Type: "int"},
 			},
 			ReturnTypes: []string{"int"},
@@ -59,7 +59,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName:    "two return types",
 			Input:       `() (my.Type, error)`,
-			Params:      []*slang.NameType{},
+			Params:      []*ast.Param{},
 			ReturnTypes: []string{"my.Type", "error"},
 		},
 	}

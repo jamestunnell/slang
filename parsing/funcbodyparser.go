@@ -5,24 +5,26 @@ import (
 )
 
 type FuncBodyParser struct {
-	*BodyParser
+	*BodyParserBase
 }
 
 func NewFuncBodyParser() *FuncBodyParser {
 	p := &FuncBodyParser{}
 
-	p.BodyParser = NewBodyParser(p.parseStatement)
+	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
 
 	return p
 }
 
 func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	switch toks.Current().Type() {
-	// case slang.TokenFUNC:
-	// case slang.TokenCLASS:
+	case slang.TokenCLASS:
+		return p.ParseStatement(toks, NewClassStatementParser())
+	case slang.TokenFUNC:
+		return p.ParseStatement(toks, NewFuncStatementParser())
 	case slang.TokenRETURN:
-		return p.ParseReturnStatment(toks)
+		return p.ParseStatement(toks, NewReturnStatementParser())
 	}
 
-	return p.ParseExpressionOrAssignStatement(toks)
+	return p.ParseStatement(toks, NewExprOrAssignStatementParser())
 }

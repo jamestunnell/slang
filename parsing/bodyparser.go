@@ -2,29 +2,39 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast/statements"
 )
 
-type BodyParser struct {
+type BodyParserBase struct {
 	*ParserBase
 
-	ParseStatement func(slang.TokenSeq) bool
-	Statements     []slang.Statement
+	Statements []slang.Statement
+
+	parseStatement func(slang.TokenSeq) bool
 }
 
-func NewBodyParser(parseStatement func(slang.TokenSeq) bool) *BodyParser {
-	return &BodyParser{
+func NewBodyParserBase(parseStatement func(slang.TokenSeq) bool) *BodyParserBase {
+	return &BodyParserBase{
 		ParserBase:     NewParserBase(),
-		ParseStatement: parseStatement,
 		Statements:     []slang.Statement{},
+		parseStatement: parseStatement,
 	}
 }
 
-func (p *BodyParser) GetStatements() []slang.Statement {
+func (p *BodyParserBase) GetStatements() []slang.Statement {
 	return p.Statements
 }
 
-func (p *BodyParser) Run(toks slang.TokenSeq) {
+func (p *BodyParserBase) ParseStatement(toks slang.TokenSeq, sp StatementParser) bool {
+	if !p.RunSubParser(toks, sp) {
+		return false
+	}
+
+	p.Statements = append(p.Statements, sp.GetStatement())
+
+	return true
+}
+
+func (p *BodyParserBase) Run(toks slang.TokenSeq) {
 	p.Statements = []slang.Statement{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
@@ -34,7 +44,7 @@ func (p *BodyParser) Run(toks slang.TokenSeq) {
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	for !toks.Current().Is(slang.TokenRBRACE) {
-		if !p.ParseStatement(toks) {
+		if !p.parseStatement(toks) {
 			return
 		}
 
@@ -46,39 +56,4 @@ func (p *BodyParser) Run(toks slang.TokenSeq) {
 	}
 
 	toks.Advance()
-}
-
-func (p *BodyParser) ParseReturnStatment(toks slang.TokenSeq) bool {
-	toks.Advance()
-
-	exprParser := NewExprParser(PrecedenceLOWEST)
-	if !p.RunSubParser(toks, exprParser) {
-		return false
-	}
-
-	p.Statements = append(p.Statements, statements.NewReturn(exprParser.Expr))
-
-	return true
-}
-
-func (p *BodyParser) ParseExpressionOrAssignStatement(toks slang.TokenSeq) bool {
-	exprParser := NewExprParser(PrecedenceLOWEST)
-	if !p.RunSubParser(toks, exprParser) {
-		return false
-	}
-
-	if toks.Current().Is(slang.TokenASSIGN) {
-		toks.AdvanceSkip(slang.TokenNEWLINE)
-
-		valueParser := NewExprParser(PrecedenceLOWEST)
-		if !p.RunSubParser(toks, valueParser) {
-			return false
-		}
-
-		p.Statements = append(p.Statements, statements.NewAssign(exprParser.Expr, valueParser.Expr))
-	} else {
-		p.Statements = append(p.Statements, statements.NewExpression(exprParser.Expr))
-	}
-
-	return true
 }

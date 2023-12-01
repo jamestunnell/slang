@@ -14,7 +14,7 @@ type ErrWrongTokenType struct {
 
 func NewErrWrongTokenType(
 	tok *slang.Token,
-	expectedTypes []slang.TokenType,
+	expectedTypes ...slang.TokenType,
 ) *ErrWrongTokenType {
 	return &ErrWrongTokenType{
 		token:         tok,

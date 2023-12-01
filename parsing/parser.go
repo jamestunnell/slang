@@ -8,8 +8,14 @@ type Parser interface {
 	GetErrors() []*ParseErr
 }
 
-type StatementParser interface {
+type BodyParser interface {
 	Parser
 
 	GetStatements() []slang.Statement
+}
+
+type StatementParser interface {
+	Parser
+
+	GetStatement() slang.Statement
 }

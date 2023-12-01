@@ -2,86 +2,34 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
-	"github.com/jamestunnell/slang/ast/statements"
 )
 
 type ClassBodyParser struct {
-	*ParserBase
-
-	Statements []slang.Statement
+	*BodyParserBase
 }
 
 func NewClassBodyParser() *ClassBodyParser {
-	return &ClassBodyParser{
-		ParserBase: NewParserBase(),
-	}
+	p := &ClassBodyParser{}
+
+	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
+
+	return p
 }
 
-func (p *ClassBodyParser) GetStatements() []slang.Statement {
-	return p.Statements
-}
-
-func (p *ClassBodyParser) Run(toks slang.TokenSeq) {
-	p.Statements = []slang.Statement{}
-
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-		return
-	}
-
-	toks.AdvanceSkip(slang.TokenNEWLINE)
-
-	for !toks.Current().Is(slang.TokenRBRACE) {
-		if !p.parseMember(toks) {
-			return
-		}
-
-		toks.Skip(slang.TokenNEWLINE)
-	}
-
-	toks.Advance()
-}
-
-func (p *ClassBodyParser) parseMember(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenFIELD, slang.TokenMETHOD) {
-		return false
-	}
-
-	tokType := toks.Current().Type()
-
-	toks.Advance()
-
-	switch tokType {
+func (p *ClassBodyParser) parseStatement(toks slang.TokenSeq) bool {
+	switch toks.Current().Type() {
+	case slang.TokenCLASS:
+		return p.ParseStatement(toks, NewClassStatementParser())
 	case slang.TokenFIELD:
-		name, typ, ok := p.ParseNameTypePair(toks)
-		if !ok {
-			return false
-		}
-
-		p.Statements = append(p.Statements, statements.NewField(name, typ))
+		return p.ParseStatement(toks, NewFieldStatementParser())
+	case slang.TokenFUNC:
+		return p.ParseStatement(toks, NewFuncStatementParser())
 	case slang.TokenMETHOD:
-		if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-			return false
-		}
-
-		name := toks.Current().Value()
-
-		toks.Advance()
-
-		sigParser := NewFuncSignatureParser()
-		if !p.RunSubParser(toks, sigParser) {
-			return false
-		}
-
-		bodyParser := NewFuncBodyParser()
-		if !p.RunSubParser(toks, bodyParser) {
-			return false
-		}
-
-		fn := ast.NewFunction(
-			sigParser.Params, sigParser.ReturnTypes, bodyParser.Statements...)
-		p.Statements = append(p.Statements, statements.NewMethod(name, fn))
+		return p.ParseStatement(toks, NewMethodStatementParser())
 	}
 
-	return true
+	p.TokenErr(
+		toks.Current(), slang.TokenCLASS, slang.TokenFIELD, slang.TokenFUNC, slang.TokenMETHOD)
+
+	return false
 }

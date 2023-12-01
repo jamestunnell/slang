@@ -101,7 +101,7 @@ func TestCondBodyParser(t *testing.T) {
 }
 
 func testCondBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.StatementParser { return parsing.NewCondBodyParser() }
+	newParser := func() parsing.BodyParser { return parsing.NewCondBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }

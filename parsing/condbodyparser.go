@@ -5,13 +5,13 @@ import (
 )
 
 type CondBodyParser struct {
-	*BodyParser
+	*BodyParserBase
 }
 
 func NewCondBodyParser() *CondBodyParser {
 	p := &CondBodyParser{}
 
-	p.BodyParser = NewBodyParser(p.parseStatement)
+	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
 
 	return p
 }
@@ -19,8 +19,8 @@ func NewCondBodyParser() *CondBodyParser {
 func (p *CondBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	switch toks.Current().Type() {
 	case slang.TokenRETURN:
-		return p.ParseReturnStatment(toks)
+		return p.ParseStatement(toks, NewReturnStatementParser())
 	}
 
-	return p.ParseExpressionOrAssignStatement(toks)
+	return p.ParseStatement(toks, NewExprOrAssignStatementParser())
 }
