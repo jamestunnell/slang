@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"reflect"
 	"strconv"
 
 	"github.com/jamestunnell/slang"
@@ -11,31 +12,32 @@ type Bool struct {
 	Value bool
 }
 
-const ClassBOOL = "Bool"
+// const ClassBOOL = "Bool"
 
-var boolClass = NewBuiltInClass(ClassBOOL)
+// var boolClass = NewBuiltInClass(ClassBOOL)
 
-func NewBool(val bool) Object {
+func NewBool(val bool) slang.Object {
 	return &Bool{Value: val}
 }
 
-func (obj *Bool) Class() Class {
-	return boolClass
+func (obj *Bool) Equal(other slang.Object) bool {
+	obj2, ok := other.(*Bool)
+	if !ok {
+		return false
+	}
+
+	return obj.Value == obj2.Value
 }
 
 func (obj *Bool) Inspect() string {
 	return strconv.FormatBool(obj.Value)
 }
 
-func (obj *Bool) Truthy() bool {
-	return obj.Value
-}
-
-func (obj *Bool) Send(methodName string, args ...Object) (Object, error) {
-	// an added instance method would override a standard one
-	if m, found := boolClass.GetInstanceMethod(methodName); found {
-		return m.Run(args)
-	}
+func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// // an added instance method would override a standard one
+	// if m, found := boolClass.GetInstanceMethod(methodName); found {
+	// 	return m.Run(args)
+	// }
 
 	switch methodName {
 	case slang.MethodNOT:
@@ -47,10 +49,10 @@ func (obj *Bool) Send(methodName string, args ...Object) (Object, error) {
 
 		arg, ok := args[0].(*Bool)
 		if !ok {
-			return nil, customerrs.NewErrArgType(ClassBOOL, args[0].Class().Name())
+			return nil, customerrs.NewErrArgType("Bool", reflect.TypeOf(args[0]).String())
 		}
 
-		var ret Object
+		var ret slang.Object
 		switch methodName {
 		case slang.MethodEQ:
 			ret = NewBool(obj.Value == arg.Value)
@@ -61,7 +63,7 @@ func (obj *Bool) Send(methodName string, args ...Object) (Object, error) {
 		return ret, nil
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
+	err := customerrs.NewErrMethodUndefined(methodName, "Bool")
 
 	return nil, err
 }

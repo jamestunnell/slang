@@ -2,6 +2,7 @@ package objects
 
 import (
 	"math"
+	"reflect"
 	"strconv"
 
 	"github.com/jamestunnell/slang"
@@ -12,31 +13,40 @@ type Float struct {
 	Value float64
 }
 
-const ClassFLOAT = "Float"
+// const ClassFLOAT = "Float"
 
-var fltClass = NewBuiltInClass(ClassFLOAT)
+// var fltClass = NewBuiltInClass(ClassFLOAT)
 
 func NewFloat(val float64) *Float {
 	return &Float{Value: val}
 }
 
-func (obj *Float) Class() Class {
-	return fltClass
+func (obj *Float) Equal(other slang.Object) bool {
+	obj2, ok := other.(*Float)
+	if !ok {
+		return false
+	}
+
+	return obj.Value == obj2.Value
 }
 
 func (obj *Float) Inspect() string {
 	return strconv.FormatFloat(obj.Value, 'g', -1, 64)
 }
 
-func (obj *Float) Truthy() bool {
-	return true
-}
+// func (obj *Float) Class() Class {
+// 	return fltClass
+// }
 
-func (obj *Float) Send(methodName string, args ...Object) (Object, error) {
-	// an added instance method would override a standard one
-	if m, found := fltClass.GetInstanceMethod(methodName); found {
-		return m.Run(args)
-	}
+// func (obj *Float) Truthy() bool {
+// 	return true
+// }
+
+func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// // an added instance method would override a standard one
+	// if m, found := fltClass.GetInstanceMethod(methodName); found {
+	// 	return m.Run(args)
+	// }
 
 	switch methodName {
 	case slang.MethodNEG:
@@ -53,18 +63,18 @@ func (obj *Float) Send(methodName string, args ...Object) (Object, error) {
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassFLOAT)
+	err := customerrs.NewErrMethodUndefined(methodName, "Float")
 
 	return nil, err
 }
 
-func (obj *Float) sendOne(method string, arg Object) (Object, error) {
+func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*Float)
 	if !ok {
-		return nil, customerrs.NewErrArgType(ClassFLOAT, arg.Class().Name())
+		return nil, customerrs.NewErrArgType("Float", reflect.TypeOf(arg).String())
 	}
 
-	var ret Object
+	var ret slang.Object
 
 	switch method {
 	case slang.MethodADD:

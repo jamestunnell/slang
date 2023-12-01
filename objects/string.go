@@ -1,6 +1,8 @@
 package objects
 
 import (
+	"reflect"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
 )
@@ -9,35 +11,40 @@ type String struct {
 	Value string
 }
 
-const ClassSTRING = "String"
+// const ClassSTRING = "String"
 
-var strClass = NewBuiltInClass(ClassSTRING)
+// var strClass = NewBuiltInClass(ClassSTRING)
 
-func NewString(val string) Object {
+func NewString(val string) slang.Object {
 	return &String{Value: val}
 }
 
-func (obj *String) Class() Class {
-	return strClass
+func (obj *String) Equal(other slang.Object) bool {
+	obj2, ok := other.(*String)
+	if !ok {
+		return false
+	}
+
+	return obj.Value == obj2.Value
 }
 
 func (obj *String) Inspect() string {
 	return obj.Value
 }
 
-func (obj *String) Truthy() bool {
-	return true
-}
+// func (obj *String) Class() Class {
+// 	return strClass
+// }
 
-func (obj *String) Type() ObjectType {
-	return ObjectSTRING
-}
+// func (obj *String) Truthy() bool {
+// 	return true
+// }
 
-func (obj *String) Send(methodName string, args ...Object) (Object, error) {
-	// an added instance method would override a standard one
-	if m, found := strClass.GetInstanceMethod(methodName); found {
-		return m.Run(args)
-	}
+func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+	// // an added instance method would override a standard one
+	// if m, found := strClass.GetInstanceMethod(methodName); found {
+	// 	return m.Run(args)
+	// }
 
 	switch methodName {
 	case slang.MethodSIZE:
@@ -55,18 +62,18 @@ func (obj *String) Send(methodName string, args ...Object) (Object, error) {
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
+	err := customerrs.NewErrMethodUndefined(methodName, "String")
 
 	return nil, err
 }
 
-func (obj *String) sendOne(method string, arg Object) (Object, error) {
+func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*String)
 	if !ok {
-		return nil, customerrs.NewErrArgType(ClassSTRING, arg.Class().Name())
+		return nil, customerrs.NewErrArgType("String", reflect.TypeOf(arg).String())
 	}
 
-	var ret Object
+	var ret slang.Object
 
 	switch method {
 	case slang.MethodADD:
