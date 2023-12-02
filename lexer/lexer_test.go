@@ -212,6 +212,30 @@ func TestLexer_FloatMethodCall(t *testing.T) {
 	testLexer(t, str, expected...)
 }
 
+func TestLexer_AndExprCall(t *testing.T) {
+	const str = "x and y"
+
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("x"), 1, 1),
+		tok(tokens.AND(), 1, 3),
+		tok(tokens.SYMBOL("y"), 1, 7),
+	}
+
+	testLexer(t, str, expected...)
+}
+
+func TestLexer_OrExprCall(t *testing.T) {
+	const str = "x or y"
+
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("x"), 1, 1),
+		tok(tokens.OR(), 1, 3),
+		tok(tokens.SYMBOL("y"), 1, 6),
+	}
+
+	testLexer(t, str, expected...)
+}
+
 func TestLexer_FloatMath(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("my_num"), 1, 1),

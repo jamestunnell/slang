@@ -116,6 +116,10 @@ func (c *Compiler) processBinOp(expr *expressions.BinaryOperation) error {
 		opcode = runtime.OpGT
 	case slang.ExprGREATEREQUAL:
 		opcode = runtime.OpGEQ
+	case slang.ExprAND:
+		opcode = runtime.OpAND
+	case slang.ExprOR:
+		opcode = runtime.OpOR
 	default:
 		return fmt.Errorf("unknown binary expression type %s", expr.Type().String())
 	}

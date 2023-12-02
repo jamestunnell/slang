@@ -68,6 +68,10 @@ func (p *ExprParser) findInfixParseFn(
 	var infixParse infixParseFn
 
 	switch tokType {
+	case slang.TokenAND:
+		infixParse = p.parseAnd
+	case slang.TokenOR:
+		infixParse = p.parseOr
 	case slang.TokenPLUS:
 		infixParse = p.parseAdd
 	case slang.TokenMINUS:

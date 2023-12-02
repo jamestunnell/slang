@@ -83,6 +83,10 @@ func (vm *VM) Step() error {
 		err = vm.exeBinaryOp(slang.MethodGT)
 	case OpGEQ:
 		err = vm.exeBinaryOp(slang.MethodGEQ)
+	case OpAND:
+		err = vm.exeBinaryOp(slang.MethodAND)
+	case OpOR:
+		err = vm.exeBinaryOp(slang.MethodOR)
 	default:
 		err = fmt.Errorf("unknown opcode %d", opcode)
 	}

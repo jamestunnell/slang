@@ -5,26 +5,30 @@ import "github.com/jamestunnell/slang"
 type Precedence int
 
 const (
-	PrecedenceLOWEST      Precedence = iota
-	PrecedenceEQUALS                 // ==
-	PrecedenceLESSGREATER            // >, <, >=, <=
-	PrecedenceSUM                    // +
-	PrecedencePRODUCT                // *
-	PrecedencePREFIX                 // -X or !X
-	PrecedenceDOTCALLIDX             // a.b.c, myFunction(X), myArray[0]
+	PrecedenceLOWEST     Precedence = iota
+	PrecedenceOR                    // or
+	PrecedenceAND                   // and
+	PrecedenceEQUALITY              // ==, !=
+	PrecedenceRELATIONAL            // <, <=, >, >=
+	PrecedenceADDSUB                // +, -
+	PrecedenceMULDIVREM             // *, /, %
+	PrecedencePREFIX                // -X or !X
+	PrecedenceDOTCALLIDX            // a.b.c, myFunction(X), myArray[0]
 )
 
 var precedences = map[slang.TokenType]Precedence{
-	slang.TokenEQUAL:        PrecedenceEQUALS,
-	slang.TokenNOTEQUAL:     PrecedenceEQUALS,
-	slang.TokenLESS:         PrecedenceLESSGREATER,
-	slang.TokenLESSEQUAL:    PrecedenceLESSGREATER,
-	slang.TokenGREATER:      PrecedenceLESSGREATER,
-	slang.TokenGREATEREQUAL: PrecedenceLESSGREATER,
-	slang.TokenPLUS:         PrecedenceSUM,
-	slang.TokenMINUS:        PrecedenceSUM,
-	slang.TokenSLASH:        PrecedencePRODUCT,
-	slang.TokenSTAR:         PrecedencePRODUCT,
+	slang.TokenOR:           PrecedenceOR,
+	slang.TokenAND:          PrecedenceAND,
+	slang.TokenEQUAL:        PrecedenceEQUALITY,
+	slang.TokenNOTEQUAL:     PrecedenceEQUALITY,
+	slang.TokenLESS:         PrecedenceRELATIONAL,
+	slang.TokenLESSEQUAL:    PrecedenceRELATIONAL,
+	slang.TokenGREATER:      PrecedenceRELATIONAL,
+	slang.TokenGREATEREQUAL: PrecedenceRELATIONAL,
+	slang.TokenPLUS:         PrecedenceADDSUB,
+	slang.TokenMINUS:        PrecedenceADDSUB,
+	slang.TokenSLASH:        PrecedenceMULDIVREM,
+	slang.TokenSTAR:         PrecedenceMULDIVREM,
 	slang.TokenDOT:          PrecedenceDOTCALLIDX,
 	slang.TokenLPAREN:       PrecedenceDOTCALLIDX,
 	slang.TokenLBRACKET:     PrecedenceDOTCALLIDX,

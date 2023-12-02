@@ -12,6 +12,7 @@ type Expression interface {
 
 const (
 	ExprADD ExprType = iota
+	ExprAND
 	ExprARRAY
 	ExprBOOL
 	ExprCALL
@@ -34,6 +35,7 @@ const (
 	ExprNEGATIVE
 	ExprNOT
 	ExprNOTEQUAL
+	ExprOR
 	ExprSUBTRACT
 	ExprSTRING
 )
@@ -62,6 +64,8 @@ func (et ExprType) String() string {
 	switch et {
 	case ExprADD:
 		str = "ADD"
+	case ExprAND:
+		str = "AND"
 	case ExprARRAY:
 		str = "ARRAY"
 	case ExprBOOL:
@@ -106,6 +110,8 @@ func (et ExprType) String() string {
 		str = "NOT"
 	case ExprNOTEQUAL:
 		str = "NOTEQUAL"
+	case ExprOR:
+		str = "OR"
 	case ExprSUBTRACT:
 		str = "SUBTRACT"
 	case ExprSTRING:

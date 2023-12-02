@@ -42,7 +42,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 	switch methodName {
 	case slang.MethodNOT:
 		return NewBool(!obj.Value), nil
-	case slang.MethodEQ, slang.MethodNEQ:
+	case slang.MethodEQ, slang.MethodNEQ, slang.MethodAND, slang.MethodOR:
 		if err := checkArgCount(args, 1); err != nil {
 			return nil, err
 		}
@@ -58,6 +58,10 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 			ret = NewBool(obj.Value == arg.Value)
 		case slang.MethodNEQ:
 			ret = NewBool(obj.Value != arg.Value)
+		case slang.MethodAND:
+			ret = NewBool(obj.Value && arg.Value)
+		case slang.MethodOR:
+			ret = NewBool(obj.Value || arg.Value)
 		}
 
 		return ret, nil

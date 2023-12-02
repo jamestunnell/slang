@@ -17,4 +17,7 @@ const (
 	OpLEQ
 	OpGT
 	OpGEQ
+
+	OpAND
+	OpOR
 )

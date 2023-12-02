@@ -383,6 +383,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 	str := b.String()
 
 	switch str {
+	case tokens.StrAND:
+		l.emit(tokens.AND(), loc)
 	case tokens.StrCLASS:
 		l.emit(tokens.CLASS(), loc)
 	case tokens.StrELSE:
@@ -397,6 +399,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.IF(), loc)
 	case tokens.StrMETHOD:
 		l.emit(tokens.METHOD(), loc)
+	case tokens.StrOR:
+		l.emit(tokens.OR(), loc)
 	case tokens.StrRETURN:
 		l.emit(tokens.RETURN(), loc)
 	case tokens.StrTRUE:

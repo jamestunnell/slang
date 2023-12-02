@@ -333,6 +333,14 @@ func (p *ExprParser) parseCallArgs(
 	return args, true
 }
 
+func (p *ExprParser) parseAnd(toks slang.TokenSeq, left slang.Expression) slang.Expression {
+	return p.parseInfixExpr(toks, left, expressions.NewAnd)
+}
+
+func (p *ExprParser) parseOr(toks slang.TokenSeq, left slang.Expression) slang.Expression {
+	return p.parseInfixExpr(toks, left, expressions.NewOr)
+}
+
 func (p *ExprParser) parseAdd(toks slang.TokenSeq, left slang.Expression) slang.Expression {
 	return p.parseInfixExpr(toks, left, expressions.NewAdd)
 }

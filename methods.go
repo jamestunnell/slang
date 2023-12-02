@@ -12,13 +12,19 @@ const (
 	MethodMUL = "mul"
 	MethodDIV = "div"
 
-	// binary logical comparison
+	// binary equality
 	MethodEQ  = "eq"
 	MethodNEQ = "neq"
+
+	// binary relational
 	MethodLT  = "lt"
 	MethodLEQ = "leq"
 	MethodGT  = "gt"
 	MethodGEQ = "geq"
+
+	// binary logical
+	MethodAND = "and"
+	MethodOR  = "or"
 
 	MethodCALL = "call"
 

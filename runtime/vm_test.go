@@ -46,14 +46,18 @@ func TestVMPushConstant(t *testing.T) {
 	assert.ErrorIs(t, err, runtime.ErrEndOfProgram)
 }
 
-func TestVMBinaryOps(t *testing.T) {
-	// arithmetic
+func TestVMExprStmts(t *testing.T) {
+	// basic integer arithmetic
 	testVMWithExprStmt(t, "1 + 7", i(8))
 	testVMWithExprStmt(t, "12 - 5", i(7))
 	testVMWithExprStmt(t, "3 * 11", i(33))
 	testVMWithExprStmt(t, "60 / 5", i(12))
 
-	// comparison
+	// more elaborate integer arithmetic
+	testVMWithExprStmt(t, "(65 - 11) + (78 * 13)", i(1068))
+	testVMWithExprStmt(t, "40 + 77 / (13 - 47)", i(38))
+
+	// basic integer comparison
 	testVMWithExprStmt(t, "6 == 6", b(true))
 	testVMWithExprStmt(t, "6 == 3", b(false))
 	testVMWithExprStmt(t, "6 != 6", b(false))
@@ -70,6 +74,10 @@ func TestVMBinaryOps(t *testing.T) {
 	testVMWithExprStmt(t, "6 >= 6", b(true))
 	testVMWithExprStmt(t, "6 >= 3", b(true))
 	testVMWithExprStmt(t, "6 >= 13", b(false))
+
+	// and/or expression
+	testVMWithExprStmt(t, "(7 == 12 or true) and 13 < 50", b(true))
+	testVMWithExprStmt(t, "3 == 4 and true", b(false))
 }
 
 func testVMWithExprStmt(
