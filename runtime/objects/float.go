@@ -13,7 +13,7 @@ type Float struct {
 	Value float64
 }
 
-// const ClassFLOAT = "Float"
+const ClassFLOAT = "Float"
 
 // var fltClass = NewBuiltInClass(ClassFLOAT)
 
@@ -63,7 +63,7 @@ func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, e
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, "Float")
+	err := customerrs.NewErrMethodUndefined(methodName, ClassFLOAT)
 
 	return nil, err
 }
@@ -71,7 +71,7 @@ func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, e
 func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*Float)
 	if !ok {
-		return nil, customerrs.NewErrArgType("Float", reflect.TypeOf(arg).String())
+		return nil, customerrs.NewErrArgType(ClassFLOAT, reflect.TypeOf(arg).String())
 	}
 
 	var ret slang.Object

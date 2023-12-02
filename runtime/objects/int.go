@@ -8,22 +8,20 @@ import (
 	"github.com/jamestunnell/slang/customerrs"
 )
 
-type Integer struct {
+type Int struct {
 	Value int64
 }
 
-const (
-// ClassINTEGER = "Integer"
-)
+const ClassINT = "Int"
 
-// var intClass = NewBuiltInClass(ClassINTEGER)
+// var intClass = NewBuiltInClass(ClassINT)
 
-func NewInteger(val int64) slang.Object {
-	return &Integer{Value: val}
+func NewInt(val int64) slang.Object {
+	return &Int{Value: val}
 }
 
-func (obj *Integer) Equal(other slang.Object) bool {
-	obj2, ok := other.(*Integer)
+func (obj *Int) Equal(other slang.Object) bool {
+	obj2, ok := other.(*Int)
 	if !ok {
 		return false
 	}
@@ -31,19 +29,19 @@ func (obj *Integer) Equal(other slang.Object) bool {
 	return obj.Value == obj2.Value
 }
 
-func (obj *Integer) Inspect() string {
+func (obj *Int) Inspect() string {
 	return strconv.FormatInt(obj.Value, 10)
 }
 
-// func (obj *Integer) Class() Class {
+// func (obj *Int) Class() Class {
 // 	return intClass
 // }
 
-// func (obj *Integer) Truthy() bool {
+// func (obj *Int) Truthy() bool {
 // 	return true
 // }
 
-func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Int) Send(methodName string, args ...slang.Object) (slang.Object, error) {
 	// // an added instance method would override a standard one
 	// if m, found := intClass.GetInstanceMethod(methodName); found {
 	// 	return m.Run(args)
@@ -51,9 +49,9 @@ func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object,
 
 	switch methodName {
 	case slang.MethodNEG:
-		return NewInteger(-obj.Value), nil
+		return NewInt(-obj.Value), nil
 	case slang.MethodABS:
-		return NewInteger(intAbs(obj.Value)), nil
+		return NewInt(intAbs(obj.Value)), nil
 	case slang.MethodADD, slang.MethodSUB, slang.MethodMUL, slang.MethodDIV,
 		slang.MethodEQ, slang.MethodNEQ, slang.MethodLT, slang.MethodLEQ,
 		slang.MethodGT, slang.MethodGEQ:
@@ -68,28 +66,28 @@ func (obj *Integer) Send(methodName string, args ...slang.Object) (slang.Object,
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, "Integer")
+	err := customerrs.NewErrMethodUndefined(methodName, ClassINT)
 
 	return nil, err
 }
 
-func (obj *Integer) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	otherInt, ok := arg.(*Integer)
+func (obj *Int) sendOne(method string, arg slang.Object) (slang.Object, error) {
+	otherInt, ok := arg.(*Int)
 	if !ok {
-		return nil, customerrs.NewErrArgType("Integer", reflect.TypeOf(arg).String())
+		return nil, customerrs.NewErrArgType(ClassINT, reflect.TypeOf(arg).String())
 	}
 
 	var ret slang.Object
 
 	switch method {
 	case slang.MethodADD:
-		ret = NewInteger(obj.Value + otherInt.Value)
+		ret = NewInt(obj.Value + otherInt.Value)
 	case slang.MethodSUB:
-		ret = NewInteger(obj.Value - otherInt.Value)
+		ret = NewInt(obj.Value - otherInt.Value)
 	case slang.MethodMUL:
-		ret = NewInteger(obj.Value * otherInt.Value)
+		ret = NewInt(obj.Value * otherInt.Value)
 	case slang.MethodDIV:
-		ret = NewInteger(obj.Value / otherInt.Value)
+		ret = NewInt(obj.Value / otherInt.Value)
 	case slang.MethodEQ:
 		ret = NewBool(obj.Value == otherInt.Value)
 	case slang.MethodNEQ:

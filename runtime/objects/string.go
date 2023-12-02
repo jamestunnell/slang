@@ -11,7 +11,7 @@ type String struct {
 	Value string
 }
 
-// const ClassSTRING = "String"
+const ClassSTRING = "String"
 
 // var strClass = NewBuiltInClass(ClassSTRING)
 
@@ -48,7 +48,7 @@ func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, 
 
 	switch methodName {
 	case slang.MethodSIZE:
-		sz := NewInteger(int64(len(obj.Value)))
+		sz := NewInt(int64(len(obj.Value)))
 		return sz, nil
 	case slang.MethodADD,
 		slang.MethodEQ, slang.MethodNEQ,
@@ -62,7 +62,7 @@ func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, 
 		return obj.sendOne(methodName, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, "String")
+	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
 
 	return nil, err
 }
@@ -70,7 +70,7 @@ func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, 
 func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
 	flt, ok := arg.(*String)
 	if !ok {
-		return nil, customerrs.NewErrArgType("String", reflect.TypeOf(arg).String())
+		return nil, customerrs.NewErrArgType(ClassSTRING, reflect.TypeOf(arg).String())
 	}
 
 	var ret slang.Object

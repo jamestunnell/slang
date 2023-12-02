@@ -9,8 +9,8 @@ type Null struct {
 }
 
 const (
-	StrNULL = "null"
-	// ClassNULL = "Null"
+	StrNULL   = "null"
+	ClassNULL = "Null"
 )
 
 var null = &Null{}
@@ -45,5 +45,5 @@ func (obj *Null) Send(methodName string, args ...slang.Object) (slang.Object, er
 	// 	return m.Run(args)
 	// }
 
-	return nil, customerrs.NewErrMethodUndefined(methodName, "Null")
+	return nil, customerrs.NewErrMethodUndefined(methodName, ClassNULL)
 }

@@ -30,12 +30,18 @@ func (bc *Bytecode) AddConstant(obj slang.Object) bool {
 	return true
 }
 
-func (bc *Bytecode) AddInstructionUint16(opcode Opcode, operand uint16) {
-	data := make([]byte, 3)
+func (bc *Bytecode) AddInstructionNoOperands(opcode Opcode) {
+	bc.Instructions = append(bc.Instructions, byte(opcode))
+}
+
+func (bc *Bytecode) AddInstructionUint16Operands(opcode Opcode, operands ...uint16) {
+	data := make([]byte, 1+2*len(operands))
 
 	data[0] = byte(opcode)
 
-	binary.BigEndian.PutUint16(data[1:], operand)
+	for i, operand := range operands {
+		binary.BigEndian.PutUint16(data[1+2*i:], operand)
+	}
 
 	bc.Instructions = append(bc.Instructions, data...)
 }

@@ -13,7 +13,7 @@ type Array struct {
 	Elements []slang.Object
 }
 
-// const ClassARRAY = "Array"
+const ClassARRAY = "Array"
 
 var (
 	errArrayEmpty = errors.New("array is empty")
@@ -69,7 +69,7 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 		case slang.MethodLAST:
 			return obj.Elements[len(obj.Elements)-1], nil
 		case slang.MethodSIZE:
-			return NewInteger(int64(len(obj.Elements))), nil
+			return NewInt(int64(len(obj.Elements))), nil
 		}
 	case slang.MethodINDEX:
 		if err := checkArgCount(args, 1); err != nil {
@@ -79,13 +79,13 @@ func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, e
 		return obj.Index(args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, "Array")
+	err := customerrs.NewErrMethodUndefined(methodName, ClassARRAY)
 
 	return nil, err
 }
 
 func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
-	idx, ok := arg.(*Integer)
+	idx, ok := arg.(*Int)
 	if !ok {
 		return nil, customerrs.NewErrArgType("Integer", reflect.TypeOf(arg).String())
 	}

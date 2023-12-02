@@ -3,5 +3,15 @@ package runtime
 type Opcode byte
 
 const (
-	OpConstant Opcode = iota
+	OpCONST Opcode = iota
+	OpADD
+	OpSUB
+	OpMUL
+	OpDIV
+	OpEQ
+	OpNEQ
+	OpLT
+	OpLEQ
+	OpGT
+	OpGEQ
 )

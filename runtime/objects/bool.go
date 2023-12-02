@@ -12,7 +12,7 @@ type Bool struct {
 	Value bool
 }
 
-// const ClassBOOL = "Bool"
+const ClassBOOL = "Bool"
 
 // var boolClass = NewBuiltInClass(ClassBOOL)
 
@@ -49,7 +49,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 
 		arg, ok := args[0].(*Bool)
 		if !ok {
-			return nil, customerrs.NewErrArgType("Bool", reflect.TypeOf(args[0]).String())
+			return nil, customerrs.NewErrArgType(ClassBOOL, reflect.TypeOf(args[0]).String())
 		}
 
 		var ret slang.Object
@@ -63,7 +63,7 @@ func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, er
 		return ret, nil
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, "Bool")
+	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
 
 	return nil, err
 }
