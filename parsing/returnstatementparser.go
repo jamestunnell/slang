@@ -19,17 +19,19 @@ func (p *ReturnStatementParser) GetStatement() slang.Statement {
 	return p.ReturnStmt
 }
 
-func (p *ReturnStatementParser) Run(toks slang.TokenSeq) {
+func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenRETURN) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
-		return
+		return false
 	}
 
 	p.ReturnStmt = statements.NewReturn(exprParser.Expr)
+
+	return true
 }

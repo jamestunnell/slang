@@ -18,18 +18,20 @@ func NewFileParser() *FileParser {
 	}
 }
 
-func (p *FileParser) Run(toks slang.TokenSeq) {
+func (p *FileParser) Run(toks slang.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
 	for !toks.Current().Is(slang.TokenEOF) {
 		toks.Skip(slang.TokenNEWLINE)
 
 		if !p.parseStatement(toks) {
-			return
+			return false
 		}
 
 		toks.Skip(slang.TokenNEWLINE)
 	}
+
+	return true
 }
 
 func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {

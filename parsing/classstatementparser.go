@@ -19,15 +19,15 @@ func (p *ClassStatementParser) GetStatement() slang.Statement {
 	return p.ClassStmt
 }
 
-func (p *ClassStatementParser) Run(toks slang.TokenSeq) {
+func (p *ClassStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenCLASS) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-		return
+		return false
 	}
 
 	name := toks.Current().Value()
@@ -36,8 +36,10 @@ func (p *ClassStatementParser) Run(toks slang.TokenSeq) {
 
 	classParser := NewClassBodyParser()
 	if !p.RunSubParser(toks, classParser) {
-		return
+		return false
 	}
 
 	p.ClassStmt = statements.NewClass(name, "", classParser.Statements...)
+
+	return true
 }

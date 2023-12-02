@@ -9,11 +9,12 @@ import (
 )
 
 type VM struct {
-	code    *Bytecode
-	stack   []slang.Object
-	iOffset int
-	iLength int
-	cLength int
+	code       *Bytecode
+	stack      []slang.Object
+	iOffset    int
+	iLength    int
+	cLength    int
+	lastPopped slang.Object
 }
 
 var (
@@ -23,12 +24,17 @@ var (
 
 func NewVM(code *Bytecode) *VM {
 	return &VM{
-		code:    code,
-		stack:   []slang.Object{},
-		iOffset: 0,
-		iLength: len(code.Instructions),
-		cLength: len(code.Constants),
+		code:       code,
+		stack:      []slang.Object{},
+		iOffset:    0,
+		iLength:    len(code.Instructions),
+		cLength:    len(code.Constants),
+		lastPopped: nil,
 	}
+}
+
+func (vm *VM) LastPopped() slang.Object {
+	return vm.lastPopped
 }
 
 func (vm *VM) Step() error {
@@ -53,6 +59,10 @@ func (vm *VM) Step() error {
 		vm.push(vm.code.Constants[idx])
 
 		vm.iOffset += 3
+	case OpPOP:
+		vm.pop()
+
+		vm.iOffset++
 	case OpADD:
 		err = vm.exeBinaryOp(slang.MethodADD)
 	case OpSUB:
@@ -110,6 +120,8 @@ func (vm *VM) exeBinaryOp(method string) error {
 
 	vm.push(result)
 
+	vm.iOffset++
+
 	return nil
 }
 
@@ -127,6 +139,8 @@ func (vm *VM) pop() (slang.Object, bool) {
 	obj := vm.stack[size-1]
 
 	vm.stack = vm.stack[:size-1]
+
+	vm.lastPopped = obj
 
 	return obj, true
 }

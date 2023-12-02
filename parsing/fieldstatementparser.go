@@ -19,17 +19,19 @@ func (p *FieldStatementParser) GetStatement() slang.Statement {
 	return p.FieldStmt
 }
 
-func (p *FieldStatementParser) Run(toks slang.TokenSeq) {
+func (p *FieldStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFIELD) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
 	name, typ, ok := p.ParseNameTypePair(toks)
 	if !ok {
-		return
+		return false
 	}
 
 	p.FieldStmt = statements.NewField(name, typ)
+
+	return true
 }

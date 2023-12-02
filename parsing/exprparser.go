@@ -21,8 +21,10 @@ func NewExprParser(prec Precedence) *ExprParser {
 	}
 }
 
-func (p *ExprParser) Run(toks slang.TokenSeq) {
+func (p *ExprParser) Run(toks slang.TokenSeq) bool {
 	p.Expr = p.parseExpression(toks, p.prec)
+
+	return p.Expr != nil
 }
 
 func (p *ExprParser) findPrefixParseFn(

@@ -20,14 +20,16 @@ func NewBytecode() *Bytecode {
 	}
 }
 
-func (bc *Bytecode) AddConstant(obj slang.Object) bool {
+func (bc *Bytecode) AddConstant(obj slang.Object) (uint16, bool) {
 	if len(bc.Constants) == MaxVMConstants {
-		return false
+		return 0, false
 	}
+
+	idx := len(bc.Constants)
 
 	bc.Constants = append(bc.Constants, obj)
 
-	return true
+	return uint16(idx), true
 }
 
 func (bc *Bytecode) AddInstructionNoOperands(opcode Opcode) {

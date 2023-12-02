@@ -20,12 +20,12 @@ func NewFuncSignatureParser() *FuncSignatureParser {
 	}
 }
 
-func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
+func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 	p.Params = []*ast.Param{}
 	p.ReturnTypes = []string{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
-		return
+		return false
 	}
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
@@ -34,18 +34,18 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
 	p.ReturnTypes = []string{}
 
 	if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {
-		return
+		return false
 	}
 
 	for !toks.Current().Is(slang.TokenRPAREN) {
 		if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
-			return
+			return false
 		}
 
 		toks.Advance()
 
 		if !p.parseParam(toks) {
-			return
+			return false
 		}
 	}
 
@@ -67,29 +67,31 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
 	switch toks.Current().Type() {
 	case slang.TokenSYMBOL:
 		if !addRetType() {
-			return
+			return false
 		}
 	case slang.TokenLPAREN:
 		toks.Advance()
 
 		if !addRetType() {
-			return
+			return false
 		}
 
 		for !toks.Current().Is(slang.TokenRPAREN) {
 			if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
-				return
+				return false
 			}
 
 			toks.Advance()
 
 			if !addRetType() {
-				return
+				return false
 			}
 		}
 
 		toks.Advance()
 	}
+
+	return true
 }
 
 func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {

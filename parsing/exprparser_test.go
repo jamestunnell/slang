@@ -75,7 +75,7 @@ func testExprParser(t *testing.T, input string, expected slang.Expression) {
 		toks := parsing.NewTokenSeq(l)
 		p := parsing.NewExprParser(parsing.PrecedenceLOWEST)
 
-		p.Run(toks)
+		assert.True(t, p.Run(toks))
 
 		if !assert.Empty(t, p.GetErrors()) {
 			logParseErrs(t, p.GetErrors())

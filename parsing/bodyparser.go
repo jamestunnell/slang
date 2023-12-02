@@ -34,26 +34,28 @@ func (p *BodyParserBase) ParseStatement(toks slang.TokenSeq, sp StatementParser)
 	return true
 }
 
-func (p *BodyParserBase) Run(toks slang.TokenSeq) {
+func (p *BodyParserBase) Run(toks slang.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-		return
+		return false
 	}
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	for !toks.Current().Is(slang.TokenRBRACE) {
 		if !p.parseStatement(toks) {
-			return
+			return false
 		}
 
 		if !p.ExpectToken(toks.Current(), slang.TokenNEWLINE, slang.TokenRBRACE) {
-			return
+			return false
 		}
 
 		toks.Skip(slang.TokenNEWLINE)
 	}
 
 	toks.Advance()
+
+	return true
 }

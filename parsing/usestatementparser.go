@@ -19,15 +19,15 @@ func (p *UseStatementParser) GetStatement() slang.Statement {
 	return p.UseStmt
 }
 
-func (p *UseStatementParser) Run(toks slang.TokenSeq) {
+func (p *UseStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenUSE) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSTRING) {
-		return
+		return false
 	}
 
 	path := toks.Current().Value()
@@ -35,4 +35,6 @@ func (p *UseStatementParser) Run(toks slang.TokenSeq) {
 	toks.Advance()
 
 	p.UseStmt = statements.NewUse(path)
+
+	return true
 }

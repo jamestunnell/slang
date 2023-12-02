@@ -89,7 +89,7 @@ func testBodyParserSuccess(
 		l := lexer.New(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
-		p.Run(seq)
+		assert.True(t, p.Run(seq))
 
 		if !assert.Empty(t, p.GetErrors()) {
 			logParseErrs(t, p.GetErrors())
@@ -107,7 +107,7 @@ func testClassBodyParserFail(t *testing.T, testName, input string) {
 		l := lexer.New(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 
-		p.Run(seq)
+		assert.False(t, p.Run(seq))
 
 		assert.NotEmpty(t, p.GetErrors)
 	})

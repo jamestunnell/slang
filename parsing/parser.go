@@ -3,7 +3,7 @@ package parsing
 import "github.com/jamestunnell/slang"
 
 type Parser interface {
-	Run(slang.TokenSeq)
+	Run(slang.TokenSeq) bool
 
 	GetErrors() []*ParseErr
 }

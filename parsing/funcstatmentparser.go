@@ -22,15 +22,15 @@ func (p *FuncStatementParser) GetStatement() slang.Statement {
 	return p.FuncStmt
 }
 
-func (p *FuncStatementParser) Run(toks slang.TokenSeq) {
+func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFUNC) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-		return
+		return false
 	}
 
 	name := toks.Current().Value()
@@ -39,16 +39,18 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) {
 
 	sigParser := NewFuncSignatureParser()
 	if !p.RunSubParser(toks, sigParser) {
-		return
+		return false
 	}
 
 	bodyParser := NewFuncBodyParser()
 	if !p.RunSubParser(toks, bodyParser) {
-		return
+		return false
 	}
 
 	fn := ast.NewFunction(
 		sigParser.Params, sigParser.ReturnTypes, bodyParser.GetStatements()...)
 
 	p.FuncStmt = statements.NewFunc(name, fn)
+
+	return true
 }

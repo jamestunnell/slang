@@ -19,10 +19,10 @@ func (p *ExprOrAssignStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) {
+func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) bool {
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
-		return
+		return false
 	}
 
 	if toks.Current().Is(slang.TokenASSIGN) {
@@ -30,11 +30,13 @@ func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) {
 
 		valueParser := NewExprParser(PrecedenceLOWEST)
 		if !p.RunSubParser(toks, valueParser) {
-			return
+			return false
 		}
 
 		p.Stmt = statements.NewAssign(exprParser.Expr, valueParser.Expr)
 	} else {
 		p.Stmt = statements.NewExpression(exprParser.Expr)
 	}
+
+	return true
 }

@@ -4,10 +4,13 @@ type Opcode byte
 
 const (
 	OpCONST Opcode = iota
+	OpPOP
+
 	OpADD
 	OpSUB
 	OpMUL
 	OpDIV
+
 	OpEQ
 	OpNEQ
 	OpLT
