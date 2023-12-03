@@ -63,6 +63,10 @@ func (vm *VM) Step() error {
 		vm.pop()
 
 		vm.iOffset++
+	case OpNEG:
+		err = vm.exeUnaryOp(slang.MethodNEG)
+	case OpNOT:
+		err = vm.exeUnaryOp(slang.MethodNOT)
 	case OpADD:
 		err = vm.exeBinaryOp(slang.MethodADD)
 	case OpSUB:
@@ -104,6 +108,24 @@ func (vm *VM) Top() (slang.Object, bool) {
 	}
 
 	return vm.stack[len(vm.stack)-1], true
+}
+
+func (vm *VM) exeUnaryOp(method string) error {
+	val, ok := vm.pop()
+	if !ok {
+		return fmt.Errorf("failed to get unary operand: %w", ErrPopEmptyStack)
+	}
+
+	result, err := val.Send(method)
+	if err != nil {
+		return fmt.Errorf("method %s failed: %w", method, err)
+	}
+
+	vm.push(result)
+
+	vm.iOffset++
+
+	return nil
 }
 
 func (vm *VM) exeBinaryOp(method string) error {

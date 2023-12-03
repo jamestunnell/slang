@@ -46,7 +46,7 @@ func TestVMPushConstant(t *testing.T) {
 	assert.ErrorIs(t, err, runtime.ErrEndOfProgram)
 }
 
-func TestVMExprStmts(t *testing.T) {
+func TestVMIntegerExprStmts(t *testing.T) {
 	// basic integer arithmetic
 	testVMWithExprStmt(t, "1 + 7", i(8))
 	testVMWithExprStmt(t, "12 - 5", i(7))
@@ -56,6 +56,7 @@ func TestVMExprStmts(t *testing.T) {
 	// more elaborate integer arithmetic
 	testVMWithExprStmt(t, "(65 - 11) + (78 * 13)", i(1068))
 	testVMWithExprStmt(t, "40 + 77 / (13 - 47)", i(38))
+	testVMWithExprStmt(t, "(-12 * 5) / 3", i(-20))
 
 	// basic integer comparison
 	testVMWithExprStmt(t, "6 == 6", b(true))
@@ -75,9 +76,10 @@ func TestVMExprStmts(t *testing.T) {
 	testVMWithExprStmt(t, "6 >= 3", b(true))
 	testVMWithExprStmt(t, "6 >= 13", b(false))
 
-	// and/or expression
+	// and/or/not expression
 	testVMWithExprStmt(t, "(7 == 12 or true) and 13 < 50", b(true))
 	testVMWithExprStmt(t, "3 == 4 and true", b(false))
+	testVMWithExprStmt(t, "!(3 == 4) and true", b(true))
 }
 
 func testVMWithExprStmt(
@@ -97,7 +99,10 @@ func testVMWithExprStmt(
 
 		c := compiler.New()
 
-		require.NoError(t, c.ProcessStmt(p.Stmt))
+		compilerErr := c.ProcessStmt(p.Stmt)
+		if !assert.NoError(t, compilerErr) {
+			t.Fatalf("compiler error: %v", compilerErr)
+		}
 
 		code := c.GetCode()
 

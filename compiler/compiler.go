@@ -48,35 +48,18 @@ func (c *Compiler) processExpr(expr slang.Expression) error {
 	var err error
 
 	switch ee := expr.(type) {
+	case *expressions.UnaryOperation:
+		err = c.processUnaryOp(ee)
 	case *expressions.BinaryOperation:
-		err = c.processBinOp(ee)
-	case *expressions.Bool:
-		idx, ok := c.code.AddConstant(objects.NewBool(ee.Value))
-		if !ok {
-			err = errTooManyConstants
-
-			break
-		}
-
-		c.code.AddInstructionUint16Operands(runtime.OpCONST, idx)
-	case *expressions.Integer:
-		idx, ok := c.code.AddConstant(objects.NewInt(ee.Value))
-		if !ok {
-			err = errTooManyConstants
-
-			break
-		}
-
-		c.code.AddInstructionUint16Operands(runtime.OpCONST, idx)
-	case *expressions.Float:
-		idx, ok := c.code.AddConstant(objects.NewFloat(ee.Value))
-		if !ok {
-			err = errTooManyConstants
-
-			break
-		}
-
-		c.code.AddInstructionUint16Operands(runtime.OpCONST, idx)
+		err = c.processBinaryOp(ee)
+	case *expressions.Const[bool]:
+		err = c.processConst(objects.NewBool(ee.Value))
+	case *expressions.Const[int64]:
+		err = c.processConst(objects.NewInt(ee.Value))
+	case *expressions.Const[float64]:
+		err = c.processConst(objects.NewFloat(ee.Value))
+	case *expressions.Const[string]:
+		err = c.processConst(objects.NewString(ee.Value))
 	default:
 		err = fmt.Errorf("expression type %s not supported", expr.Type().String())
 	}
@@ -84,13 +67,45 @@ func (c *Compiler) processExpr(expr slang.Expression) error {
 	return err
 }
 
-func (c *Compiler) processBinOp(expr *expressions.BinaryOperation) error {
+func (c *Compiler) processConst(obj slang.Object) error {
+	idx, ok := c.code.AddConstant(obj)
+	if !ok {
+		return errTooManyConstants
+	}
+
+	c.code.AddInstructionUint16Operands(runtime.OpCONST, idx)
+
+	return nil
+}
+
+func (c *Compiler) processUnaryOp(expr *expressions.UnaryOperation) error {
+	if err := c.processExpr(expr.Value); err != nil {
+		return fmt.Errorf("failed to process unary expr: %w", err)
+	}
+
+	var opcode runtime.Opcode
+
+	switch expr.Type() {
+	case slang.ExprNOT:
+		opcode = runtime.OpNOT
+	case slang.ExprNEGATIVE:
+		opcode = runtime.OpNEG
+	default:
+		return fmt.Errorf("unknown unary expression type %s", expr.Type().String())
+	}
+
+	c.code.AddInstructionNoOperands(opcode)
+
+	return nil
+}
+
+func (c *Compiler) processBinaryOp(expr *expressions.BinaryOperation) error {
 	if err := c.processExpr(expr.Left); err != nil {
-		return fmt.Errorf("failed to process left-expr: %w", err)
+		return fmt.Errorf("failed to process binary left-expr: %w", err)
 	}
 
 	if err := c.processExpr(expr.Right); err != nil {
-		return fmt.Errorf("failed to process right-expr: %w", err)
+		return fmt.Errorf("failed to process binary right-expr: %w", err)
 	}
 
 	var opcode runtime.Opcode

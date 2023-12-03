@@ -10,6 +10,7 @@ const (
 	OpSUB
 	OpMUL
 	OpDIV
+	OpNEG
 
 	OpEQ
 	OpNEQ
@@ -18,6 +19,7 @@ const (
 	OpGT
 	OpGEQ
 
+	OpNOT
 	OpAND
 	OpOR
 )

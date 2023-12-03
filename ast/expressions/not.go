@@ -5,25 +5,11 @@ import (
 )
 
 type Not struct {
-	*Base
-
-	Value slang.Expression `json:"value"`
+	*UnaryOperation
 }
 
 func NewNot(val slang.Expression) slang.Expression {
-	return &Not{
-		Base:  NewBase(slang.ExprNOT),
-		Value: val,
-	}
-}
-
-func (b *Not) Equal(other slang.Expression) bool {
-	b2, ok := other.(*Not)
-	if !ok {
-		return false
-	}
-
-	return b2.Value.Equal(b.Value)
+	return NewUnaryOperation(slang.ExprNOT, val)
 }
 
 // func (expr *Not) Eval(env *slang.Environment) (slang.Object, error) {
