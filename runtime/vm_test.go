@@ -2,7 +2,6 @@ package runtime_test
 
 import (
 	"bufio"
-	"errors"
 	"strings"
 	"testing"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/jamestunnell/slang/runtime"
 	"github.com/jamestunnell/slang/runtime/objects"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestVMEmptyCode(t *testing.T) {
@@ -48,84 +46,135 @@ func TestVMPushConstant(t *testing.T) {
 
 func TestVMIntegerExprStmts(t *testing.T) {
 	// basic integer arithmetic
-	testVMWithExprStmt(t, "1 + 7", i(8))
-	testVMWithExprStmt(t, "12 - 5", i(7))
-	testVMWithExprStmt(t, "3 * 11", i(33))
-	testVMWithExprStmt(t, "60 / 5", i(12))
+	testVMWithFuncBodyStmts(t, "1 + 7", i(8))
+	testVMWithFuncBodyStmts(t, "12 - 5", i(7))
+	testVMWithFuncBodyStmts(t, "3 * 11", i(33))
+	testVMWithFuncBodyStmts(t, "60 / 5", i(12))
 
 	// more elaborate integer arithmetic
-	testVMWithExprStmt(t, "(65 - 11) + (78 * 13)", i(1068))
-	testVMWithExprStmt(t, "40 + 77 / (13 - 47)", i(38))
-	testVMWithExprStmt(t, "(-12 * 5) / 3", i(-20))
+	testVMWithFuncBodyStmts(t, "(65 - 11) + (78 * 13)", i(1068))
+	testVMWithFuncBodyStmts(t, "40 + 77 / (13 - 47)", i(38))
+	testVMWithFuncBodyStmts(t, "(-12 * 5) / 3", i(-20))
 
 	// basic integer comparison
-	testVMWithExprStmt(t, "6 == 6", b(true))
-	testVMWithExprStmt(t, "6 == 3", b(false))
-	testVMWithExprStmt(t, "6 != 6", b(false))
-	testVMWithExprStmt(t, "6 != 3", b(true))
-	testVMWithExprStmt(t, "6 < 6", b(false))
-	testVMWithExprStmt(t, "6 < 13", b(true))
-	testVMWithExprStmt(t, "6 < 3", b(false))
-	testVMWithExprStmt(t, "6 <= 6", b(true))
-	testVMWithExprStmt(t, "6 <= 33", b(true))
-	testVMWithExprStmt(t, "6 <= 3", b(false))
-	testVMWithExprStmt(t, "6 > 6", b(false))
-	testVMWithExprStmt(t, "6 > 3", b(true))
-	testVMWithExprStmt(t, "6 > 13", b(false))
-	testVMWithExprStmt(t, "6 >= 6", b(true))
-	testVMWithExprStmt(t, "6 >= 3", b(true))
-	testVMWithExprStmt(t, "6 >= 13", b(false))
+	testVMWithFuncBodyStmts(t, "6 == 6", b(true))
+	testVMWithFuncBodyStmts(t, "6 == 3", b(false))
+	testVMWithFuncBodyStmts(t, "6 != 6", b(false))
+	testVMWithFuncBodyStmts(t, "6 != 3", b(true))
+	testVMWithFuncBodyStmts(t, "6 < 6", b(false))
+	testVMWithFuncBodyStmts(t, "6 < 13", b(true))
+	testVMWithFuncBodyStmts(t, "6 < 3", b(false))
+	testVMWithFuncBodyStmts(t, "6 <= 6", b(true))
+	testVMWithFuncBodyStmts(t, "6 <= 33", b(true))
+	testVMWithFuncBodyStmts(t, "6 <= 3", b(false))
+	testVMWithFuncBodyStmts(t, "6 > 6", b(false))
+	testVMWithFuncBodyStmts(t, "6 > 3", b(true))
+	testVMWithFuncBodyStmts(t, "6 > 13", b(false))
+	testVMWithFuncBodyStmts(t, "6 >= 6", b(true))
+	testVMWithFuncBodyStmts(t, "6 >= 3", b(true))
+	testVMWithFuncBodyStmts(t, "6 >= 13", b(false))
 
 	// and/or/not expression
-	testVMWithExprStmt(t, "(7 == 12 or true) and 13 < 50", b(true))
-	testVMWithExprStmt(t, "3 == 4 and true", b(false))
-	testVMWithExprStmt(t, "!(3 == 4) and true", b(true))
+	testVMWithFuncBodyStmts(t, "(7 == 12 or true) and 13 < 50", b(true))
+	testVMWithFuncBodyStmts(t, "3 == 4 and true", b(false))
+	testVMWithFuncBodyStmts(t, "!(3 == 4) and true", b(true))
 }
 
-func testVMWithExprStmt(
+func TestVMWithIfExpr(t *testing.T) {
+	testVMWithFuncBodyStmts(t, "if true {75}", i(75))
+	testVMWithFuncBodyStmts(t, `if true {
+			75
+		}
+		100`, i(100))
+	testVMWithFuncBodyStmts(t, "if true {if false {12}}", b(false))
+	testVMWithFuncBodyStmts(t, "if true {if true {12}}", i(12))
+}
+
+func TestVMWithIfElseExpr(t *testing.T) {
+	testVMWithFuncBodyStmts(t, "if true {75} else {58}", i(75))
+	testVMWithFuncBodyStmts(t, "if false {75} else {58}", i(58))
+	testVMWithFuncBodyStmts(t, `
+		if true {
+			75
+		} else {
+			20
+		}
+		88`, i(88))
+	testVMWithFuncBodyStmts(t, `
+		if false {
+			75
+		} else {
+			20
+		}
+		88`, i(88))
+}
+
+func testVMWithFuncBodyStmts(
 	t *testing.T,
 	input string,
 	expected slang.Object) {
 	t.Run(input, func(t *testing.T) {
-		l := lexer.New(bufio.NewReader(strings.NewReader(input)))
-		toks := parsing.NewTokenSeq(l)
-		p := parsing.NewExprOrAssignStatementParser()
-
-		if !assert.True(t, p.Run(toks)) {
-			logParseErrs(t, p.GetErrors())
-
+		vm, ok := setupVM(t, "{"+input+"}", parsing.NewFuncBodyParser())
+		if !ok {
 			return
 		}
 
-		c := compiler.New()
-
-		compilerErr := c.ProcessStmt(p.Stmt)
-		if !assert.NoError(t, compilerErr) {
-			t.Fatalf("compiler error: %v", compilerErr)
+		if !runVM(t, vm) {
+			return
 		}
 
-		code := c.GetCode()
-
-		vm := runtime.NewVM(code)
-
-		err := vm.Step()
-
-		for err == nil {
-			err = vm.Step()
-		}
-
-		if !errors.Is(err, runtime.ErrEndOfProgram) {
-			t.Fatalf("VM failed unexpectedly: %v", err)
-		}
-
-		last := vm.LastPopped()
-
-		require.NotNil(t, last)
-
-		if !assert.True(t, expected.Equal(vm.LastPopped())) {
-			t.Logf("%s (actual) != %s (expected)", last.Inspect(), expected.Inspect())
-		}
+		verifyObject(t, vm.LastPopped(), expected)
 	})
+}
+
+func verifyObject(t *testing.T, actual, expected slang.Object) bool {
+	if !assert.True(t, actual.Equal(expected)) {
+		t.Logf("%s (actual) != %s (expected)", actual.Inspect(), expected.Inspect())
+
+		return false
+	}
+
+	return true
+}
+
+func runVM(t *testing.T, vm *runtime.VM) bool {
+	err := vm.Step()
+
+	for err == nil {
+		err = vm.Step()
+	}
+
+	if !assert.ErrorIs(t, err, runtime.ErrEndOfProgram) {
+		t.Logf("VM failed unexpectedly: %v", err)
+
+		return false
+	}
+
+	return true
+}
+
+func setupVM(t *testing.T, input string, parser parsing.BodyParser) (*runtime.VM, bool) {
+	l := lexer.New(bufio.NewReader(strings.NewReader(input)))
+	toks := parsing.NewTokenSeq(l)
+
+	if !assert.True(t, parser.Run(toks)) {
+		logParseErrs(t, parser.GetErrors())
+
+		return nil, false
+	}
+
+	c := compiler.New()
+
+	for _, stmt := range parser.GetStatements() {
+		compilerErr := c.ProcessStmt(stmt)
+		if !assert.NoError(t, compilerErr) {
+			return nil, false
+		}
+	}
+
+	code := c.GetCode()
+
+	return runtime.NewVM(code), true
 }
 
 func stepOKAndVerifyTop(

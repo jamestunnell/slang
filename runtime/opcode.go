@@ -22,4 +22,7 @@ const (
 	OpNOT
 	OpAND
 	OpOR
+
+	OpJUMP
+	OpJUMPIFFALSE
 )

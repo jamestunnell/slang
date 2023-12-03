@@ -12,10 +12,13 @@ type Statement interface {
 
 const (
 	StatementASSIGN StatementType = iota
+	StatementBLOCK
 	StatementCLASS
 	StatementEXPRESSION
 	StatementFIELD
 	StatementFUNC
+	StatementIF
+	StatementIFELSE
 	StatementMETHOD
 	StatementRETURN
 	StatementUSE
@@ -23,6 +26,8 @@ const (
 	StrASSIGN     = "ASSIGN"
 	StrCLASS      = "CLASS"
 	StrEXPRESSION = "EXPRESSION"
+	StrIF         = "IF"
+	StrIFELSE     = "IFELSE"
 	StrFIELD      = "FIELD"
 	StrFUNC       = "FUNC"
 	StrMETHOD     = "METHOD"
@@ -58,6 +63,10 @@ func (st StatementType) String() string {
 		str = StrCLASS
 	case StatementEXPRESSION:
 		str = StrEXPRESSION
+	case StatementIF:
+		str = StrIF
+	case StatementIFELSE:
+		str = StrIFELSE
 	case StatementFIELD:
 		str = StrFIELD
 	case StatementFUNC:

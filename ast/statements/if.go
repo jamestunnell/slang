@@ -1,4 +1,4 @@
-package expressions
+package statements
 
 import (
 	"github.com/jamestunnell/slang"
@@ -7,19 +7,19 @@ import (
 type If struct {
 	*Base
 
-	Condition    slang.Expression  `json:"condition"`
-	Consequences []slang.Statement `json:"consequences"`
+	Condition slang.Expression `json:"condition"`
+	Block     slang.Statement  `json:"block"`
 }
 
-func NewIf(cond slang.Expression, conseqs []slang.Statement) *If {
+func NewIf(cond slang.Expression, ifBlock slang.Statement) *If {
 	return &If{
-		Base:         NewBase(slang.ExprIF),
-		Condition:    cond,
-		Consequences: conseqs,
+		Base:      NewBase(slang.StatementIF),
+		Condition: cond,
+		Block:     ifBlock,
 	}
 }
 
-func (i *If) Equal(other slang.Expression) bool {
+func (i *If) Equal(other slang.Statement) bool {
 	i2, ok := other.(*If)
 	if !ok {
 		return false
@@ -29,7 +29,7 @@ func (i *If) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return slang.StatementsEqual(i.Consequences, i2.Consequences)
+	return i.Block.Equal(i2.Block)
 }
 
 // func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {

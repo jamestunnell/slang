@@ -6,7 +6,6 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
-	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/stretchr/testify/assert"
@@ -59,17 +58,6 @@ func TestExprParser(t *testing.T) {
 			testExprParser(t, input, expected)
 		})
 	}
-}
-
-func TestExprParserIf(t *testing.T) {
-	input := `if a > b {
-			return 5
-		}`
-
-	cond := gt(id("a"), id("b"))
-	conseqs := []slang.Statement{statements.NewReturn(i(5))}
-
-	testExprParser(t, input, expressions.NewIf(cond, conseqs))
 }
 
 func testExprParser(t *testing.T, input string, expected slang.Expression) {

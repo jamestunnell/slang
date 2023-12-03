@@ -28,12 +28,6 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, expressions.NewGreater(a, b))
 	testMarshalJSON(t, expressions.NewGreaterEqual(a, b))
 	testMarshalJSON(t, expressions.NewIdentifier("x"))
-	testMarshalJSON(t, expressions.NewIf(
-		expressions.NewLessEqual(a, b), []slang.Statement{}))
-	testMarshalJSON(t, expressions.NewIfElse(
-		expressions.NewLessEqual(a, b),
-		[]slang.Statement{},
-		[]slang.Statement{}))
 	testMarshalJSON(t, expressions.NewInteger(0))
 	testMarshalJSON(t, expressions.NewLess(a, b))
 	testMarshalJSON(t, expressions.NewLessEqual(a, b))

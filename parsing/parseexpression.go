@@ -76,30 +76,6 @@ func (p *ExprParser) parseArray(toks slang.TokenSeq) slang.Expression {
 	return expressions.NewArray(elems...)
 }
 
-func (p *ExprParser) parseIfExpression(toks slang.TokenSeq) slang.Expression {
-	toks.Advance()
-
-	cond := p.parseExpression(toks, PrecedenceLOWEST)
-
-	conseqParser := NewCondBodyParser()
-	if !p.RunSubParser(toks, conseqParser) {
-		return nil
-	}
-
-	if !toks.Current().Is(slang.TokenELSE) {
-		return expressions.NewIf(cond, conseqParser.Statements)
-	}
-
-	toks.Advance()
-
-	alternParser := NewCondBodyParser()
-	if !p.RunSubParser(toks, alternParser) {
-		return nil
-	}
-
-	return expressions.NewIfElse(cond, conseqParser.Statements, alternParser.Statements)
-}
-
 func (p *ExprParser) parseFuncLiteral(toks slang.TokenSeq) slang.Expression {
 	toks.Advance()
 

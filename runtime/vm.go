@@ -6,13 +6,14 @@ import (
 	"fmt"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/runtime/objects"
 )
 
 type VM struct {
 	code       *Bytecode
 	stack      []slang.Object
-	iOffset    int
-	iLength    int
+	iOffset    uint64
+	iLength    uint64
 	cLength    int
 	lastPopped slang.Object
 }
@@ -20,6 +21,8 @@ type VM struct {
 var (
 	ErrEndOfProgram  = errors.New("end of program reached")
 	ErrPopEmptyStack = errors.New("cannot pop an empty stack")
+
+	False = objects.NewBool(false)
 )
 
 func NewVM(code *Bytecode) *VM {
@@ -27,7 +30,7 @@ func NewVM(code *Bytecode) *VM {
 		code:       code,
 		stack:      []slang.Object{},
 		iOffset:    0,
-		iLength:    len(code.Instructions),
+		iLength:    uint64(len(code.Instructions)),
 		cLength:    len(code.Constants),
 		lastPopped: nil,
 	}
@@ -48,17 +51,11 @@ func (vm *VM) Step() error {
 
 	switch opcode {
 	case OpCONST:
-		idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
-
-		if int(idx) >= vm.cLength {
-			err = fmt.Errorf("constant index %d is out of bounds", idx)
-
-			break
-		}
-
-		vm.push(vm.code.Constants[idx])
-
-		vm.iOffset += 3
+		err = vm.exeConst()
+	case OpJUMP:
+		vm.iOffset = binary.BigEndian.Uint64(vm.code.Instructions[vm.iOffset+1:])
+	case OpJUMPIFFALSE:
+		err = vm.exeJumpIfFalse()
 	case OpPOP:
 		vm.pop()
 
@@ -108,6 +105,35 @@ func (vm *VM) Top() (slang.Object, bool) {
 	}
 
 	return vm.stack[len(vm.stack)-1], true
+}
+
+func (vm *VM) exeConst() error {
+	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+
+	if int(idx) >= vm.cLength {
+		return fmt.Errorf("constant index %d is out of bounds", idx)
+	}
+
+	vm.push(vm.code.Constants[idx])
+
+	vm.iOffset += 3
+
+	return nil
+}
+
+func (vm *VM) exeJumpIfFalse() error {
+	val, ok := vm.pop()
+	if !ok {
+		return fmt.Errorf("failed to get jump-if-false value: %w", ErrPopEmptyStack)
+	}
+
+	if val.Equal(False) {
+		vm.iOffset = binary.BigEndian.Uint64(vm.code.Instructions[vm.iOffset+1:])
+	} else {
+		vm.iOffset += 9
+	}
+
+	return nil
 }
 
 func (vm *VM) exeUnaryOp(method string) error {

@@ -54,8 +54,6 @@ func (p *ExprParser) findPrefixParseFn(
 		prefixParse = p.parseGroupedExpression
 	case slang.TokenLBRACKET:
 		prefixParse = p.parseArray
-	case slang.TokenIF:
-		prefixParse = p.parseIfExpression
 	case slang.TokenFUNC:
 		prefixParse = p.parseFuncLiteral
 	}

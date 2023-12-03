@@ -31,6 +31,16 @@ func (c *Compiler) ProcessStmt(stmt slang.Statement) error {
 	var err error
 
 	switch stmt.Type() {
+	case slang.StatementBLOCK:
+		for _, stmt := range stmt.(*statements.Block).Statements {
+			if err = c.ProcessStmt(stmt); err != nil {
+				break
+			}
+		}
+	case slang.StatementIF:
+		err = c.processIfStmt(stmt.(*statements.If))
+	case slang.StatementIFELSE:
+		err = c.processIfElseStmt(stmt.(*statements.IfElse))
 	case slang.StatementEXPRESSION:
 		if err = c.processExpr(stmt.(*statements.Expression).Value); err != nil {
 			break
@@ -42,6 +52,46 @@ func (c *Compiler) ProcessStmt(stmt slang.Statement) error {
 	}
 
 	return err
+}
+
+func (c *Compiler) processIfStmt(stmt *statements.If) error {
+	if err := c.processExpr(stmt.Condition); err != nil {
+		return fmt.Errorf("failed to process if-condition expr: %w", err)
+	}
+
+	fixup := c.code.AddJumpIfFalse()
+
+	if err := c.ProcessStmt(stmt.Block); err != nil {
+		return fmt.Errorf("failed to process if block: %w", err)
+	}
+
+	fixup(uint64(len(c.code.Instructions)))
+
+	return nil
+}
+
+func (c *Compiler) processIfElseStmt(stmt *statements.IfElse) error {
+	if err := c.processExpr(stmt.Condition); err != nil {
+		return fmt.Errorf("failed to process if-condition expr: %w", err)
+	}
+
+	fixupJumpToElse := c.code.AddJumpIfFalse()
+
+	if err := c.ProcessStmt(stmt.IfBlock); err != nil {
+		return fmt.Errorf("failed to process if block: %w", err)
+	}
+
+	fixupSkipElse := c.code.AddJump()
+
+	fixupJumpToElse(uint64(len(c.code.Instructions)))
+
+	if err := c.ProcessStmt(stmt.ElseBlock); err != nil {
+		return fmt.Errorf("failed to process if block: %w", err)
+	}
+
+	fixupSkipElse(uint64(len(c.code.Instructions)))
+
+	return nil
 }
 
 func (c *Compiler) processExpr(expr slang.Expression) error {

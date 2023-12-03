@@ -1,4 +1,4 @@
-package expressions
+package statements
 
 import (
 	"github.com/jamestunnell/slang"
@@ -7,21 +7,21 @@ import (
 type IfElse struct {
 	*Base
 
-	Condition    slang.Expression  `json:"condition"`
-	Consequences []slang.Statement `json:"consequences"`
-	Alternatives []slang.Statement `json:"alternatives"`
+	Condition slang.Expression `json:"condition"`
+	IfBlock   slang.Statement  `json:"ifBlock"`
+	ElseBlock slang.Statement  `json:"elseBlock"`
 }
 
-func NewIfElse(cond slang.Expression, conseqs, alterns []slang.Statement) *IfElse {
+func NewIfElse(cond slang.Expression, ifBlock, elseBlock slang.Statement) *IfElse {
 	return &IfElse{
-		Base:         NewBase(slang.ExprIFELSE),
-		Condition:    cond,
-		Consequences: conseqs,
-		Alternatives: alterns,
+		Base:      NewBase(slang.StatementIFELSE),
+		Condition: cond,
+		IfBlock:   ifBlock,
+		ElseBlock: elseBlock,
 	}
 }
 
-func (i *IfElse) Equal(other slang.Expression) bool {
+func (i *IfElse) Equal(other slang.Statement) bool {
 	i2, ok := other.(*IfElse)
 	if !ok {
 		return false
@@ -31,11 +31,11 @@ func (i *IfElse) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if !slang.StatementsEqual(i.Consequences, i2.Consequences) {
+	if !i.IfBlock.Equal(i2.IfBlock) {
 		return false
 	}
 
-	return slang.StatementsEqual(i.Alternatives, i2.Alternatives)
+	return i.ElseBlock.Equal(i2.ElseBlock)
 }
 
 // func (expr *IfElse) Eval(env *slang.Environment) (slang.Object, error) {

@@ -22,6 +22,8 @@ func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
 		return p.ParseStatement(toks, NewClassStatementParser())
 	case slang.TokenFUNC:
 		return p.ParseStatement(toks, NewFuncStatementParser())
+	case slang.TokenIF:
+		return p.ParseStatement(toks, NewIfStatementParser())
 	case slang.TokenRETURN:
 		return p.ParseStatement(toks, NewReturnStatementParser())
 	}

@@ -32,6 +32,39 @@ func (bc *Bytecode) AddConstant(obj slang.Object) (uint16, bool) {
 	return uint16(idx), true
 }
 
+type FixupFunc func(targetIdx uint64)
+
+const DummyTargetIdx = uint64(0xFEEDFEEDFEEDFEED)
+
+func (bc *Bytecode) AddJumpIfFalse() FixupFunc {
+	return bc.addJump(OpJUMPIFFALSE)
+}
+
+func (bc *Bytecode) AddJump() FixupFunc {
+	return bc.addJump(OpJUMP)
+}
+
+func (bc *Bytecode) addJump(opcode Opcode) FixupFunc {
+	data := make([]byte, 9)
+
+	data[0] = byte(opcode)
+
+	binary.BigEndian.PutUint64(data[1:], DummyTargetIdx)
+
+	// this is where target index will end up in instructions
+	targetIdxLoc := len(bc.Instructions) + 1
+
+	bc.Instructions = append(bc.Instructions, data...)
+
+	return func(targetIdx uint64) {
+		binary.BigEndian.PutUint64(bc.Instructions[targetIdxLoc:], targetIdx)
+	}
+}
+
+func (bc *Bytecode) FixupTargetIndex(loc int, targetIdx uint64) {
+
+}
+
 func (bc *Bytecode) AddInstructionNoOperands(opcode Opcode) {
 	bc.Instructions = append(bc.Instructions, byte(opcode))
 }

@@ -68,9 +68,9 @@ func TestCondBodyParser(t *testing.T) {
 			},
 		},
 		{
-			TestName: "assign nested string interpolation",
+			TestName: "assign string interpolation",
 			Input: `{
-				myVar = "${word} is a ${if word.Size() < 10 {"short"} else {"not short"}} word"
+				myVar = "${word} is a ${fanciness.String()} word"
 			}`,
 			Statements: []slang.Statement{
 				statements.NewAssign(
@@ -79,15 +79,8 @@ func TestCondBodyParser(t *testing.T) {
 						expressions.NewString(""),
 						expressions.NewIdentifier("word"),
 						expressions.NewString(" is a "),
-						expressions.NewIfElse(
-							expressions.NewLess(
-								expressions.NewCall(
-									expressions.NewMemberAccess(expressions.NewIdentifier("word"), "Size")),
-								expressions.NewInteger(10),
-							),
-							[]slang.Statement{statements.NewExpression(expressions.NewString("short"))},
-							[]slang.Statement{statements.NewExpression(expressions.NewString("not short"))},
-						),
+						expressions.NewCall(
+							expressions.NewMemberAccess(expressions.NewIdentifier("fanciness"), "String")),
 						expressions.NewString(" word"),
 					),
 				),

@@ -18,6 +18,8 @@ func NewCondBodyParser() *CondBodyParser {
 
 func (p *CondBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	switch toks.Current().Type() {
+	case slang.TokenIF:
+		return p.ParseStatement(toks, NewIfStatementParser())
 	case slang.TokenRETURN:
 		return p.ParseStatement(toks, NewReturnStatementParser())
 	}
