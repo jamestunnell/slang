@@ -6,6 +6,12 @@ const (
 	OpCONST Opcode = iota
 	OpPOP
 
+	OpGETGLOBAL
+	OpSETGLOBAL
+
+	OpJUMP
+	OpJUMPIFFALSE
+
 	OpADD
 	OpSUB
 	OpMUL
@@ -22,7 +28,4 @@ const (
 	OpNOT
 	OpAND
 	OpOR
-
-	OpJUMP
-	OpJUMPIFFALSE
 )

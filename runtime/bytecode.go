@@ -36,6 +36,14 @@ type FixupFunc func(targetIdx uint64)
 
 const DummyTargetIdx = uint64(0xFEEDFEEDFEEDFEED)
 
+func (bc *Bytecode) AddSetGlobal(idx uint16) {
+	bc.AddInstructionUint16Operands(OpSETGLOBAL, idx)
+}
+
+func (bc *Bytecode) AddGetGlobal(idx uint16) {
+	bc.AddInstructionUint16Operands(OpGETGLOBAL, idx)
+}
+
 func (bc *Bytecode) AddJumpIfFalse() FixupFunc {
 	return bc.addJump(OpJUMPIFFALSE)
 }

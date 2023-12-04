@@ -12,14 +12,16 @@ import (
 )
 
 type Compiler struct {
-	code *runtime.Bytecode
+	code        *runtime.Bytecode
+	symbolTable *SymbolTable
 }
 
 var errTooManyConstants = errors.New("too many constants")
 
 func New() *Compiler {
 	return &Compiler{
-		code: runtime.NewBytecode(),
+		code:        runtime.NewBytecode(),
+		symbolTable: NewSymbolTable(),
 	}
 }
 
@@ -31,6 +33,8 @@ func (c *Compiler) ProcessStmt(stmt slang.Statement) error {
 	var err error
 
 	switch stmt.Type() {
+	case slang.StatementASSIGN:
+		err = c.proccessAssignStmt(stmt.(*statements.Assign))
 	case slang.StatementBLOCK:
 		for _, stmt := range stmt.(*statements.Block).Statements {
 			if err = c.ProcessStmt(stmt); err != nil {
@@ -54,9 +58,34 @@ func (c *Compiler) ProcessStmt(stmt slang.Statement) error {
 	return err
 }
 
+func (c *Compiler) proccessAssignStmt(stmt *statements.Assign) error {
+	if err := c.processExpr(stmt.Value); err != nil {
+		return fmt.Errorf("failed to process assign value expr: %w", err)
+	}
+
+	if stmt.Target.Type() != slang.ExprIDENTIFIER {
+		return fmt.Errorf("non-simple assign target not supported")
+	}
+
+	name := stmt.Target.(*expressions.Identifier).Name
+
+	sym, found := c.symbolTable.Resolve(name)
+	if !found {
+		sym = c.symbolTable.Define(name)
+	}
+
+	if sym.Index >= runtime.MaxGlobals {
+		return fmt.Errorf("max globals exceeded")
+	}
+
+	c.code.AddSetGlobal(uint16(sym.Index))
+
+	return nil
+}
+
 func (c *Compiler) processIfStmt(stmt *statements.If) error {
 	if err := c.processExpr(stmt.Condition); err != nil {
-		return fmt.Errorf("failed to process if-condition expr: %w", err)
+		return fmt.Errorf("failed to process if condition expr: %w", err)
 	}
 
 	fixup := c.code.AddJumpIfFalse()
@@ -98,6 +127,8 @@ func (c *Compiler) processExpr(expr slang.Expression) error {
 	var err error
 
 	switch ee := expr.(type) {
+	case *expressions.Identifier:
+		err = c.processIdent(ee)
 	case *expressions.UnaryOperation:
 		err = c.processUnaryOp(ee)
 	case *expressions.BinaryOperation:
@@ -115,6 +146,17 @@ func (c *Compiler) processExpr(expr slang.Expression) error {
 	}
 
 	return err
+}
+
+func (c *Compiler) processIdent(expr *expressions.Identifier) error {
+	sym, found := c.symbolTable.Resolve(expr.Name)
+	if !found {
+		return fmt.Errorf("symbol %s not defined", expr.Name)
+	}
+
+	c.code.AddGetGlobal(uint16(sym.Index))
+
+	return nil
 }
 
 func (c *Compiler) processConst(obj slang.Object) error {

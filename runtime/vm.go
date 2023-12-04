@@ -12,11 +12,14 @@ import (
 type VM struct {
 	code       *Bytecode
 	stack      []slang.Object
+	globals    []slang.Object
 	iOffset    uint64
 	iLength    uint64
 	cLength    int
 	lastPopped slang.Object
 }
+
+const MaxGlobals = 65536
 
 var (
 	ErrEndOfProgram  = errors.New("end of program reached")
@@ -29,6 +32,7 @@ func NewVM(code *Bytecode) *VM {
 	return &VM{
 		code:       code,
 		stack:      []slang.Object{},
+		globals:    make([]slang.Object, MaxGlobals),
 		iOffset:    0,
 		iLength:    uint64(len(code.Instructions)),
 		cLength:    len(code.Constants),
@@ -52,6 +56,10 @@ func (vm *VM) Step() error {
 	switch opcode {
 	case OpCONST:
 		err = vm.exeConst()
+	case OpGETGLOBAL:
+		err = vm.exeGetGlobal()
+	case OpSETGLOBAL:
+		err = vm.exeSetGlobal()
 	case OpJUMP:
 		vm.iOffset = binary.BigEndian.Uint64(vm.code.Instructions[vm.iOffset+1:])
 	case OpJUMPIFFALSE:
@@ -115,6 +123,31 @@ func (vm *VM) exeConst() error {
 	}
 
 	vm.push(vm.code.Constants[idx])
+
+	vm.iOffset += 3
+
+	return nil
+}
+
+func (vm *VM) exeGetGlobal() error {
+	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+
+	vm.push(vm.globals[idx])
+
+	vm.iOffset += 3
+
+	return nil
+}
+
+func (vm *VM) exeSetGlobal() error {
+	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+
+	obj, ok := vm.pop()
+	if !ok {
+		return fmt.Errorf("failed to get set global value: %w", ErrPopEmptyStack)
+	}
+
+	vm.globals[idx] = obj
 
 	vm.iOffset += 3
 

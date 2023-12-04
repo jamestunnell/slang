@@ -80,7 +80,7 @@ func TestVMIntegerExprStmts(t *testing.T) {
 	testVMWithFuncBodyStmts(t, "!(3 == 4) and true", b(true))
 }
 
-func TestVMWithIfExpr(t *testing.T) {
+func TestVM_IfExpr(t *testing.T) {
 	testVMWithFuncBodyStmts(t, "if true {75}", i(75))
 	testVMWithFuncBodyStmts(t, `if true {
 			75
@@ -90,7 +90,7 @@ func TestVMWithIfExpr(t *testing.T) {
 	testVMWithFuncBodyStmts(t, "if true {if true {12}}", i(12))
 }
 
-func TestVMWithIfElseExpr(t *testing.T) {
+func TestVM_IfElseExpr(t *testing.T) {
 	testVMWithFuncBodyStmts(t, "if true {75} else {58}", i(75))
 	testVMWithFuncBodyStmts(t, "if false {75} else {58}", i(58))
 	testVMWithFuncBodyStmts(t, `
@@ -107,6 +107,17 @@ func TestVMWithIfElseExpr(t *testing.T) {
 			20
 		}
 		88`, i(88))
+}
+
+func TestVM_AssignStmt(t *testing.T) {
+	testVMWithFuncBodyStmts(t, "x = 12", i(12))
+	testVMWithFuncBodyStmts(t, `
+		x = 12
+		5 * x`, i(60))
+	testVMWithFuncBodyStmts(t, `
+		x = 80
+		y = -4
+		x * y`, i(-320))
 }
 
 func testVMWithFuncBodyStmts(
