@@ -243,26 +243,19 @@ func (vm *VM) callFunc(numArgs int) error {
 		return fmt.Errorf("stack count is too low for func+args")
 	}
 
-	baseStackCount := vm.stackCount - (numArgs + 1)
-
-	closure, ok := vm.stack[baseStackCount].(*objects.Closure)
+	closure, ok := vm.stack[vm.stackCount-1-numArgs].(*objects.Closure)
 	if !ok {
 		return fmt.Errorf("obj is not a compiled func")
 	}
 
 	// vm.lastPopped = ???
 
-	frame := NewFrame(closure, baseStackCount)
+	frame := NewFrame(closure, vm.stackCount-numArgs)
 	if err := vm.pushFrame(frame); err != nil {
 		return err
 	}
 
-	// grow the stack if needed to fit all the locals
-	needed := closure.Func.NumLocals - numArgs
-	if needed > 0 {
-		vm.stack = append(vm.stack, make([]slang.Object, needed)...)
-	}
-	vm.stackCount = baseStackCount + closure.Func.NumLocals
+	vm.stackCount = frame.BaseStackCount + closure.Func.NumLocals
 
 	return nil
 }

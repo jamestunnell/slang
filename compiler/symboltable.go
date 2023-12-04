@@ -50,6 +50,10 @@ func (st *SymbolTable) Define(name string) Symbol {
 		Scope: GlobalScope,
 	}
 
+	if st.outer != nil {
+		sym.Scope = LocalScope
+	}
+
 	st.store[name] = sym
 
 	st.numDefs++
