@@ -78,8 +78,8 @@ func (c *Compiler) ProcessStmt(stmt slang.Statement) error {
 				break
 			}
 		}
-	// case slang.StatementFUNC:
-	// 	err = c.processFuncStmt(stmt.(*statements.Func))
+	case slang.StatementFUNC:
+		err = c.processFuncStmt(stmt.(*statements.Func))
 	case slang.StatementIF:
 		err = c.processIfStmt(stmt.(*statements.If))
 	case slang.StatementIFELSE:
@@ -137,18 +137,23 @@ func (c *Compiler) proccessReturnValStmt(stmt *statements.ReturnVal) error {
 	return nil
 }
 
-// func (c *Compiler) processFuncStmt(funcStmt *statements.Func) error {
-// 	c.symbolTable.Define(funcStmt.Name)
+func (c *Compiler) processFuncStmt(funcStmt *statements.Func) error {
+	compiledFn, numFree, err := c.processFunction(funcStmt.Function, funcStmt.Name)
+	if err != nil {
+		return fmt.Errorf("failed to process function: %w", err)
+	}
 
-// 	if err := c.processFunction(funcStmt.Function); err != nil {
-// 		return fmt.Errorf("failed to process function: %w", err)
-// 	}
+	idx, ok := c.addConst(compiledFn)
+	if !ok {
+		return errTooManyConstants
+	}
 
-// 	return c.setVar()
-// 	// c.code.AddSet
+	c.addInstr(instructions.NewClosure(idx, numFree))
 
-// 	return nil
-// }
+	c.storeSymbol(c.symbolTable.Define(funcStmt.Name))
+
+	return nil
+}
 
 func (c *Compiler) storeSymbol(s Symbol) {
 	switch s.Scope {
@@ -157,7 +162,7 @@ func (c *Compiler) storeSymbol(s Symbol) {
 
 		c.globalCollector.MaxGlobals++
 	case LocalScope:
-		c.addInstr(instructions.NewSetLocal(uint16(s.Index)))
+		c.addInstr(instructions.NewSetLocal(uint8(s.Index)))
 	}
 }
 
@@ -166,9 +171,11 @@ func (c *Compiler) loadSymbol(s Symbol) {
 	case GlobalScope:
 		c.addInstr(instructions.NewGetGlobal(uint16(s.Index)))
 	case LocalScope:
-		c.addInstr(instructions.NewGetLocal(uint16(s.Index)))
+		c.addInstr(instructions.NewGetLocal(uint8(s.Index)))
 	case FreeScope:
-		c.addInstr(instructions.NewGetFree(uint16(s.Index)))
+		c.addInstr(instructions.NewGetFree(uint8(s.Index)))
+	case FunctionScope:
+		c.addInstr(instructions.NewCurrentClosure())
 	}
 }
 
@@ -274,7 +281,7 @@ func (c *Compiler) processCall(expr *expressions.Call) error {
 }
 
 func (c *Compiler) processFuncLiteral(expr *expressions.Func) error {
-	compiledFn, numFreeVars, err := c.processFunction(expr.Function)
+	compiledFn, numFreeVars, err := c.processFunction(expr.Function, "")
 	if err != nil {
 		return err
 	}
@@ -301,8 +308,12 @@ func (c *Compiler) addConst(obj slang.Object) (uint16, bool) {
 	return uint16(numConsts), true
 }
 
-func (c *Compiler) processFunction(fn *ast.Function) (*objects.CompiledFunc, uint8, error) {
+func (c *Compiler) processFunction(fn *ast.Function, name string) (*objects.CompiledFunc, uint8, error) {
 	funcCompiler := NewChild(c)
+
+	if name != "" {
+		funcCompiler.symbolTable.DefineFunctionName(name)
+	}
 
 	// define function parameters as local variables
 	for _, name := range fn.GetParamNames() {
@@ -352,6 +363,14 @@ func (c *Compiler) processFunction(fn *ast.Function) (*objects.CompiledFunc, uin
 
 	for _, sym := range freeSymbols {
 		c.loadSymbol(sym)
+	}
+
+	fmt.Println("compiled function:")
+	offset := uint64(0)
+	for _, instr := range funcCompiler.instructions {
+		fmt.Printf("0x%016x: %s\n", offset, instr.String())
+
+		offset += uint64(instr.LengthBytes())
 	}
 
 	assembled := funcCompiler.Instructions().Assemble()

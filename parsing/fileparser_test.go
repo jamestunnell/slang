@@ -53,7 +53,7 @@ func TestFileParser(t *testing.T) {
 				ast.NewFunction(
 					[]*ast.Param{ast.NewParam("x", "float")},
 					[]string{"float"},
-					statements.NewReturn(
+					statements.NewReturnVal(
 						expressions.NewAdd(
 							expressions.NewMemberAccess(
 								expressions.NewIdentifier("this"), "Amount"),

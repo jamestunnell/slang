@@ -135,16 +135,16 @@ func (vm *VM) Step() error {
 	return exec(f)
 }
 
-func (vm *VM) StackSize() int {
-	return len(vm.stack)
+func (vm *VM) StackCount() int {
+	return vm.stackCount
 }
 
 func (vm *VM) Top() (slang.Object, bool) {
-	if len(vm.stack) == 0 {
+	if vm.stackCount == 0 {
 		return nil, false
 	}
 
-	return vm.stack[len(vm.stack)-1], true
+	return vm.stack[vm.stackCount-1], true
 }
 
 func (vm *VM) currentFrame() *Frame {
@@ -174,7 +174,7 @@ func (vm *VM) execGetGlobal(f *Frame) error {
 func (vm *VM) execGetLocal(f *Frame) error {
 	localIdx := f.Instructions()[f.InstrOffset+1]
 
-	f.InstrOffset += 3
+	f.InstrOffset += 2
 
 	return vm.push(vm.stack[f.BaseStackCount+int(localIdx)])
 }
@@ -182,7 +182,7 @@ func (vm *VM) execGetLocal(f *Frame) error {
 func (vm *VM) execGetFree(f *Frame) error {
 	freeIdx := f.Instructions()[f.InstrOffset+1]
 
-	f.InstrOffset += 3
+	f.InstrOffset += 2
 
 	return vm.push(f.Closure.FreeVars[freeIdx])
 }
@@ -221,6 +221,8 @@ func (vm *VM) execClosure(f *Frame) error {
 }
 
 func (vm *VM) execCurrentClosure(f *Frame) error {
+	f.InstrOffset++
+
 	return vm.push(f.Closure)
 }
 
@@ -281,9 +283,9 @@ func (vm *VM) callFunc(numArgs int) error {
 func (vm *VM) execReturn(f *Frame) error {
 	vm.popFrame()
 
-	vm.stackCount -= f.BaseStackCount
+	vm.stackCount = f.BaseStackCount - 1
 
-	f.InstrOffset += 1
+	f.InstrOffset++
 
 	return nil
 }
@@ -293,7 +295,7 @@ func (vm *VM) execReturnValue(f *Frame) error {
 
 	vm.popFrame()
 
-	vm.stackCount -= f.BaseStackCount
+	vm.stackCount = f.BaseStackCount - 1
 
 	f.InstrOffset++
 

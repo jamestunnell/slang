@@ -9,9 +9,10 @@ type Symbol struct {
 }
 
 const (
-	GlobalScope = "GLOBAL"
-	LocalScope  = "LOCAL"
-	FreeScope   = "FREE"
+	GlobalScope   = "GLOBAL"
+	LocalScope    = "LOCAL"
+	FreeScope     = "FREE"
+	FunctionScope = "FUNCTION"
 )
 
 type SymbolTable struct {
@@ -59,6 +60,14 @@ func (st *SymbolTable) Define(name string) Symbol {
 	st.numDefs++
 
 	return sym
+}
+
+func (st *SymbolTable) DefineFunctionName(name string) Symbol {
+	symbol := Symbol{Name: name, Index: 0, Scope: FunctionScope}
+
+	st.store[name] = symbol
+
+	return symbol
 }
 
 func (st *SymbolTable) defineFree(original Symbol) Symbol {

@@ -10,6 +10,7 @@ import (
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/runtime"
+	"github.com/jamestunnell/slang/runtime/instructions"
 	"github.com/jamestunnell/slang/runtime/objects"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,13 +25,20 @@ func TestVMEmptyCode(t *testing.T) {
 }
 
 func TestVMPushConstant(t *testing.T) {
-	code := runtime.NewBytecode()
-
-	_, _ = code.AddConstant(objects.NewBool(true))
-	_, _ = code.AddConstant(objects.NewBool(false))
-	code.AddInstructionUint16Operands(runtime.OpGETCONST, 1)
-	code.AddInstructionUint16Operands(runtime.OpGETCONST, 0)
-	code.AddInstructionUint16Operands(runtime.OpGETCONST, 1)
+	is := runtime.Instructions{
+		instructions.NewGetConst(1),
+		instructions.NewGetConst(0),
+		instructions.NewGetConst(1),
+	}
+	constants := []slang.Object{
+		objects.NewBool(true),
+		objects.NewBool(false),
+	}
+	code := &runtime.Bytecode{
+		Instructions: is.Assemble(),
+		Constants:    constants,
+		MaxGlobals:   0,
+	}
 
 	vm := runtime.NewVM(code)
 
@@ -142,6 +150,47 @@ func TestVM_FuncLiteral(t *testing.T) {
 	`, i(87))
 }
 
+func TestVM_FuncStatement(t *testing.T) {
+	// not a closure
+	testVMWithFuncBodyStmts(t, `
+		func Or(a bool, b bool) bool {
+			return a or b
+		}
+
+		Or(true, false)
+	`, b(true))
+
+	// closure
+	testVMWithFuncBodyStmts(t, `
+	  amount = 2.5
+
+		func AddAmount(x float) float {
+			return x + amount
+		}
+
+		amount = 7.0
+
+		AddAmount(13.0)
+	`, f(20.0))
+
+	// recursive
+	testVMWithFuncBodyStmts(t, `
+		func Fib(n int) int {
+			if n == 0 {
+				return 0
+			}
+
+			if n == 1 {
+				return 1
+			}
+
+			return Fib(n-1) + Fib(n-2)
+		}
+
+		Fib(10)
+	`, i(55))
+}
+
 func testVMWithFuncBodyStmts(
 	t *testing.T,
 	input string,
@@ -238,6 +287,10 @@ func i(val int64) slang.Object {
 
 func b(val bool) slang.Object {
 	return objects.NewBool(val)
+}
+
+func f(val float64) slang.Object {
+	return objects.NewFloat(val)
 }
 
 func logParseErrs(t *testing.T, parseErrs []*parsing.ParseErr) {

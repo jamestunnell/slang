@@ -1,6 +1,11 @@
 package runtime
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"strings"
+)
 
 type Instruction struct {
 	Opcode   Opcode
@@ -53,6 +58,14 @@ func NewUint64Operand(val uint64) *Uint64Operand {
 	return &Uint64Operand{Value: val}
 }
 
+func FormatOperand(operand Operand) string {
+	d := make([]byte, operand.Width())
+
+	operand.Put(d)
+
+	return hex.EncodeToString(d)
+}
+
 func (i *Instruction) LengthBytes() int {
 	length := 1 // for the op code
 
@@ -61,6 +74,22 @@ func (i *Instruction) LengthBytes() int {
 	}
 
 	return length
+}
+
+func (i *Instruction) String() string {
+	if len(i.Operands) == 0 {
+		return i.Opcode.String()
+	}
+
+	operandStrings := make([]string, len(i.Operands))
+
+	for idx, o := range i.Operands {
+		operandStrings[idx] = "0x" + FormatOperand(o)
+	}
+
+	operandsStr := strings.Join(operandStrings, ", ")
+
+	return fmt.Sprintf("%s: %s", i.Opcode, operandsStr)
 }
 
 func (is Instructions) LengthBytes() int {

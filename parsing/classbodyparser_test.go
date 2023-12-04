@@ -63,7 +63,7 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				statements.NewMethod("sub", ast.NewFunction(
 					[]*ast.Param{{Name: "x", Type: "int"}, {Name: "y", Type: "int"}},
 					[]string{"int"},
-					statements.NewReturn(sub(id("x"), id("y"))),
+					statements.NewReturnVal(sub(id("x"), id("y"))),
 				)),
 			},
 		},

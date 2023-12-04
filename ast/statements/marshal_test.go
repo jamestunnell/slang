@@ -18,7 +18,7 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, statements.NewClass("myclass", ""))
 	testMarshalJSON(t, statements.NewField("myfield", "int"))
 	testMarshalJSON(t, statements.NewMethod("mymethod", ast.NewFunction([]*ast.Param{}, []string{})))
-	testMarshalJSON(t, statements.NewReturn(expressions.NewInteger(7)))
+	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInteger(7)))
 	testMarshalJSON(t, statements.NewUse("my/path"))
 }
 
