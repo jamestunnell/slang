@@ -17,16 +17,24 @@ func NewFuncBodyParser() *FuncBodyParser {
 }
 
 func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
+	var sp StatementParser
+
 	switch toks.Current().Type() {
 	case slang.TokenCLASS:
-		return p.ParseStatement(toks, NewClassStatementParser())
+		sp = NewClassStatementParser()
 	case slang.TokenFUNC:
-		return p.ParseStatement(toks, NewFuncStatementParser())
+		if toks.Next().Is(slang.TokenLPAREN) {
+			sp = NewExprOrAssignStatementParser()
+		} else {
+			sp = NewFuncStatementParser()
+		}
 	case slang.TokenIF:
-		return p.ParseStatement(toks, NewIfStatementParser())
+		sp = NewIfStatementParser()
 	case slang.TokenRETURN:
-		return p.ParseStatement(toks, NewReturnStatementParser())
+		sp = NewReturnStatementParser()
+	default:
+		sp = NewExprOrAssignStatementParser()
 	}
 
-	return p.ParseStatement(toks, NewExprOrAssignStatementParser())
+	return p.ParseStatement(toks, sp)
 }

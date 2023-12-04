@@ -28,9 +28,9 @@ func TestVMPushConstant(t *testing.T) {
 
 	_, _ = code.AddConstant(objects.NewBool(true))
 	_, _ = code.AddConstant(objects.NewBool(false))
-	code.AddInstructionUint16Operands(runtime.OpCONST, 1)
-	code.AddInstructionUint16Operands(runtime.OpCONST, 0)
-	code.AddInstructionUint16Operands(runtime.OpCONST, 1)
+	code.AddInstructionUint16Operands(runtime.OpGETCONST, 1)
+	code.AddInstructionUint16Operands(runtime.OpGETCONST, 0)
+	code.AddInstructionUint16Operands(runtime.OpGETCONST, 1)
 
 	vm := runtime.NewVM(code)
 
@@ -125,6 +125,13 @@ func TestVM_AssignStmt(t *testing.T) {
 		2 * x`, i(150))
 }
 
+func TestVM_FuncLiteral(t *testing.T) {
+	testVMWithFuncBodyStmts(t, `
+		add5 = func(x int) int { return x + 5 }
+		add5(12)
+	`, i(17))
+}
+
 func testVMWithFuncBodyStmts(
 	t *testing.T,
 	input string,
@@ -145,7 +152,7 @@ func testVMWithFuncBodyStmts(
 
 func verifyObject(t *testing.T, actual, expected slang.Object) bool {
 	if !assert.True(t, actual.Equal(expected)) {
-		t.Logf("%s (actual) != %s (expected)", actual.Inspect(), expected.Inspect())
+		t.Logf("%#v (actual) != %#v (expected)", actual, expected)
 
 		return false
 	}
@@ -188,7 +195,7 @@ func setupVM(t *testing.T, input string, parser parsing.BodyParser) (*runtime.VM
 		}
 	}
 
-	code := c.GetCode()
+	code := c.MakeBytecode()
 
 	return runtime.NewVM(code), true
 }
@@ -208,7 +215,7 @@ func stepOKAndVerifyTop(
 	}
 
 	if !assert.True(t, obj.Equal(expected)) {
-		t.Logf("%s (actual) != %s (expected)", obj.Inspect(), expected.Inspect())
+		t.Logf("%#v (actual) != %#v (expected)", obj, expected)
 		return false
 	}
 

@@ -21,6 +21,7 @@ const (
 	StatementIFELSE
 	StatementMETHOD
 	StatementRETURN
+	StatementRETURNVAL
 	StatementUSE
 
 	StrASSIGN     = "ASSIGN"
@@ -32,6 +33,7 @@ const (
 	StrFUNC       = "FUNC"
 	StrMETHOD     = "METHOD"
 	StrRETURN     = "RETURN"
+	StrRETURNVAL  = "RETURNVAL"
 	StrUSE        = "USE"
 )
 
@@ -75,6 +77,8 @@ func (st StatementType) String() string {
 		str = StrMETHOD
 	case StatementRETURN:
 		str = StrRETURN
+	case StatementRETURNVAL:
+		str = StrRETURNVAL
 	case StatementUSE:
 		str = StrUSE
 	}

@@ -5,7 +5,6 @@ import (
 
 	"github.com/jamestunnell/slang/compiler"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSymbolTableDefine(t *testing.T) {
@@ -32,19 +31,39 @@ func TestSymbolTableDefine(t *testing.T) {
 	assert.Equal(t, expected["b"], b)
 }
 
-func TestSymbolTableResolveGlobal(t *testing.T) {
+func TestSymbolTable(t *testing.T) {
 	global := compiler.NewSymbolTable()
 
 	global.Define("a")
 	global.Define("b")
 
-	sym, found := global.Resolve("a")
+	verifyResolves(t, global, "a", 0)
+	verifyResolves(t, global, "b", 1)
 
-	require.True(t, found)
-	assert.Equal(t, "a", sym.Name)
+	firstLocal := compiler.NewEnclosedSymbolTable(global)
+	firstLocal.Define("c")
+	firstLocal.Define("d")
 
-	sym, found = global.Resolve("b")
+	verifyResolves(t, firstLocal, "c", 0)
+	verifyResolves(t, firstLocal, "d", 1)
 
-	require.True(t, found)
-	assert.Equal(t, "b", sym.Name)
+	secondLocal := compiler.NewEnclosedSymbolTable(firstLocal)
+	secondLocal.Define("e")
+	secondLocal.Define("f")
+
+	verifyResolves(t, secondLocal, "c", 0)
+	verifyResolves(t, secondLocal, "d", 1)
+}
+
+func verifyResolves(
+	t *testing.T,
+	st *compiler.SymbolTable,
+	name string,
+	expectedIdx int,
+) {
+	sym, found := st.Resolve("a")
+
+	if assert.True(t, found) {
+		assert.Equal(t, "a", sym.Name)
+	}
 }

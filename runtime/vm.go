@@ -10,32 +10,47 @@ import (
 )
 
 type VM struct {
-	code       *Bytecode
+	frames          []*Frame
+	frameCount      int
+	lastPoppedFrame *Frame
+
 	stack      []slang.Object
-	globals    []slang.Object
-	iOffset    uint64
-	iLength    uint64
-	cLength    int
+	stackCount int
 	lastPopped slang.Object
+
+	constants []slang.Object
+	numConsts int
+
+	globals []slang.Object
 }
 
-const MaxGlobals = 65536
+const (
+	GlobalsSize = 65536
+	MaxFrames   = 256
+	StackSize   = 2048
+)
 
 var (
-	ErrEndOfProgram  = errors.New("end of program reached")
-	ErrPopEmptyStack = errors.New("cannot pop an empty stack")
+	ErrEndOfProgram       = errors.New("end of program reached")
+	ErrPopEmptyStack      = errors.New("cannot pop an empty stack")
+	ErrStackOverflow      = errors.New("stack overflow")
+	ErrPopEmptyFrameStack = errors.New("cannot pop empty frame stack")
 
 	False = objects.NewBool(false)
 )
 
 func NewVM(code *Bytecode) *VM {
+	compiledFn := objects.NewCompiledFunc(code.Instructions, 0)
+	mainClosure := objects.NewClosure(compiledFn)
+	mainFrame := NewFrame(mainClosure, 0)
 	return &VM{
-		code:       code,
-		stack:      []slang.Object{},
-		globals:    make([]slang.Object, MaxGlobals),
-		iOffset:    0,
-		iLength:    uint64(len(code.Instructions)),
-		cLength:    len(code.Constants),
+		frames:     []*Frame{mainFrame},
+		frameCount: 1,
+		stack:      make([]slang.Object, StackSize),
+		stackCount: 0,
+		constants:  code.Constants,
+		numConsts:  len(code.Constants),
+		globals:    make([]slang.Object, GlobalsSize),
 		lastPopped: nil,
 	}
 }
@@ -45,57 +60,74 @@ func (vm *VM) LastPopped() slang.Object {
 }
 
 func (vm *VM) Step() error {
-	if vm.iOffset >= vm.iLength {
+	f := vm.currentFrame()
+	if f.InstrOffset >= f.InstrLength {
 		return ErrEndOfProgram
 	}
 
-	opcode := Opcode(vm.code.Instructions[vm.iOffset])
+	instr := f.Instructions()
+
+	opcode := Opcode(instr[f.InstrOffset])
 
 	var err error
 
 	switch opcode {
-	case OpCONST:
-		err = vm.exeConst()
+	case OpGETCONST:
+		err = vm.exeGetConst(f)
 	case OpGETGLOBAL:
-		err = vm.exeGetGlobal()
+		err = vm.exeGetGlobal(f)
+	case OpGETLOCAL:
+		err = vm.exeGetLocal(f)
+	case OpGETFREE:
+		err = vm.exeGetFree(f)
 	case OpSETGLOBAL:
-		err = vm.exeSetGlobal()
+		err = vm.exeSetGlobal(f)
+	case OpSETLOCAL:
+		err = vm.exeSetLocal(f)
+	case OpCLOSURE:
+		err = vm.exeClosure(f)
 	case OpJUMP:
-		vm.iOffset = binary.BigEndian.Uint64(vm.code.Instructions[vm.iOffset+1:])
+		f.InstrOffset = binary.BigEndian.Uint64(f.Instructions()[f.InstrOffset+1:])
 	case OpJUMPIFFALSE:
-		err = vm.exeJumpIfFalse()
+		err = vm.exeJumpIfFalse(f)
 	case OpPOP:
 		vm.pop()
 
-		vm.iOffset++
+		f.InstrOffset++
+	case OpCALL:
+		err = vm.exeCall(f)
+	case OpRETURN:
+		err = vm.exeReturn(f)
+	case OpRETURNVAL:
+		err = vm.exeReturnValue(f)
 	case OpNEG:
-		err = vm.exeUnaryOp(slang.MethodNEG)
+		err = vm.exeUnaryOp(f, slang.MethodNEG)
 	case OpNOT:
-		err = vm.exeUnaryOp(slang.MethodNOT)
+		err = vm.exeUnaryOp(f, slang.MethodNOT)
 	case OpADD:
-		err = vm.exeBinaryOp(slang.MethodADD)
+		err = vm.exeBinaryOp(f, slang.MethodADD)
 	case OpSUB:
-		err = vm.exeBinaryOp(slang.MethodSUB)
+		err = vm.exeBinaryOp(f, slang.MethodSUB)
 	case OpMUL:
-		err = vm.exeBinaryOp(slang.MethodMUL)
+		err = vm.exeBinaryOp(f, slang.MethodMUL)
 	case OpDIV:
-		err = vm.exeBinaryOp(slang.MethodDIV)
+		err = vm.exeBinaryOp(f, slang.MethodDIV)
 	case OpEQ:
-		err = vm.exeBinaryOp(slang.MethodEQ)
+		err = vm.exeBinaryOp(f, slang.MethodEQ)
 	case OpNEQ:
-		err = vm.exeBinaryOp(slang.MethodNEQ)
+		err = vm.exeBinaryOp(f, slang.MethodNEQ)
 	case OpLT:
-		err = vm.exeBinaryOp(slang.MethodLT)
+		err = vm.exeBinaryOp(f, slang.MethodLT)
 	case OpLEQ:
-		err = vm.exeBinaryOp(slang.MethodLEQ)
+		err = vm.exeBinaryOp(f, slang.MethodLEQ)
 	case OpGT:
-		err = vm.exeBinaryOp(slang.MethodGT)
+		err = vm.exeBinaryOp(f, slang.MethodGT)
 	case OpGEQ:
-		err = vm.exeBinaryOp(slang.MethodGEQ)
+		err = vm.exeBinaryOp(f, slang.MethodGEQ)
 	case OpAND:
-		err = vm.exeBinaryOp(slang.MethodAND)
+		err = vm.exeBinaryOp(f, slang.MethodAND)
 	case OpOR:
-		err = vm.exeBinaryOp(slang.MethodOR)
+		err = vm.exeBinaryOp(f, slang.MethodOR)
 	default:
 		err = fmt.Errorf("unknown opcode %d", opcode)
 	}
@@ -115,117 +147,233 @@ func (vm *VM) Top() (slang.Object, bool) {
 	return vm.stack[len(vm.stack)-1], true
 }
 
-func (vm *VM) exeConst() error {
-	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+func (vm *VM) currentFrame() *Frame {
+	return vm.frames[vm.frameCount-1]
+}
 
-	if int(idx) >= vm.cLength {
+func (vm *VM) exeGetConst(f *Frame) error {
+	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
+
+	if int(idx) >= vm.numConsts {
 		return fmt.Errorf("constant index %d is out of bounds", idx)
 	}
 
-	vm.push(vm.code.Constants[idx])
+	f.InstrOffset += 3
 
-	vm.iOffset += 3
+	return vm.push(vm.constants[idx])
+}
+
+func (vm *VM) exeGetGlobal(f *Frame) error {
+	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
+
+	f.InstrOffset += 3
+
+	return vm.push(vm.globals[idx])
+}
+
+func (vm *VM) exeGetLocal(f *Frame) error {
+	localIdx := f.Instructions()[f.InstrOffset+1]
+
+	f.InstrOffset += 2
+
+	return vm.push(vm.stack[f.BaseStackCount+int(localIdx)])
+}
+
+func (vm *VM) exeGetFree(f *Frame) error {
+	freeIdx := f.Instructions()[f.InstrOffset+1]
+
+	f.InstrOffset += 2
+
+	return vm.push(f.Closure.FreeVars[freeIdx])
+}
+
+func (vm *VM) exeSetGlobal(f *Frame) error {
+	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
+
+	vm.globals[idx] = vm.pop()
+
+	f.InstrOffset += 3
 
 	return nil
 }
 
-func (vm *VM) exeGetGlobal() error {
-	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+func (vm *VM) exeSetLocal(f *Frame) error {
+	localIdx := f.Instructions()[f.InstrOffset+1]
 
-	vm.push(vm.globals[idx])
+	vm.stack[f.BaseStackCount+int(localIdx)] = vm.pop()
 
-	vm.iOffset += 3
+	f.InstrOffset += 2
 
 	return nil
 }
 
-func (vm *VM) exeSetGlobal() error {
-	idx := binary.BigEndian.Uint16(vm.code.Instructions[vm.iOffset+1:])
+func (vm *VM) exeClosure(f *Frame) error {
+	constIdx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
+	numFree := f.Instructions()[f.InstrOffset+3]
 
-	obj, ok := vm.pop()
-	if !ok {
-		return fmt.Errorf("failed to get set global value: %w", ErrPopEmptyStack)
+	if err := vm.pushClosure(int(constIdx), int(numFree)); err != nil {
+		return err
 	}
 
-	vm.globals[idx] = obj
-
-	vm.iOffset += 3
+	f.InstrOffset += 4
 
 	return nil
 }
 
-func (vm *VM) exeJumpIfFalse() error {
-	val, ok := vm.pop()
-	if !ok {
-		return fmt.Errorf("failed to get jump-if-false value: %w", ErrPopEmptyStack)
-	}
-
-	if val.Equal(False) {
-		vm.iOffset = binary.BigEndian.Uint64(vm.code.Instructions[vm.iOffset+1:])
+func (vm *VM) exeJumpIfFalse(f *Frame) error {
+	if vm.pop().Equal(False) {
+		f.InstrOffset = binary.BigEndian.Uint64(f.Instructions()[f.InstrOffset+1:])
 	} else {
-		vm.iOffset += 9
+		f.InstrOffset += 9
 	}
 
 	return nil
 }
 
-func (vm *VM) exeUnaryOp(method string) error {
-	val, ok := vm.pop()
-	if !ok {
-		return fmt.Errorf("failed to get unary operand: %w", ErrPopEmptyStack)
+func (vm *VM) exeCall(f *Frame) error {
+	numArgs := f.Instructions()[f.InstrOffset+1]
+
+	f.InstrOffset += 2
+
+	return vm.callFunc(int(numArgs))
+}
+
+func (vm *VM) callFunc(numArgs int) error {
+	if vm.stackCount < (numArgs + 1) {
+		return fmt.Errorf("stack count is too low for func+args")
 	}
 
-	result, err := val.Send(method)
+	baseStackCount := vm.stackCount - (numArgs + 1)
+
+	closure, ok := vm.stack[baseStackCount].(*objects.Closure)
+	if !ok {
+		return fmt.Errorf("obj is not a compiled func")
+	}
+
+	// vm.lastPopped = ???
+
+	frame := NewFrame(closure, baseStackCount)
+	if err := vm.pushFrame(frame); err != nil {
+		return err
+	}
+
+	// grow the stack if needed to fit all the locals
+	needed := closure.Func.NumLocals - numArgs
+	if needed > 0 {
+		vm.stack = append(vm.stack, make([]slang.Object, needed)...)
+	}
+	vm.stackCount = baseStackCount + closure.Func.NumLocals
+
+	return nil
+}
+
+func (vm *VM) exeReturn(f *Frame) error {
+	vm.popFrame()
+
+	vm.stackCount -= f.BaseStackCount
+
+	f.InstrOffset += 1
+
+	return nil
+}
+
+func (vm *VM) exeReturnValue(f *Frame) error {
+	returnVal := vm.pop()
+
+	vm.popFrame()
+
+	vm.stackCount -= f.BaseStackCount
+
+	f.InstrOffset++
+
+	return vm.push(returnVal)
+}
+
+func (vm *VM) exeUnaryOp(f *Frame, method string) error {
+	subject := vm.pop()
+	result, err := subject.Send(method)
 	if err != nil {
 		return fmt.Errorf("method %s failed: %w", method, err)
 	}
 
-	vm.push(result)
+	f.InstrOffset++
 
-	vm.iOffset++
-
-	return nil
+	return vm.push(result)
 }
 
-func (vm *VM) exeBinaryOp(method string) error {
-	right, ok := vm.pop()
-	if !ok {
-		return fmt.Errorf("failed to get right operand: %w", ErrPopEmptyStack)
-	}
-
-	left, ok := vm.pop()
-	if !ok {
-		return fmt.Errorf("failed to get left operand: %w", ErrPopEmptyStack)
-	}
+func (vm *VM) exeBinaryOp(f *Frame, method string) error {
+	right := vm.pop()
+	left := vm.pop()
 
 	result, err := left.Send(method, right)
 	if err != nil {
 		return fmt.Errorf("method %s failed: %w", method, err)
 	}
 
-	vm.push(result)
+	f.InstrOffset++
 
-	vm.iOffset++
+	return vm.push(result)
+}
+
+func (vm *VM) push(obj slang.Object) error {
+	if vm.stackCount >= StackSize {
+		return ErrStackOverflow
+	}
+
+	vm.stack[vm.stackCount] = obj
+
+	vm.stackCount++
 
 	return nil
 }
 
-func (vm *VM) push(obj slang.Object) {
-	vm.stack = append(vm.stack, obj)
-}
+func (vm *VM) pop() slang.Object {
+	obj := vm.stack[vm.stackCount-1]
 
-func (vm *VM) pop() (slang.Object, bool) {
-	size := len(vm.stack)
-
-	if size == 0 {
-		return nil, false
-	}
-
-	obj := vm.stack[size-1]
-
-	vm.stack = vm.stack[:size-1]
+	vm.stackCount--
 
 	vm.lastPopped = obj
 
-	return obj, true
+	return obj
+}
+
+func (vm *VM) pushFrame(f *Frame) error {
+	if vm.frameCount == MaxFrames {
+		return fmt.Errorf("max frame count %d reached", MaxFrames)
+	}
+
+	vm.frames = append(vm.frames, f)
+	vm.frameCount++
+
+	return nil
+}
+
+func (vm *VM) popFrame() *Frame {
+	f := vm.frames[vm.frameCount-1]
+
+	vm.frames = vm.frames[:vm.frameCount-1]
+
+	vm.frameCount--
+
+	vm.lastPoppedFrame = f
+
+	return f
+}
+
+func (vm *VM) pushClosure(constIndex, numFree int) error {
+	constant := vm.constants[constIndex]
+	function, ok := constant.(*objects.CompiledFunc)
+	if !ok {
+		return fmt.Errorf("not a function: %+v", constant)
+	}
+
+	free := make([]slang.Object, numFree)
+	for i := 0; i < numFree; i++ {
+		free[i] = vm.stack[vm.stackCount-numFree+i]
+	}
+	vm.stackCount -= numFree
+
+	closure := objects.NewClosure(function, free...)
+
+	return vm.push(closure)
 }

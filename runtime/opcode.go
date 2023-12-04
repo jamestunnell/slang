@@ -3,14 +3,24 @@ package runtime
 type Opcode byte
 
 const (
-	OpCONST Opcode = iota
-	OpPOP
+	OpPOP Opcode = iota
 
+	OpGETCONST
 	OpGETGLOBAL
+	OpGETLOCAL
+	OpGETFREE
+
 	OpSETGLOBAL
+	OpSETLOCAL
+
+	OpCLOSURE
 
 	OpJUMP
 	OpJUMPIFFALSE
+
+	OpCALL
+	OpRETURN
+	OpRETURNVAL
 
 	OpADD
 	OpSUB

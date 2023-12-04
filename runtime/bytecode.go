@@ -8,6 +8,7 @@ import (
 
 type Bytecode struct {
 	Constants    []slang.Object
+	MaxGlobals   int
 	Instructions []byte
 }
 
@@ -16,6 +17,7 @@ const MaxVMConstants = 65535
 func NewBytecode() *Bytecode {
 	return &Bytecode{
 		Constants:    []slang.Object{},
+		MaxGlobals:   0,
 		Instructions: []byte{},
 	}
 }
@@ -34,14 +36,24 @@ func (bc *Bytecode) AddConstant(obj slang.Object) (uint16, bool) {
 
 type FixupFunc func(targetIdx uint64)
 
-const DummyTargetIdx = uint64(0xFEEDFEEDFEEDFEED)
+const DummyJumpTarget = uint64(0xFEEDFEEDFEEDFEED)
 
 func (bc *Bytecode) AddSetGlobal(idx uint16) {
 	bc.AddInstructionUint16Operands(OpSETGLOBAL, idx)
+
+	bc.MaxGlobals++
 }
 
 func (bc *Bytecode) AddGetGlobal(idx uint16) {
 	bc.AddInstructionUint16Operands(OpGETGLOBAL, idx)
+}
+
+func (bc *Bytecode) AddGetLocal(idx uint16) {
+	bc.AddInstructionUint16Operands(OpGETLOCAL, idx)
+}
+
+func (bc *Bytecode) AddGetFree(idx uint16) {
+	bc.AddInstructionUint16Operands(OpGETFREE, idx)
 }
 
 func (bc *Bytecode) AddJumpIfFalse() FixupFunc {
@@ -52,12 +64,24 @@ func (bc *Bytecode) AddJump() FixupFunc {
 	return bc.addJump(OpJUMP)
 }
 
+func (bc *Bytecode) AddClosure(fnIdx uint16, numFreeVars uint8) {
+	data := make([]byte, 4)
+
+	data[0] = byte(OpCLOSURE)
+
+	binary.BigEndian.PutUint16(data[1:], fnIdx)
+
+	data[3] = byte(numFreeVars)
+
+	bc.Instructions = append(bc.Instructions, data...)
+}
+
 func (bc *Bytecode) addJump(opcode Opcode) FixupFunc {
 	data := make([]byte, 9)
 
 	data[0] = byte(opcode)
 
-	binary.BigEndian.PutUint64(data[1:], DummyTargetIdx)
+	binary.BigEndian.PutUint64(data[1:], DummyJumpTarget)
 
 	// this is where target index will end up in instructions
 	targetIdxLoc := len(bc.Instructions) + 1
@@ -85,6 +109,12 @@ func (bc *Bytecode) AddInstructionUint16Operands(opcode Opcode, operands ...uint
 	for i, operand := range operands {
 		binary.BigEndian.PutUint16(data[1+2*i:], operand)
 	}
+
+	bc.Instructions = append(bc.Instructions, data...)
+}
+
+func (bc *Bytecode) AddInstructionUint8Operand(opcode Opcode, operand uint8) {
+	data := []byte{byte(opcode), operand}
 
 	bc.Instructions = append(bc.Instructions, data...)
 }
