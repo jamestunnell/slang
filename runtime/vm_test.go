@@ -127,9 +127,19 @@ func TestVM_AssignStmt(t *testing.T) {
 
 func TestVM_FuncLiteral(t *testing.T) {
 	testVMWithFuncBodyStmts(t, `
+		func() int { return 7 }()
+	`, i(7))
+
+	testVMWithFuncBodyStmts(t, `
 		add5 = func(x int) int { return x + 5 }
 		add5(12)
 	`, i(17))
+
+	testVMWithFuncBodyStmts(t, `
+	    y = 77
+		addY = func(x int) int { return x + y }
+		addY(10)
+	`, i(87))
 }
 
 func testVMWithFuncBodyStmts(
