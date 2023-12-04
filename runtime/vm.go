@@ -65,74 +65,74 @@ func (vm *VM) Step() error {
 		return ErrEndOfProgram
 	}
 
-	instr := f.Instructions()
+	opcode := Opcode(f.Instructions()[f.InstrOffset])
 
-	opcode := Opcode(instr[f.InstrOffset])
-
-	var err error
+	var exec func(*Frame) error
 
 	switch opcode {
 	case OpGETCONST:
-		err = vm.exeGetConst(f)
+		exec = vm.execGetConst
 	case OpGETGLOBAL:
-		err = vm.exeGetGlobal(f)
+		exec = vm.execGetGlobal
 	case OpGETLOCAL:
-		err = vm.exeGetLocal(f)
+		exec = vm.execGetLocal
 	case OpGETFREE:
-		err = vm.exeGetFree(f)
+		exec = vm.execGetFree
 	case OpSETGLOBAL:
-		err = vm.exeSetGlobal(f)
+		exec = vm.execSetGlobal
 	case OpSETLOCAL:
-		err = vm.exeSetLocal(f)
+		exec = vm.execSetLocal
 	case OpCLOSURE:
-		err = vm.exeClosure(f)
+		exec = vm.execClosure
+	case OpCURRENTCLOSURE:
+		exec = vm.execCurrentClosure
 	case OpJUMP:
-		f.InstrOffset = binary.BigEndian.Uint64(f.Instructions()[f.InstrOffset+1:])
+		exec = vm.execJump
 	case OpJUMPIFFALSE:
-		err = vm.exeJumpIfFalse(f)
+		exec = vm.execJumpIfFalse
 	case OpPOP:
-		vm.pop()
-
-		f.InstrOffset++
+		exec = vm.execPop
 	case OpCALL:
-		err = vm.exeCall(f)
+		exec = vm.execCall
 	case OpRETURN:
-		err = vm.exeReturn(f)
+		exec = vm.execReturn
 	case OpRETURNVAL:
-		err = vm.exeReturnValue(f)
+		exec = vm.execReturnValue
 	case OpNEG:
-		err = vm.exeUnaryOp(f, slang.MethodNEG)
+		exec = vm.execNeg
 	case OpNOT:
-		err = vm.exeUnaryOp(f, slang.MethodNOT)
+		exec = vm.execNot
 	case OpADD:
-		err = vm.exeBinaryOp(f, slang.MethodADD)
+		exec = vm.execAdd
 	case OpSUB:
-		err = vm.exeBinaryOp(f, slang.MethodSUB)
+		exec = vm.execSub
 	case OpMUL:
-		err = vm.exeBinaryOp(f, slang.MethodMUL)
+		exec = vm.execMul
 	case OpDIV:
-		err = vm.exeBinaryOp(f, slang.MethodDIV)
+		exec = vm.execDiv
 	case OpEQ:
-		err = vm.exeBinaryOp(f, slang.MethodEQ)
+		exec = vm.execEq
 	case OpNEQ:
-		err = vm.exeBinaryOp(f, slang.MethodNEQ)
+		exec = vm.execNeq
 	case OpLT:
-		err = vm.exeBinaryOp(f, slang.MethodLT)
+		exec = vm.execLt
 	case OpLEQ:
-		err = vm.exeBinaryOp(f, slang.MethodLEQ)
+		exec = vm.execLeq
 	case OpGT:
-		err = vm.exeBinaryOp(f, slang.MethodGT)
+		exec = vm.execGt
 	case OpGEQ:
-		err = vm.exeBinaryOp(f, slang.MethodGEQ)
+		exec = vm.execGeq
 	case OpAND:
-		err = vm.exeBinaryOp(f, slang.MethodAND)
+		exec = vm.execAnd
 	case OpOR:
-		err = vm.exeBinaryOp(f, slang.MethodOR)
-	default:
-		err = fmt.Errorf("unknown opcode %d", opcode)
+		exec = vm.execOr
 	}
 
-	return err
+	if exec == nil {
+		return fmt.Errorf("unknown opcode %d", opcode)
+	}
+
+	return exec(f)
 }
 
 func (vm *VM) StackSize() int {
@@ -151,7 +151,7 @@ func (vm *VM) currentFrame() *Frame {
 	return vm.frames[vm.frameCount-1]
 }
 
-func (vm *VM) exeGetConst(f *Frame) error {
+func (vm *VM) execGetConst(f *Frame) error {
 	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
 
 	if int(idx) >= vm.numConsts {
@@ -163,7 +163,7 @@ func (vm *VM) exeGetConst(f *Frame) error {
 	return vm.push(vm.constants[idx])
 }
 
-func (vm *VM) exeGetGlobal(f *Frame) error {
+func (vm *VM) execGetGlobal(f *Frame) error {
 	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
 
 	f.InstrOffset += 3
@@ -171,23 +171,23 @@ func (vm *VM) exeGetGlobal(f *Frame) error {
 	return vm.push(vm.globals[idx])
 }
 
-func (vm *VM) exeGetLocal(f *Frame) error {
+func (vm *VM) execGetLocal(f *Frame) error {
 	localIdx := f.Instructions()[f.InstrOffset+1]
 
-	f.InstrOffset += 2
+	f.InstrOffset += 3
 
 	return vm.push(vm.stack[f.BaseStackCount+int(localIdx)])
 }
 
-func (vm *VM) exeGetFree(f *Frame) error {
+func (vm *VM) execGetFree(f *Frame) error {
 	freeIdx := f.Instructions()[f.InstrOffset+1]
 
-	f.InstrOffset += 2
+	f.InstrOffset += 3
 
 	return vm.push(f.Closure.FreeVars[freeIdx])
 }
 
-func (vm *VM) exeSetGlobal(f *Frame) error {
+func (vm *VM) execSetGlobal(f *Frame) error {
 	idx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
 
 	vm.globals[idx] = vm.pop()
@@ -197,7 +197,7 @@ func (vm *VM) exeSetGlobal(f *Frame) error {
 	return nil
 }
 
-func (vm *VM) exeSetLocal(f *Frame) error {
+func (vm *VM) execSetLocal(f *Frame) error {
 	localIdx := f.Instructions()[f.InstrOffset+1]
 
 	vm.stack[f.BaseStackCount+int(localIdx)] = vm.pop()
@@ -207,7 +207,7 @@ func (vm *VM) exeSetLocal(f *Frame) error {
 	return nil
 }
 
-func (vm *VM) exeClosure(f *Frame) error {
+func (vm *VM) execClosure(f *Frame) error {
 	constIdx := binary.BigEndian.Uint16(f.Instructions()[f.InstrOffset+1:])
 	numFree := f.Instructions()[f.InstrOffset+3]
 
@@ -220,7 +220,17 @@ func (vm *VM) exeClosure(f *Frame) error {
 	return nil
 }
 
-func (vm *VM) exeJumpIfFalse(f *Frame) error {
+func (vm *VM) execCurrentClosure(f *Frame) error {
+	return vm.push(f.Closure)
+}
+
+func (vm *VM) execJump(f *Frame) error {
+	f.InstrOffset = binary.BigEndian.Uint64(f.Instructions()[f.InstrOffset+1:])
+
+	return nil
+}
+
+func (vm *VM) execJumpIfFalse(f *Frame) error {
 	if vm.pop().Equal(False) {
 		f.InstrOffset = binary.BigEndian.Uint64(f.Instructions()[f.InstrOffset+1:])
 	} else {
@@ -230,7 +240,15 @@ func (vm *VM) exeJumpIfFalse(f *Frame) error {
 	return nil
 }
 
-func (vm *VM) exeCall(f *Frame) error {
+func (vm *VM) execPop(f *Frame) error {
+	vm.pop()
+
+	f.InstrOffset++
+
+	return nil
+}
+
+func (vm *VM) execCall(f *Frame) error {
 	numArgs := f.Instructions()[f.InstrOffset+1]
 
 	f.InstrOffset += 2
@@ -243,7 +261,7 @@ func (vm *VM) callFunc(numArgs int) error {
 		return fmt.Errorf("stack count is too low for func+args")
 	}
 
-	closure, ok := vm.stack[vm.stackCount-1-numArgs].(*objects.Closure)
+	closure, ok := vm.stack[vm.stackCount-(numArgs+1)].(*objects.Closure)
 	if !ok {
 		return fmt.Errorf("obj is not a compiled func")
 	}
@@ -260,7 +278,7 @@ func (vm *VM) callFunc(numArgs int) error {
 	return nil
 }
 
-func (vm *VM) exeReturn(f *Frame) error {
+func (vm *VM) execReturn(f *Frame) error {
 	vm.popFrame()
 
 	vm.stackCount -= f.BaseStackCount
@@ -270,7 +288,7 @@ func (vm *VM) exeReturn(f *Frame) error {
 	return nil
 }
 
-func (vm *VM) exeReturnValue(f *Frame) error {
+func (vm *VM) execReturnValue(f *Frame) error {
 	returnVal := vm.pop()
 
 	vm.popFrame()
@@ -280,6 +298,62 @@ func (vm *VM) exeReturnValue(f *Frame) error {
 	f.InstrOffset++
 
 	return vm.push(returnVal)
+}
+
+func (vm *VM) execNeg(f *Frame) error {
+	return vm.exeUnaryOp(f, slang.MethodNEG)
+}
+
+func (vm *VM) execNot(f *Frame) error {
+	return vm.exeUnaryOp(f, slang.MethodNOT)
+}
+
+func (vm *VM) execAdd(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodADD)
+}
+
+func (vm *VM) execSub(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodSUB)
+}
+
+func (vm *VM) execMul(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodMUL)
+}
+
+func (vm *VM) execDiv(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodDIV)
+}
+
+func (vm *VM) execEq(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodEQ)
+}
+
+func (vm *VM) execNeq(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodNEQ)
+}
+
+func (vm *VM) execLt(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodLT)
+}
+
+func (vm *VM) execLeq(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodLEQ)
+}
+
+func (vm *VM) execGt(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodGT)
+}
+
+func (vm *VM) execGeq(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodGEQ)
+}
+
+func (vm *VM) execAnd(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodAND)
+}
+
+func (vm *VM) execOr(f *Frame) error {
+	return vm.exeBinaryOp(f, slang.MethodOR)
 }
 
 func (vm *VM) exeUnaryOp(f *Frame, method string) error {
