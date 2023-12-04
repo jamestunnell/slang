@@ -118,6 +118,11 @@ func TestVM_AssignStmt(t *testing.T) {
 		x = 80
 		y = -4
 		x * y`, i(-320))
+	testVMWithFuncBodyStmts(t, `
+		x = 80
+		y = -5
+		x = x + y
+		2 * x`, i(150))
 }
 
 func testVMWithFuncBodyStmts(
