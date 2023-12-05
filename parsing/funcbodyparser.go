@@ -20,14 +20,6 @@ func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	var sp StatementParser
 
 	switch toks.Current().Type() {
-	case slang.TokenCLASS:
-		sp = NewClassStatementParser()
-	case slang.TokenFUNC:
-		if toks.Next().Is(slang.TokenLPAREN) {
-			sp = NewExprOrAssignStatementParser()
-		} else {
-			sp = NewFuncStatementParser()
-		}
 	case slang.TokenIF:
 		sp = NewIfStatementParser()
 	case slang.TokenRETURN:

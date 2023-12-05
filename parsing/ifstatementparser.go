@@ -29,7 +29,7 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	ifBodyParser := NewCondBodyParser()
+	ifBodyParser := NewFuncBodyParser()
 	if !p.RunSubParser(toks, ifBodyParser) {
 		return false
 	}
@@ -44,7 +44,7 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 
 	toks.Advance()
 
-	elseBodyParser := NewCondBodyParser()
+	elseBodyParser := NewFuncBodyParser()
 	if !p.RunSubParser(toks, elseBodyParser) {
 		return false
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/jamestunnell/slang/parsing"
 )
 
-func TestCondBodyParser(t *testing.T) {
+func TestFuncBodyParser(t *testing.T) {
 	tests := []*bodyParserSuccessTest{
 		{
 			TestName:   "empty",
@@ -89,12 +89,12 @@ func TestCondBodyParser(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		testCondBodyParserSuccess(t, test)
+		testFuncBodyParserSuccess(t, test)
 	}
 }
 
-func testCondBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.BodyParser { return parsing.NewCondBodyParser() }
+func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
+	newParser := func() parsing.BodyParser { return parsing.NewFuncBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }
