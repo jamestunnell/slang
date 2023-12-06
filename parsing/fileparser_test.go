@@ -43,8 +43,8 @@ func TestFileParser(t *testing.T) {
 		}
 	`)
 	expected := []slang.Statement{
-		statements.NewUse("first/path"),
-		statements.NewUse("path/number/2"),
+		statements.NewUse("first", "path"),
+		statements.NewUse("path", "number", "2"),
 		statements.NewUse("path-3"),
 		statements.NewClass("AmountAdder", "",
 			statements.NewField("Amount", "float"),

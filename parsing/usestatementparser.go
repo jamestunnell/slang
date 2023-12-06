@@ -1,6 +1,9 @@
 package parsing
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
 )
@@ -10,6 +13,8 @@ type UseStatementParser struct {
 
 	UseStmt *statements.Use
 }
+
+var errEmptyUsePath = errors.New("use path is empty")
 
 func NewUseStatementParser() *UseStatementParser {
 	return &UseStatementParser{ParserBase: NewParserBase()}
@@ -30,11 +35,22 @@ func (p *UseStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	path := toks.Current().Value()
+	pathTok := toks.Current()
 
 	toks.Advance()
 
-	p.UseStmt = statements.NewUse(path)
+	path := pathTok.Value()
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 {
+		parseErr := NewParseError(errEmptyUsePath, pathTok)
+
+		p.errors = append(p.errors, parseErr)
+
+		return false
+	}
+
+	p.UseStmt = statements.NewUse(parts...)
 
 	return true
 }

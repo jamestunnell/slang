@@ -1,19 +1,21 @@
 package statements
 
 import (
+	"golang.org/x/exp/slices"
+
 	"github.com/jamestunnell/slang"
 )
 
 type Use struct {
 	*Base
 
-	Path string `json:"path"`
+	PathParts []string `json:"pathParts"`
 }
 
-func NewUse(path string) *Use {
+func NewUse(parts ...string) *Use {
 	return &Use{
-		Base: NewBase(slang.StatementUSE),
-		Path: path,
+		Base:      NewBase(slang.StatementUSE),
+		PathParts: parts,
 	}
 }
 
@@ -23,5 +25,5 @@ func (u *Use) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return u.Path == u2.Path
+	return slices.Equal(u.PathParts, u2.PathParts)
 }
