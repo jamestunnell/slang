@@ -1,17 +1,11 @@
 package compilation
 
-type Compiler struct {
-	symbols  map[string]Symbol
-	parent   *Compiler
-	errors   []error
-	children map[string]*Compiler
+type Compiler interface {
+	FirstPass() error
+
+	CollectSymbols() []Symbol
 }
 
-func NewCompiler(parent *Compiler) *Compiler {
-	return &Compiler{
-		symbols:  map[string]Symbol{},
-		parent:   parent,
-		errors:   []error{},
-		children: map[string]*Compiler{},
-	}
+type Visitor interface {
+	Visit(name string, child Compiler)
 }

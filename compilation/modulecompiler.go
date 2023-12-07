@@ -1,49 +1,48 @@
 package compilation
 
 import (
+	"strings"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type ModuleCompiler struct {
-	*Compiler
+	*Base
+
+	Imports map[string]string
 }
 
-func NewModuleCompiler() *ModuleCompiler {
+func NewModuleCompiler(stmts StmtSeq) *ModuleCompiler {
 	return &ModuleCompiler{
-		Compiler: NewCompiler(nil),
+		Base: NewBase("", stmts, nil),
 	}
 }
 
-func (c *ModuleCompiler) Run(stmts StmtSeq) bool {
-	if !c.firstPass(stmts) {
-		return false
-	}
+func (c *ModuleCompiler) FirstPass() error {
+	stmt, ok := c.stmts.Current()
 
-	return false
-}
-
-func (c *ModuleCompiler) firstPass(stmts StmtSeq) bool {
-	stmt, ok := stmts.Next()
 	for ok {
 		switch stmt.Type() {
 		case slang.StatementCLASS:
-			name := stmt.(*statements.Class).Name
-
-			c.symbols[name] = NewSymbol(name, SymbolCLASS)
+			c.handleClassStmtFirstPass(stmt, c)
 		case slang.StatementFUNC:
-			name := stmt.(*statements.Class).Name
-
-			c.symbols[name] = NewSymbol(name, SymbolFUNC)
+			c.handleFuncStmtFirstPass(stmt, c)
 		case slang.StatementUSE:
 			use := stmt.(*statements.Use)
 			name := use.PathParts[len(use.PathParts)-1]
 
-			c.symbols[name] = NewSymbol(name, SymbolMODULE)
+			c.Imports[name] = strings.Join(use.PathParts, "/")
+		default:
+			return customerrs.NewErrTypeNotAllowed(
+				stmt.Type().String()+" statement", "module file")
 		}
 
-		stmt, ok = stmts.Next()
+		c.stmts.Advance()
+
+		stmt, ok = c.stmts.Current()
 	}
 
-	return true
+	return c.runChildFirstPasses()
 }

@@ -1,8 +1,9 @@
 package compilation
 
 type Symbol struct {
-	Name string
-	Type SymbolType
+	Scope string
+	Name  string
+	Type  SymbolType
 }
 
 type SymbolType int
@@ -16,9 +17,10 @@ const (
 	SymbolVAR
 )
 
-func NewSymbol(name string, typ SymbolType) Symbol {
+func NewSymbol(scope, name string, typ SymbolType) Symbol {
 	return Symbol{
-		Name: name,
-		Type: typ,
+		Name:  name,
+		Scope: scope,
+		Type:  typ,
 	}
 }
