@@ -1,9 +1,12 @@
 package compilation
 
+import "github.com/jamestunnell/slang"
+
 type Compiler interface {
 	FirstPass() error
 
-	CollectSymbols() []Symbol
+	Symbol() *slang.Symbol
+	ChildSymbols() []*slang.Symbol
 }
 
 type Visitor interface {

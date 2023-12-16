@@ -153,7 +153,7 @@ func TestVM_FuncLiteral(t *testing.T) {
 func TestVM_FuncStatement(t *testing.T) {
 	// not a closure
 	testVMWithFuncBodyStmts(t, `
-		func Or(a bool, b bool) bool {
+		Or = func(a bool, b bool) bool {
 			return a or b
 		}
 
@@ -162,9 +162,9 @@ func TestVM_FuncStatement(t *testing.T) {
 
 	// closure
 	testVMWithFuncBodyStmts(t, `
-	  amount = 2.5
+		amount = 2.5
 
-		func AddAmount(x float) float {
+		AddAmount = func(x float) float {
 			return x + amount
 		}
 
@@ -172,23 +172,6 @@ func TestVM_FuncStatement(t *testing.T) {
 
 		AddAmount(13.0)
 	`, f(20.0))
-
-	// recursive
-	testVMWithFuncBodyStmts(t, `
-		func Fib(n int) int {
-			if n == 0 {
-				return 0
-			}
-
-			if n == 1 {
-				return 1
-			}
-
-			return Fib(n-1) + Fib(n-2)
-		}
-
-		Fib(10)
-	`, i(55))
 }
 
 func testVMWithFuncBodyStmts(

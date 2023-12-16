@@ -14,9 +14,9 @@ type ModuleCompiler struct {
 	Imports map[string]string
 }
 
-func NewModuleCompiler(stmts StmtSeq) *ModuleCompiler {
+func NewModuleCompiler(symbol *slang.Symbol, stmts StmtSeq) *ModuleCompiler {
 	return &ModuleCompiler{
-		Base: NewBase("", stmts, nil),
+		Base: NewBase(symbol, stmts, nil),
 	}
 }
 

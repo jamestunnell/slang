@@ -10,9 +10,9 @@ type ClassCompiler struct {
 	*Base
 }
 
-func NewClassCompiler(scope string, stmts StmtSeq, parent Compiler) *ClassCompiler {
+func NewClassCompiler(symbol *slang.Symbol, stmts StmtSeq, parent Compiler) *ClassCompiler {
 	return &ClassCompiler{
-		Base: NewBase(scope, stmts, parent),
+		Base: NewBase(symbol, stmts, parent),
 	}
 }
 
@@ -28,16 +28,16 @@ func (c *ClassCompiler) FirstPass() error {
 		case slang.StatementFIELD:
 			fieldStmt := stmt.(*statements.Field)
 			name := fieldStmt.Name
+			childSymbol := slang.NewChildSymbol(name, slang.SymbolFIELD, c.symbol)
 
-			c.symbols[name] = NewSymbol(c.scope, name, SymbolFIELD)
+			c.children[name] = NewFieldCompiler(childSymbol, c)
 		case slang.StatementMETHOD:
 			methStmt := stmt.(*statements.Method)
 			name := methStmt.Name
+			childSymbol := slang.NewChildSymbol(name, slang.SymbolMETHOD, c.symbol)
 			childStmts := NewStmtSeq(methStmt.Function.Statements)
-			child := NewFuncCompiler(c.scopedName(name), childStmts, c)
 
-			c.symbols[name] = NewSymbol(c.scope, name, SymbolMETHOD)
-			c.children[name] = child
+			c.children[name] = NewMethodCompiler(childSymbol, childStmts, c)
 		default:
 			return customerrs.NewErrTypeNotAllowed(
 				stmt.Type().String()+" statement", "class body")

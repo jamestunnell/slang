@@ -1,11 +1,13 @@
 package compilation
 
+import "github.com/jamestunnell/slang"
+
 type MethodCompiler struct {
 	*FuncCompiler
 }
 
-func NewMethodCompiler(scope string, stmts StmtSeq, parent Compiler) *MethodCompiler {
+func NewMethodCompiler(symbol *slang.Symbol, stmts StmtSeq, parent Compiler) *MethodCompiler {
 	return &MethodCompiler{
-		FuncCompiler: NewFuncCompiler(scope, stmts, parent),
+		FuncCompiler: NewFuncCompiler(symbol, stmts, parent),
 	}
 }

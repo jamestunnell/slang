@@ -1,40 +1,62 @@
 package compilation_test
 
 import (
+	"bufio"
+	"strings"
 	"testing"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
-	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/compilation"
+	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/parsing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestModuleCompiler_FirstPass_HappyPath(t *testing.T) {
-	stmts := []slang.Statement{
-		statements.NewClass("MyClass", "",
-			statements.NewMethod("MyMethod", ast.NewFunction(
-				[]*ast.Param{}, []string{"bool"}),
-			),
-			statements.NewField("MyField", "string"),
-		),
-		statements.NewFunc("MyFunc", ast.NewFunction(
-			[]*ast.Param{}, []string{"bool"})),
+	input := `
+	class MyClass {
+		method MyMethod() bool {
+			return true
+		}
+
+		field MyField string
 	}
-	expectedSyms := []compilation.Symbol{
-		compilation.NewSymbol("", "MyClass", compilation.SymbolCLASS),
-		compilation.NewSymbol("MyClass", "MyMethod", compilation.SymbolMETHOD),
-		compilation.NewSymbol("MyClass", "MyField", compilation.SymbolFIELD),
-		compilation.NewSymbol("", "MyFunc", compilation.SymbolFUNC),
+
+	func MyFunc() bool {
+		return false
 	}
-	stmtSeq := compilation.NewStmtSeq(stmts)
-	mc := compilation.NewModuleCompiler(stmtSeq)
+	`
+
+	l := lexer.New(bufio.NewReader(strings.NewReader(input)))
+	toks := parsing.NewTokenSeq(l)
+	p := parsing.NewFileParser()
+
+	require.True(t, p.Run(toks))
+
+	moduleSymbol := slang.NewRootSymbol("abc", slang.SymbolMODULE)
+	expected := map[string]slang.SymbolType{
+		"abc.MyClass":          slang.SymbolCLASS,
+		"abc.MyClass.MyMethod": slang.SymbolMETHOD,
+		"abc.MyClass.MyField":  slang.SymbolFIELD,
+		"abc.MyFunc":           slang.SymbolFUNC,
+	}
+	stmtSeq := compilation.NewStmtSeq(p.Statements)
+	mc := compilation.NewModuleCompiler(moduleSymbol, stmtSeq)
 
 	err := mc.FirstPass()
 
 	assert.NoError(t, err)
 
-	symbols := mc.CollectSymbols()
+	childSymbols := mc.ChildSymbols()
 
-	assert.ElementsMatch(t, expectedSyms, symbols)
+	require.Len(t, childSymbols, len(expected))
+
+	for _, sym := range childSymbols {
+		scopedName := sym.ScopedName()
+
+		if assert.Contains(t, expected, scopedName) {
+			assert.Equal(t, expected[scopedName], sym.Type)
+		}
+	}
 }

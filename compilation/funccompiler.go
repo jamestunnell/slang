@@ -9,9 +9,9 @@ type FuncCompiler struct {
 	*Base
 }
 
-func NewFuncCompiler(scope string, stmts StmtSeq, parent Compiler) *FuncCompiler {
+func NewFuncCompiler(symbol *slang.Symbol, stmts StmtSeq, parent Compiler) *FuncCompiler {
 	return &FuncCompiler{
-		Base: NewBase(scope, stmts, parent),
+		Base: NewBase(symbol, stmts, parent),
 	}
 }
 

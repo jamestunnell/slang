@@ -1,6 +1,6 @@
 module github.com/jamestunnell/slang
 
-go 1.19
+go 1.20
 
 require (
 	github.com/akrennmair/slice v0.0.0-20220105203817-49445747ab81
