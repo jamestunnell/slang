@@ -2,7 +2,6 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
 )
 
 type FileParser struct {
@@ -45,10 +44,7 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 	case slang.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
-		err := customerrs.NewErrWrongTokenType(
-			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS)
-
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		sp = NewAssignStatementParser()
 	}
 
 	if !p.RunSubParser(toks, sp) {

@@ -29,8 +29,7 @@ func (p *ClassBodyParser) parseStatement(toks slang.TokenSeq) bool {
 	case slang.TokenMETHOD:
 		sp = NewMethodStatementParser()
 	default:
-		p.TokenErr(
-			toks.Current(), slang.TokenCLASS, slang.TokenFIELD, slang.TokenFUNC, slang.TokenMETHOD)
+		sp = NewAssignStatementParser()
 	}
 
 	return p.ParseStatement(toks, sp)

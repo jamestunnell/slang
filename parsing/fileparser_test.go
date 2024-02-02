@@ -15,13 +15,19 @@ import (
 
 func TestFileParser(t *testing.T) {
 	file := strings.NewReader(`
+		use "test"
+
 		use "first/path"
 			
 		use "path/number/2"
 		use "path-3"
 
+		myGlobal = 6.2
+
 		class AmountAdder {
 			field Amount float
+
+			classVar = "okay"
 
 			method AddAmount(x float) float {
 				return this.Amount + x
@@ -43,11 +49,20 @@ func TestFileParser(t *testing.T) {
 		}
 	`)
 	expected := []slang.Statement{
+		statements.NewUse("test"),
 		statements.NewUse("first", "path"),
 		statements.NewUse("path", "number", "2"),
 		statements.NewUse("path-3"),
+		statements.NewAssign(
+			expressions.NewIdentifier("myGlobal"),
+			expressions.NewFloat(6.2),
+		),
 		statements.NewClass("AmountAdder", "",
 			statements.NewField("Amount", "float"),
+			statements.NewAssign(
+				expressions.NewIdentifier("classVar"),
+				expressions.NewString("okay"),
+			),
 			statements.NewMethod(
 				"AddAmount",
 				ast.NewFunction(
