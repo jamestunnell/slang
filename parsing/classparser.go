@@ -28,6 +28,8 @@ func (p *ClassParser) parseStatement(toks slang.TokenSeq) bool {
 		sp = NewFuncStatementParser()
 	case slang.TokenMETHOD:
 		sp = NewMethodStatementParser()
+	case slang.TokenVAR:
+		sp = NewVarParser()
 	default:
 		p.TokenErr(
 			toks.Current(), slang.TokenCLASS, slang.TokenFIELD, slang.TokenFUNC, slang.TokenMETHOD)

@@ -67,6 +67,15 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				)),
 			},
 		},
+		{
+			TestName: "vars",
+			Input: `{
+				var x int
+			}`,
+			Statements: []slang.Statement{
+				statements.NewVar("x", "int"),
+			},
+		},
 	}
 
 	for _, test := range tests {

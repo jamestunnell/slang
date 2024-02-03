@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFileParserGlobalWithInit(t *testing.T) {
+func TestFileParserGlobalVars(t *testing.T) {
 	file := strings.NewReader(`
 		use "rand"
 
