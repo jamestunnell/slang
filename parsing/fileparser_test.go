@@ -18,7 +18,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 	file := strings.NewReader(`
 		use "rand"
 
-	  var x int
+		var x int
 		var y int
 
 		func init() {

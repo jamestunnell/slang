@@ -26,8 +26,10 @@ const (
 	ExprIDENTIFIER
 	ExprINDEX
 	ExprINTEGER
+	ExprKEY
 	ExprLESS
 	ExprLESSEQUAL
+	ExprMAP
 	ExprMEMBERACCESS
 	ExprMULTIPLY
 	ExprNEGATIVE
@@ -90,10 +92,14 @@ func (et ExprType) String() string {
 		str = "INDEX"
 	case ExprINTEGER:
 		str = "INTEGER"
+	case ExprKEY:
+		str = "KEY"
 	case ExprLESS:
 		str = "LESS"
 	case ExprLESSEQUAL:
 		str = "LESSEQUAL"
+	case ExprMAP:
+		str = "MAP"
 	case ExprMEMBERACCESS:
 		str = "MEMBERACCESS"
 	case ExprMULTIPLY:

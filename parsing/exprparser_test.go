@@ -51,6 +51,27 @@ func TestExprParser(t *testing.T) {
 
 		// strings
 		`"abc" + "123"`: add(str("abc"), str("123")),
+
+		// string interpolation
+		`"${x} is a ${y}"`: expressions.NewConcat(str(""), id("x"), str(" is a "), id("y"), str("")),
+
+		// map value
+		`{"a": 1, "b": 2}`: m(exprs(str("a"), str("b")), exprs(i(1), i(2))),
+
+		// nested map values
+		`{"a": {"b": 2}}`: m(exprs(str("a")), exprs(m(exprs(str("b")), exprs(i(2))))),
+
+		// access map with key
+		`map{key}`: expressions.NewKey(id("map"), id("key")),
+
+		// array value
+		`[1, 2, 3]`: ary(i(1), i(2), i(3)),
+
+		// nested array values
+		`["abc", ["xyz"]]`: ary(str("abc"), ary(str("xyz"))),
+
+		// access array with index
+		`ary[idx]`: expressions.NewIndex(id("ary"), id("idx")),
 	}
 
 	for input, expected := range testCases {
@@ -144,4 +165,16 @@ func or(left, right slang.Expression) slang.Expression {
 
 func not(val slang.Expression) slang.Expression {
 	return expressions.NewNot(val)
+}
+
+func ary(vals ...slang.Expression) slang.Expression {
+	return expressions.NewArray(vals...)
+}
+
+func exprs(vals ...slang.Expression) []slang.Expression {
+	return vals
+}
+
+func m(keys, vals []slang.Expression) slang.Expression {
+	return expressions.NewMap(keys, vals)
 }

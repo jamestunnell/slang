@@ -5,7 +5,7 @@ import (
 )
 
 type Index struct {
-	Array slang.Expression `json:"container"`
+	Array slang.Expression `json:"array"`
 	Index slang.Expression `json:"index"`
 }
 

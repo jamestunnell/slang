@@ -60,20 +60,75 @@ func (p *ExprParser) parseArray(toks slang.TokenSeq) slang.Expression {
 		p.parseExpression(toks, PrecedenceLOWEST),
 	}
 
-	for toks.Next().Is(slang.TokenCOMMA) {
-		toks.Advance()
+	for toks.Current().Is(slang.TokenCOMMA) {
 		toks.Advance()
 
 		elems = append(elems, p.parseExpression(toks, PrecedenceLOWEST))
 	}
 
-	if !p.ExpectToken(toks.Next(), slang.TokenRBRACKET) {
+	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
 		return nil
 	}
 
 	toks.Advance()
 
 	return expressions.NewArray(elems...)
+}
+
+func (p *ExprParser) parseMap(toks slang.TokenSeq) slang.Expression {
+	toks.Advance()
+
+	keys := []slang.Expression{}
+	vals := []slang.Expression{}
+
+	// check for empty map
+	if toks.Current().Is(slang.TokenRBRACE) {
+		return expressions.NewMap(keys, vals)
+	}
+
+	// first KV pair
+	k, v, ok := p.parseMapKVPair(toks)
+	if !ok {
+		return nil
+	}
+
+	keys = append(keys, k)
+	vals = append(vals, v)
+
+	// more KV pairs
+	for toks.Current().Is(slang.TokenCOMMA) {
+		toks.Advance()
+
+		k, v, ok := p.parseMapKVPair(toks)
+		if !ok {
+			return nil
+		}
+
+		keys = append(keys, k)
+		vals = append(vals, v)
+	}
+
+	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
+		return nil
+	}
+
+	toks.Advance()
+
+	return expressions.NewMap(keys, vals)
+}
+
+func (p *ExprParser) parseMapKVPair(toks slang.TokenSeq) (key, val slang.Expression, ok bool) {
+	k := p.parseExpression(toks, PrecedenceLOWEST)
+
+	if !p.ExpectToken(toks.Current(), slang.TokenCOLON) {
+		return nil, nil, false
+	}
+
+	toks.Advance()
+
+	v := p.parseExpression(toks, PrecedenceLOWEST)
+
+	return k, v, true
 }
 
 func (p *ExprParser) parseFuncLiteral(toks slang.TokenSeq) slang.Expression {
@@ -239,13 +294,30 @@ func (p *ExprParser) parseIndex(toks slang.TokenSeq, ary slang.Expression) slang
 		return nil
 	}
 
-	toks.Advance()
-
 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
 		return nil
 	}
 
+	toks.Advance()
+
 	return expressions.NewIndex(ary, indexExprParser.Expr)
+}
+
+func (p *ExprParser) parseKey(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
+	toks.Advance()
+
+	keyExprParser := NewExprParser(PrecedenceLOWEST)
+	if !p.RunSubParser(toks, keyExprParser) {
+		return nil
+	}
+
+	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
+		return nil
+	}
+
+	toks.Advance()
+
+	return expressions.NewKey(ary, keyExprParser.Expr)
 }
 
 func (p *ExprParser) parseCallArgs(

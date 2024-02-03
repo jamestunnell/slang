@@ -54,6 +54,8 @@ func (p *ExprParser) findPrefixParseFn(
 		prefixParse = p.parseGroupedExpression
 	case slang.TokenLBRACKET:
 		prefixParse = p.parseArray
+	case slang.TokenLBRACE:
+		prefixParse = p.parseMap
 	case slang.TokenFUNC:
 		prefixParse = p.parseFuncLiteral
 	}
@@ -96,6 +98,8 @@ func (p *ExprParser) findInfixParseFn(
 		infixParse = p.parseCall
 	case slang.TokenLBRACKET:
 		infixParse = p.parseIndex
+	case slang.TokenLBRACE:
+		infixParse = p.parseKey
 	}
 
 	return infixParse, infixParse != nil
