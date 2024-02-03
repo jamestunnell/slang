@@ -393,6 +393,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.FALSE(), loc)
 	case tokens.StrFIELD:
 		l.emit(tokens.FIELD(), loc)
+	case tokens.StrVAR:
+		l.emit(tokens.VAR(), loc)
 	case tokens.StrFUNC:
 		l.emit(tokens.FUNC(), loc)
 	case tokens.StrIF:

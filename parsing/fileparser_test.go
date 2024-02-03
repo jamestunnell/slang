@@ -1,6 +1,7 @@
 package parsing_test
 
 import (
+	"encoding/json"
 	"io"
 	"strings"
 	"testing"
@@ -13,109 +14,195 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFileParser(t *testing.T) {
+func TestFileParserGlobalWithInit(t *testing.T) {
+	file := strings.NewReader(`
+		use "rand"
+
+	  var x int
+		var y int
+
+		func init() {
+			x = rand.Int()
+			y = rand.Int()
+		}
+
+		func GetX() int {
+			return x
+		}
+
+		func GetY() int {
+			return y
+		}
+	`)
+	expected := []slang.Statement{
+		statements.NewUse("rand"),
+		statements.NewVar("x", "int"),
+		statements.NewVar("y", "int"),
+		statements.NewFunc("init", ast.NewFunction(
+			[]*ast.Param{},
+			[]string{},
+			statements.NewAssign(
+				expressions.NewIdentifier("x"),
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("rand"), "Int"),
+				),
+			),
+			statements.NewAssign(
+				expressions.NewIdentifier("y"),
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("rand"), "Int"),
+				),
+			),
+		)),
+		statements.NewFunc("GetX", ast.NewFunction(
+			[]*ast.Param{},
+			[]string{"int"},
+			statements.NewReturnVal(
+				expressions.NewIdentifier("x"),
+			),
+		)),
+		statements.NewFunc("GetY", ast.NewFunction(
+			[]*ast.Param{},
+			[]string{"int"},
+			statements.NewReturnVal(
+				expressions.NewIdentifier("y"),
+			),
+		)),
+	}
+	testFileParserSuccess(t, "just a class statement", file, expected)
+}
+
+func TestFileParserClassWithTest(t *testing.T) {
 	file := strings.NewReader(`
 		use "test"
 
-		use "first/path"
-			
-		use "path/number/2"
-		use "path-3"
+		class Accumulator {
+			field total float
 
-		myGlobal = 6.2
-
-		class AmountAdder {
-			field Amount float
-
-			classVar = "okay"
-
-			method AddAmount(x float) float {
-				return this.Amount + x
+			method Add(x float) {
+				this.total = this.total + x
 			}
 
-			method ChangeAmount(amt float) {
-				this.Amount = amt
+			method Mul(x float) {
+				this.total = this.total * x
+			}
+
+			method Total() float {
+				return this.total
 			}
 		}
 
-		func TestAmountAdder(t test.Test) {
-			aa = AmountAdder.New()
+		func TestAccumulator(t test.Test) {
+			accum = Accumulator()
+			
+			accum.Add(2.0)
+			accum.Mul(2.0)
 
-			aa.ChangeAmount(2.5)
+			t.AssertAlmostEq(accum.Total(), 4.0)
 
-			result = aa.AddAmount(12.0)
+			accum.Add(1.0)
+			accum.Mul(0.5)
 
-			t.AssertAlmostEq(result, 14.5)
+			t.AssertAlmostEq(accum.Total(), 2.5)
 		}
 	`)
 	expected := []slang.Statement{
 		statements.NewUse("test"),
-		statements.NewUse("first", "path"),
-		statements.NewUse("path", "number", "2"),
-		statements.NewUse("path-3"),
-		statements.NewAssign(
-			expressions.NewIdentifier("myGlobal"),
-			expressions.NewFloat(6.2),
-		),
-		statements.NewClass("AmountAdder", "",
-			statements.NewField("Amount", "float"),
-			statements.NewAssign(
-				expressions.NewIdentifier("classVar"),
-				expressions.NewString("okay"),
-			),
+		statements.NewClass("Accumulator", "",
+			statements.NewField("total", "float"),
 			statements.NewMethod(
-				"AddAmount",
+				"Add",
 				ast.NewFunction(
 					[]*ast.Param{ast.NewParam("x", "float")},
-					[]string{"float"},
-					statements.NewReturnVal(
+					[]string{},
+					statements.NewAssign(
+						expressions.NewMemberAccess(
+							expressions.NewIdentifier("this"), "total"),
 						expressions.NewAdd(
 							expressions.NewMemberAccess(
-								expressions.NewIdentifier("this"), "Amount"),
+								expressions.NewIdentifier("this"), "total"),
 							expressions.NewIdentifier("x"),
 						),
 					),
 				),
 			),
 			statements.NewMethod(
-				"ChangeAmount",
+				"Mul",
 				ast.NewFunction(
-					[]*ast.Param{ast.NewParam("amt", "float")},
+					[]*ast.Param{ast.NewParam("x", "float")},
 					[]string{},
 					statements.NewAssign(
 						expressions.NewMemberAccess(
-							expressions.NewIdentifier("this"), "Amount"),
-						expressions.NewIdentifier("amt"),
+							expressions.NewIdentifier("this"), "total"),
+						expressions.NewMultiply(
+							expressions.NewMemberAccess(
+								expressions.NewIdentifier("this"), "total"),
+							expressions.NewIdentifier("x"),
+						),
+					),
+				),
+			),
+			statements.NewMethod(
+				"Total",
+				ast.NewFunction(
+					[]*ast.Param{},
+					[]string{"float"},
+					statements.NewReturnVal(
+						expressions.NewMemberAccess(
+							expressions.NewIdentifier("this"), "total"),
 					),
 				),
 			),
 		),
-		statements.NewFunc("TestAmountAdder", ast.NewFunction(
+		statements.NewFunc("TestAccumulator", ast.NewFunction(
 			[]*ast.Param{ast.NewParam("t", "test.Test")},
 			[]string{},
 			statements.NewAssign(
-				expressions.NewIdentifier("aa"),
+				expressions.NewIdentifier("accum"),
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("AmountAdder"), "New")),
+					expressions.NewIdentifier("Accumulator"),
+				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "ChangeAmount"),
-					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
+					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
 				),
 			),
-			statements.NewAssign(
-				expressions.NewIdentifier("result"),
+			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "AddAmount"),
-					expressions.NewPositionalArg(expressions.NewFloat(12.0)),
+					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
 					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
-					expressions.NewPositionalArg(expressions.NewIdentifier("result")),
-					expressions.NewPositionalArg(expressions.NewFloat(14.5)),
+					expressions.NewPositionalArg(expressions.NewCall(
+						expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Total"),
+					)),
+					expressions.NewPositionalArg(expressions.NewFloat(4.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewPositionalArg(expressions.NewFloat(1.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewPositionalArg(expressions.NewFloat(0.5)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewPositionalArg(expressions.NewCall(
+						expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Total"),
+					)),
+					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
 				),
 			),
 		)),
@@ -148,7 +235,12 @@ func verifyStatemnts(t *testing.T, expected, actual []slang.Statement) {
 	}
 
 	for i, stmt := range expected {
-		assert.True(t, stmt.Equal(actual[i]), "statment %d not equal", i)
+		if !assert.True(t, stmt.Equal(actual[i])) {
+			actualD, _ := json.Marshal(actual[i])
+			expectedD, _ := json.Marshal(stmt)
+
+			t.Logf("statment %d not equal: \nactual: %s\nexpected: %s", i, string(actualD), string(expectedD))
+		}
 	}
 }
 

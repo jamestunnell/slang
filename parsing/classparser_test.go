@@ -75,7 +75,7 @@ func TestClassBodyParserSuccess(t *testing.T) {
 }
 
 func testClassBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.BodyParser { return parsing.NewClassBodyParser() }
+	newParser := func() parsing.BodyParser { return parsing.NewClassParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }
@@ -103,7 +103,7 @@ func testBodyParserSuccess(
 
 func testClassBodyParserFail(t *testing.T, testName, input string) {
 	t.Run(testName, func(t *testing.T) {
-		p := parsing.NewClassBodyParser()
+		p := parsing.NewClassParser()
 		l := lexer.New(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 

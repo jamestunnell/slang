@@ -41,10 +41,15 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 		sp = NewClassStatementParser()
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
+	case slang.TokenVAR:
+		sp = NewVarParser()
 	case slang.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
-		sp = NewAssignStatementParser()
+		p.TokenErr(
+			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS, slang.TokenVAR)
+
+		return false
 	}
 
 	if !p.RunSubParser(toks, sp) {

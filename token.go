@@ -99,6 +99,7 @@ const (
 	TokenSTRING
 	TokenSYMBOL
 	TokenTRUE
+	TokenVAR
 	TokenVERBATIMSTRING
 	TokenUSE
 )
@@ -205,6 +206,8 @@ func (tt TokenType) String() string {
 		str = "VERBATIMSTRING"
 	case TokenUSE:
 		str = "USE"
+	case TokenVAR:
+		str = "VAR"
 	}
 
 	return str

@@ -16,6 +16,7 @@ const (
 	StatementCLASS
 	StatementEXPRESSION
 	StatementFIELD
+	StatementVAR
 	StatementFUNC
 	StatementIF
 	StatementIFELSE
@@ -31,6 +32,7 @@ const (
 	StrIFELSE     = "IFELSE"
 	StrFIELD      = "FIELD"
 	StrFUNC       = "FUNC"
+	StrVAR        = "VAR"
 	StrMETHOD     = "METHOD"
 	StrRETURN     = "RETURN"
 	StrRETURNVAL  = "RETURNVAL"
@@ -81,6 +83,8 @@ func (st StatementType) String() string {
 		str = StrRETURNVAL
 	case StatementUSE:
 		str = StrUSE
+	case StatementVAR:
+		str = StrVAR
 	}
 
 	return str

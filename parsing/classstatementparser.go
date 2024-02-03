@@ -34,7 +34,7 @@ func (p *ClassStatementParser) Run(toks slang.TokenSeq) bool {
 
 	toks.Advance()
 
-	classParser := NewClassBodyParser()
+	classParser := NewClassParser()
 	if !p.RunSubParser(toks, classParser) {
 		return false
 	}
