@@ -13,14 +13,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestModuleCompiler_FirstPass_HappyPath(t *testing.T) {
+func TestFileCompiler_FirstPass_HappyPath(t *testing.T) {
 	input := `
+	var X int
+
 	class MyClass {
 		method MyMethod() bool {
 			return true
 		}
 
 		field MyField string
+
+		var Y int
 	}
 
 	func MyFunc() bool {
@@ -32,17 +36,25 @@ func TestModuleCompiler_FirstPass_HappyPath(t *testing.T) {
 	toks := parsing.NewTokenSeq(l)
 	p := parsing.NewFileParser()
 
-	require.True(t, p.Run(toks))
+	if !assert.True(t, p.Run(toks)) {
+		for _, parseErr := range p.GetErrors() {
+			t.Logf("parse err at %s: %v", parseErr.Token.Location.String(), parseErr.Error)
+		}
+
+		t.FailNow()
+	}
 
 	moduleSymbol := slang.NewRootSymbol("abc", slang.SymbolMODULE)
 	expected := map[string]slang.SymbolType{
+		"abc.X":                slang.SymbolVAR,
 		"abc.MyClass":          slang.SymbolCLASS,
 		"abc.MyClass.MyMethod": slang.SymbolMETHOD,
 		"abc.MyClass.MyField":  slang.SymbolFIELD,
+		"abc.MyClass.Y":        slang.SymbolVAR,
 		"abc.MyFunc":           slang.SymbolFUNC,
 	}
 	stmtSeq := compilation.NewStmtSeq(p.Statements)
-	mc := compilation.NewModuleCompiler(moduleSymbol, stmtSeq)
+	mc := compilation.NewFileCompiler(moduleSymbol, stmtSeq)
 
 	err := mc.FirstPass()
 

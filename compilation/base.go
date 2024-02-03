@@ -56,6 +56,14 @@ func (base *Base) handleFuncStmtFirstPass(stmt slang.Statement, parent Compiler)
 	base.children[name] = NewFuncCompiler(childSymbol, childStmts, parent)
 }
 
+func (base *Base) handleVarStmtFirstPass(stmt slang.Statement, parent Compiler) {
+	varStmt := stmt.(*statements.Var)
+	name := varStmt.Name
+	childSymbol := slang.NewChildSymbol(name, slang.SymbolVAR, base.symbol)
+
+	base.children[name] = NewVarCompiler(childSymbol, parent)
+}
+
 func (base *Base) runChildFirstPasses() error {
 	for name, child := range base.children {
 		if err := child.FirstPass(); err != nil {

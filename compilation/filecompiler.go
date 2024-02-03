@@ -8,19 +8,22 @@ import (
 	"github.com/jamestunnell/slang/customerrs"
 )
 
-type ModuleCompiler struct {
+type FileCompiler struct {
 	*Base
 
 	Imports map[string]string
+	Vars    []string
 }
 
-func NewModuleCompiler(symbol *slang.Symbol, stmts StmtSeq) *ModuleCompiler {
-	return &ModuleCompiler{
-		Base: NewBase(symbol, stmts, nil),
+func NewFileCompiler(symbol *slang.Symbol, stmts StmtSeq) *FileCompiler {
+	return &FileCompiler{
+		Base:    NewBase(symbol, stmts, nil),
+		Vars:    []string{},
+		Imports: map[string]string{},
 	}
 }
 
-func (c *ModuleCompiler) FirstPass() error {
+func (c *FileCompiler) FirstPass() error {
 	stmt, ok := c.stmts.Current()
 
 	for ok {
@@ -34,6 +37,8 @@ func (c *ModuleCompiler) FirstPass() error {
 			name := use.PathParts[len(use.PathParts)-1]
 
 			c.Imports[name] = strings.Join(use.PathParts, "/")
+		case slang.StatementVAR:
+			c.handleVarStmtFirstPass(stmt, c)
 		default:
 			return customerrs.NewErrTypeNotAllowed(
 				stmt.Type().String()+" statement", "module file")

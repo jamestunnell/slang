@@ -31,6 +31,8 @@ func (c *ClassCompiler) FirstPass() error {
 			childSymbol := slang.NewChildSymbol(name, slang.SymbolFIELD, c.symbol)
 
 			c.children[name] = NewFieldCompiler(childSymbol, c)
+		case slang.StatementVAR:
+			c.handleVarStmtFirstPass(stmt, c)
 		case slang.StatementMETHOD:
 			methStmt := stmt.(*statements.Method)
 			name := methStmt.Name

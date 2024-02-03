@@ -17,6 +17,7 @@ const (
 	SymbolCLASS SymbolType = iota
 	SymbolFUNC
 	SymbolFIELD
+	SymbolIMPORT
 	SymbolMETHOD
 	SymbolMODULE
 	SymbolVAR
