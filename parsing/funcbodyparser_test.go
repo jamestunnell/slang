@@ -25,11 +25,11 @@ func TestFuncBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewAssign(
-					expressions.NewMemberAccess(expressions.NewIdentifier("this"), "X"),
+					expressions.NewAccessMember(expressions.NewIdentifier("this"), "X"),
 					expressions.NewInteger(2),
 				),
 				statements.NewAssign(
-					expressions.NewMemberAccess(expressions.NewIdentifier("person"), "Name"),
+					expressions.NewAccessMember(expressions.NewIdentifier("person"), "Name"),
 					expressions.NewString("Jill"),
 				),
 			},
@@ -42,7 +42,7 @@ func TestFuncBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewExpression(
 					expressions.NewCall(
-						expressions.NewMemberAccess(expressions.NewIdentifier("this"), "MyMethod")),
+						expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
 				),
 			},
 		},
@@ -53,9 +53,9 @@ func TestFuncBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewExpression(
-					expressions.NewMemberAccess(
+					expressions.NewAccessMember(
 						expressions.NewCall(
-							expressions.NewMemberAccess(
+							expressions.NewAccessMember(
 								expressions.NewIdentifier("a"),
 								"b",
 							),
@@ -80,7 +80,7 @@ func TestFuncBodyParser(t *testing.T) {
 						expressions.NewIdentifier("word"),
 						expressions.NewString(" is a "),
 						expressions.NewCall(
-							expressions.NewMemberAccess(expressions.NewIdentifier("fanciness"), "String")),
+							expressions.NewAccessMember(expressions.NewIdentifier("fanciness"), "String")),
 						expressions.NewString(" word"),
 					),
 				),

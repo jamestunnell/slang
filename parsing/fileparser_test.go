@@ -44,13 +44,13 @@ func TestFileParserGlobalVars(t *testing.T) {
 			statements.NewAssign(
 				expressions.NewIdentifier("x"),
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("rand"), "Int"),
+					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
 				),
 			),
 			statements.NewAssign(
 				expressions.NewIdentifier("y"),
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("rand"), "Int"),
+					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
 				),
 			),
 		)),
@@ -116,10 +116,10 @@ func TestFileParserClassWithTest(t *testing.T) {
 					[]*ast.Param{ast.NewParam("x", "float")},
 					[]string{},
 					statements.NewAssign(
-						expressions.NewMemberAccess(
+						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
 						expressions.NewAdd(
-							expressions.NewMemberAccess(
+							expressions.NewAccessMember(
 								expressions.NewIdentifier("this"), "total"),
 							expressions.NewIdentifier("x"),
 						),
@@ -132,10 +132,10 @@ func TestFileParserClassWithTest(t *testing.T) {
 					[]*ast.Param{ast.NewParam("x", "float")},
 					[]string{},
 					statements.NewAssign(
-						expressions.NewMemberAccess(
+						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
 						expressions.NewMultiply(
-							expressions.NewMemberAccess(
+							expressions.NewAccessMember(
 								expressions.NewIdentifier("this"), "total"),
 							expressions.NewIdentifier("x"),
 						),
@@ -148,7 +148,7 @@ func TestFileParserClassWithTest(t *testing.T) {
 					[]*ast.Param{},
 					[]string{"float"},
 					statements.NewReturnVal(
-						expressions.NewMemberAccess(
+						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
 					),
 				),
@@ -165,42 +165,42 @@ func TestFileParserClassWithTest(t *testing.T) {
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
 					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
 					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
 					expressions.NewPositionalArg(expressions.NewCall(
-						expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Total"),
+						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
 					)),
 					expressions.NewPositionalArg(expressions.NewFloat(4.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
 					expressions.NewPositionalArg(expressions.NewFloat(1.0)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
 					expressions.NewPositionalArg(expressions.NewFloat(0.5)),
 				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
 					expressions.NewPositionalArg(expressions.NewCall(
-						expressions.NewMemberAccess(expressions.NewIdentifier("accum"), "Total"),
+						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
 					)),
 					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
 				),

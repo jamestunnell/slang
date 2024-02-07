@@ -11,7 +11,9 @@ type Expression interface {
 }
 
 const (
-	ExprADD ExprType = iota
+	ExprACCESSELEM ExprType = iota
+	ExprACCESSMEMBER
+	ExprADD
 	ExprAND
 	ExprARRAY
 	ExprBOOL
@@ -24,13 +26,11 @@ const (
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
-	ExprINDEX
 	ExprINTEGER
 	ExprKEY
 	ExprLESS
 	ExprLESSEQUAL
 	ExprMAP
-	ExprMEMBERACCESS
 	ExprMULTIPLY
 	ExprNEGATIVE
 	ExprNOT
@@ -62,6 +62,10 @@ func (et ExprType) String() string {
 	var str string
 
 	switch et {
+	case ExprACCESSELEM:
+		str = "ACCESSELEM"
+	case ExprACCESSMEMBER:
+		str = "ACCESSMEMBER"
 	case ExprADD:
 		str = "ADD"
 	case ExprAND:
@@ -88,8 +92,6 @@ func (et ExprType) String() string {
 		str = "GREATEREQUAL"
 	case ExprIDENTIFIER:
 		str = "IDENTIFIER"
-	case ExprINDEX:
-		str = "INDEX"
 	case ExprINTEGER:
 		str = "INTEGER"
 	case ExprKEY:
@@ -100,8 +102,6 @@ func (et ExprType) String() string {
 		str = "LESSEQUAL"
 	case ExprMAP:
 		str = "MAP"
-	case ExprMEMBERACCESS:
-		str = "MEMBERACCESS"
 	case ExprMULTIPLY:
 		str = "MULTIPLY"
 	case ExprNEGATIVE:

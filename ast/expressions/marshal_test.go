@@ -16,8 +16,10 @@ func TestMarshalJSON(t *testing.T) {
 	a := expressions.NewIdentifier("a")
 	b := expressions.NewIdentifier("b")
 
+	testMarshalJSON(t, expressions.NewAccessElem(a, b))
+	testMarshalJSON(t, expressions.NewAccessMember(a, "myMember"))
 	testMarshalJSON(t, expressions.NewAdd(a, b))
-	testMarshalJSON(t, expressions.NewArray(a, b))
+	testMarshalJSON(t, expressions.NewArray("int", a, b))
 	testMarshalJSON(t, expressions.NewBool(true))
 	testMarshalJSON(t, expressions.NewDivide(a, b))
 	testMarshalJSON(t, expressions.NewEqual(a, b))
@@ -31,7 +33,7 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, expressions.NewInteger(0))
 	testMarshalJSON(t, expressions.NewLess(a, b))
 	testMarshalJSON(t, expressions.NewLessEqual(a, b))
-	testMarshalJSON(t, expressions.NewMemberAccess(a, "myMember"))
+
 	testMarshalJSON(t, expressions.NewMultiply(a, b))
 	testMarshalJSON(t, expressions.NewNegative(a))
 	testMarshalJSON(t, expressions.NewNot(a))

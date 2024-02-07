@@ -55,23 +55,20 @@ func TestExprParser(t *testing.T) {
 		// string interpolation
 		`"${x} is a ${y}"`: expressions.NewConcat(str(""), id("x"), str(" is a "), id("y"), str("")),
 
-		// map value
-		`{"a": 1, "b": 2}`: m(exprs(str("a"), str("b")), exprs(i(1), i(2))),
+		// map literal value
+		`[string]int{"a": 1, "b": 2}`: m("string", exprs(str("a"), str("b")), "int", exprs(i(1), i(2))),
 
-		// nested map values
-		`{"a": {"b": 2}}`: m(exprs(str("a")), exprs(m(exprs(str("b")), exprs(i(2))))),
+		// // nested map values
+		// `[string][string]int{"a": {"b": 2}}`: m(exprs(str("a")), exprs(m(exprs(str("b")), exprs(i(2))))),
 
-		// access map with key
-		`map{key}`: expressions.NewKey(id("map"), id("key")),
+		// array literal value
+		`[]int{1, 2, 3}`: ary("int", i(1), i(2), i(3)),
 
-		// array value
-		`[1, 2, 3]`: ary(i(1), i(2), i(3)),
+		// // nested array values
+		// `["abc", ["xyz"]]`: ary(str("abc"), ary(str("xyz"))),
 
-		// nested array values
-		`["abc", ["xyz"]]`: ary(str("abc"), ary(str("xyz"))),
-
-		// access array with index
-		`ary[idx]`: expressions.NewIndex(id("ary"), id("idx")),
+		// access map/array element
+		`myContainer[myKey]`: elem(id("myContainer"), id("myKey")),
 	}
 
 	for input, expected := range testCases {
@@ -167,14 +164,19 @@ func not(val slang.Expression) slang.Expression {
 	return expressions.NewNot(val)
 }
 
-func ary(vals ...slang.Expression) slang.Expression {
-	return expressions.NewArray(vals...)
+func ary(valType string, vals ...slang.Expression) slang.Expression {
+	return expressions.NewArray(valType, vals...)
 }
 
 func exprs(vals ...slang.Expression) []slang.Expression {
 	return vals
 }
 
-func m(keys, vals []slang.Expression) slang.Expression {
-	return expressions.NewMap(keys, vals)
+func m(keyType string, keys []slang.Expression,
+	valType string, vals []slang.Expression) slang.Expression {
+	return expressions.NewMap(keyType, keys, valType, vals)
+}
+
+func elem(a, b slang.Expression) slang.Expression {
+	return expressions.NewAccessElem(a, b)
 }

@@ -8,23 +8,29 @@ import (
 type Array struct {
 	*Base
 
-	Elements []slang.Expression `json:"elements"`
+	ValueType string             `json:"valueType"`
+	Values    []slang.Expression `json:"values"`
 }
 
-func NewArray(elems ...slang.Expression) slang.Expression {
+func NewArray(valType string, vals ...slang.Expression) slang.Expression {
 	return &Array{
-		Base:     NewBase(slang.ExprARRAY),
-		Elements: elems,
+		Base:      NewBase(slang.ExprARRAY),
+		ValueType: valType,
+		Values:    vals,
 	}
 }
 
-func (c *Array) Equal(other slang.Expression) bool {
-	c2, ok := other.(*Array)
+func (a *Array) Equal(other slang.Expression) bool {
+	a2, ok := other.(*Array)
 	if !ok {
 		return false
 	}
 
-	return slices.EqualFunc(c.Elements, c2.Elements, expressionsEqual)
+	if a.ValueType != a2.ValueType {
+		return false
+	}
+
+	return slices.EqualFunc(a.Values, a2.Values, expressionsEqual)
 }
 
 // func (expr *Array) Eval(env *slang.Environment) (slang.Object, error) {

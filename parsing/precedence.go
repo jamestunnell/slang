@@ -31,7 +31,6 @@ var precedences = map[slang.TokenType]Precedence{
 	slang.TokenSTAR:         PrecedenceMULDIVREM,
 	slang.TokenDOT:          PrecedenceDOTCALLIDX,
 	slang.TokenLPAREN:       PrecedenceDOTCALLIDX,
-	slang.TokenLBRACE:       PrecedenceDOTCALLIDX,
 	slang.TokenLBRACKET:     PrecedenceDOTCALLIDX,
 }
 
