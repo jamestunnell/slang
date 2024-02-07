@@ -16,7 +16,7 @@ func NewFuncBodyParser() *FuncBodyParser {
 	return p
 }
 
-func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) bool {
+func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	var sp StatementParser
 
 	switch toks.Current().Type() {

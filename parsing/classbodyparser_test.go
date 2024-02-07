@@ -17,6 +17,7 @@ type bodyParserSuccessTest struct {
 	TestName   string
 	Input      string
 	Statements []slang.Statement
+	ErrorCount int
 }
 
 func TestClassBodyParserFailure(t *testing.T) {
@@ -76,6 +77,19 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				statements.NewVar("x", "int"),
 			},
 		},
+		// {
+		// 	TestName: "bad one-line statements are ignored",
+		// 	Input: `{
+		// 		field x int
+		// 		field y 3
+		// 		field z float
+		// 	}`,
+		// 	Statements: []slang.Statement{
+		// 		statements.NewField("x", "int"),
+		// 		statements.NewField("z", "float"),
+		// 	},
+		// 	ErrorCount: 1,
+		// },
 	}
 
 	for _, test := range tests {
@@ -84,7 +98,7 @@ func TestClassBodyParserSuccess(t *testing.T) {
 }
 
 func testClassBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.BodyParser { return parsing.NewClassParser() }
+	newParser := func() parsing.BodyParser { return parsing.NewClassBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }
@@ -100,7 +114,7 @@ func testBodyParserSuccess(
 
 		assert.True(t, p.Run(seq))
 
-		if !assert.Empty(t, p.GetErrors()) {
+		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
 			logParseErrs(t, p.GetErrors())
 
 			return
@@ -112,7 +126,7 @@ func testBodyParserSuccess(
 
 func testClassBodyParserFail(t *testing.T, testName, input string) {
 	t.Run(testName, func(t *testing.T) {
-		p := parsing.NewClassParser()
+		p := parsing.NewClassBodyParser()
 		l := lexer.New(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 

@@ -5,21 +5,21 @@ import (
 	"github.com/jamestunnell/slang/ast/statements"
 )
 
-type VarParser struct {
+type VarStatementParser struct {
 	*ParserBase
 
 	VarStmt *statements.Var
 }
 
-func NewVarParser() *VarParser {
-	return &VarParser{ParserBase: NewParserBase()}
+func NewVarStatementParser() *VarStatementParser {
+	return &VarStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *VarParser) GetStatement() slang.Statement {
+func (p *VarStatementParser) GetStatement() slang.Statement {
 	return p.VarStmt
 }
 
-func (p *VarParser) Run(toks slang.TokenSeq) bool {
+func (p *VarStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenVAR) {
 		return false
 	}

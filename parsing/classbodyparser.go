@@ -4,19 +4,19 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type ClassParser struct {
+type ClassBodyParser struct {
 	*BodyParserBase
 }
 
-func NewClassParser() *ClassParser {
-	p := &ClassParser{}
+func NewClassBodyParser() *ClassBodyParser {
+	p := &ClassBodyParser{}
 
 	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
 
 	return p
 }
 
-func (p *ClassParser) parseStatement(toks slang.TokenSeq) bool {
+func (p *ClassBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	var sp StatementParser
 
 	switch toks.Current().Type() {
@@ -29,12 +29,12 @@ func (p *ClassParser) parseStatement(toks slang.TokenSeq) bool {
 	case slang.TokenMETHOD:
 		sp = NewMethodStatementParser()
 	case slang.TokenVAR:
-		sp = NewVarParser()
+		sp = NewVarStatementParser()
 	default:
 		p.TokenErr(
-			toks.Current(), slang.TokenCLASS, slang.TokenFIELD, slang.TokenFUNC, slang.TokenMETHOD)
+			toks.Current(), slang.TokenCLASS, slang.TokenFIELD, slang.TokenFUNC, slang.TokenMETHOD, slang.TokenVAR)
 
-		return false
+		return nil
 	}
 
 	return p.ParseStatement(toks, sp)

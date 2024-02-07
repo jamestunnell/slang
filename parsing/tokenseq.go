@@ -50,6 +50,14 @@ func (seq *TokenSeq) Advance() {
 	seq.next = seq.lexer.NextToken()
 }
 
+func (seq *TokenSeq) AdvanceUntil(types ...slang.TokenType) {
+	types = append([]slang.TokenType{slang.TokenEOF}, types...)
+
+	for !seq.current.Is(types...) {
+		seq.Advance()
+	}
+}
+
 func (seq *TokenSeq) AdvanceSkip(skipTypes ...slang.TokenType) {
 	seq.Advance()
 	seq.Skip(skipTypes...)

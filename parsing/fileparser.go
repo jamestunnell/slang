@@ -23,8 +23,8 @@ func (p *FileParser) Run(toks slang.TokenSeq) bool {
 	for !toks.Current().Is(slang.TokenEOF) {
 		toks.Skip(slang.TokenNEWLINE)
 
-		if !p.parseStatement(toks) {
-			return false
+		if st := p.parseStatement(toks); st != nil {
+			p.Statements = append(p.Statements, st)
 		}
 
 		toks.Skip(slang.TokenNEWLINE)
@@ -33,7 +33,7 @@ func (p *FileParser) Run(toks slang.TokenSeq) bool {
 	return true
 }
 
-func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
+func (p *FileParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	var sp StatementParser
 
 	switch toks.Current().Type() {
@@ -42,21 +42,19 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
 	case slang.TokenVAR:
-		sp = NewVarParser()
+		sp = NewVarStatementParser()
 	case slang.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
 		p.TokenErr(
 			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS, slang.TokenVAR)
 
-		return false
+		return nil
 	}
 
 	if !p.RunSubParser(toks, sp) {
-		return false
+		return nil
 	}
 
-	p.Statements = append(p.Statements, sp.GetStatement())
-
-	return true
+	return sp.GetStatement()
 }

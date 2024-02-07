@@ -335,8 +335,8 @@ func (p *ExprParser) parseCall(toks slang.TokenSeq, fn slang.Expression) slang.E
 func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
 	toks.Advance()
 
-	keyindexExprParser := NewExprParser(PrecedenceLOWEST)
-	if !p.RunSubParser(toks, keyindexExprParser) {
+	keyExpr := p.parseExpression(toks, PrecedenceLOWEST)
+	if keyExpr == nil {
 		return nil
 	}
 
@@ -346,7 +346,7 @@ func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) 
 
 	toks.Advance()
 
-	return expressions.NewAccessElem(ary, keyindexExprParser.Expr)
+	return expressions.NewAccessElem(ary, keyExpr)
 }
 
 func (p *ExprParser) parseCallArgs(

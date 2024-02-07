@@ -69,7 +69,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		)),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected)
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
 }
 
 func TestFileParserClassWithTest(t *testing.T) {
@@ -207,25 +207,41 @@ func TestFileParserClassWithTest(t *testing.T) {
 			),
 		)),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected)
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
 }
+
+// func TestFileParserBadOnelineStatements(t *testing.T) {
+// 	file := strings.NewReader(`
+// 		use "xyz"
+// 		use what
+
+// 		var x int
+// 		var y 3
+// 	`)
+// 	expected := []slang.Statement{
+// 		statements.NewUse("xyz"),
+// 		statements.NewVar("x", "int"),
+// 	}
+// 	testFileParserSuccess(t, "just a class statement", file, expected, 2)
+// }
 
 func testFileParserSuccess(
 	t *testing.T,
 	name string,
 	file io.Reader,
-	expected []slang.Statement,
+	expectedStmts []slang.Statement,
+	expectedErrCount int,
 ) {
 	t.Run(name, func(t *testing.T) {
 		stmts, parseErrs := parsing.ParseFile(file)
 
-		if !assert.Empty(t, parseErrs) {
+		if !assert.Len(t, parseErrs, expectedErrCount) {
 			logParseErrs(t, parseErrs)
 
 			return
 		}
 
-		verifyStatemnts(t, expected, stmts)
+		verifyStatemnts(t, expectedStmts, stmts)
 	})
 }
 
