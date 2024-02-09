@@ -7,11 +7,11 @@ import (
 type Var struct {
 	*Base
 
-	Name      string `json:"name"`
-	ValueType string `json:"valueType"`
+	Name      string     `json:"name"`
+	ValueType slang.Type `json:"valueType"`
 }
 
-func NewVar(name, valueType string) *Var {
+func NewVar(name string, valueType slang.Type) *Var {
 	return &Var{
 		Base:      NewBase(slang.StatementVAR),
 		Name:      name,
@@ -25,5 +25,9 @@ func (f *Var) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return f.Name == f2.Name && f.ValueType == f2.ValueType
+	if !f.ValueType.IsEqual(f2.ValueType) {
+		return false
+	}
+
+	return f.Name == f2.Name
 }

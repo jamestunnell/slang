@@ -49,35 +49,19 @@ func (p *ExprParser) parseGroupedExpression(toks slang.TokenSeq) slang.Expressio
 }
 
 func (p *ExprParser) parseArrayOrMap(toks slang.TokenSeq) slang.Expression {
-	toks.Advance()
-
-	keyType := ""
-
-	// check for optional key type (indicates a map literal)
-
-	if toks.Current().Is(slang.TokenSYMBOL) {
-		keyType = toks.Current().Value()
-
-		toks.Advance()
+	if toks.Next().Is(slang.TokenRBRACKET) {
+		return p.parseArray(toks)
 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
+	return p.parseMap(toks)
+}
+
+func (p *ExprParser) parseArray(toks slang.TokenSeq) slang.Expression {
+	// type includes brackets
+	typ, ok := p.ParseArrayType(toks)
+	if !ok {
 		return nil
 	}
-
-	toks.Advance()
-
-	// expect value type after brackets
-
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-		return nil
-	}
-
-	valType := toks.Current().Value()
-
-	toks.Advance()
-
-	// next come the braces
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
 		return nil
@@ -85,30 +69,11 @@ func (p *ExprParser) parseArrayOrMap(toks slang.TokenSeq) slang.Expression {
 
 	toks.Advance()
 
-	if keyType == "" {
-		vals, ok := p.parseArrayVals(toks)
-		if !ok {
-			return nil
-		}
-
-		return expressions.NewArray(valType, vals...)
-	}
-
-	keys, vals, ok := p.parseMapKeyVals(toks)
-	if !ok {
-		return nil
-	}
-
-	return expressions.NewMap(keyType, keys, valType, vals)
-}
-
-func (p *ExprParser) parseArrayVals(
-	toks slang.TokenSeq) ([]slang.Expression, bool) {
 	vals := []slang.Expression{}
 
-	// check for empty map
-	if toks.Current().Is(slang.TokenRBRACKET) {
-		return vals, true
+	// check for empty array
+	if toks.Current().Is(slang.TokenRBRACE) {
+		return expressions.NewArray(typ.ValueType)
 	}
 
 	// first value
@@ -125,23 +90,39 @@ func (p *ExprParser) parseArrayVals(
 		vals = append(vals, v)
 	}
 
-	return vals, true
+	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
+		return nil
+	}
+
+	toks.Advance()
+
+	return expressions.NewArray(typ.ValueType, vals...)
 }
 
-func (p *ExprParser) parseMapKeyVals(
-	toks slang.TokenSeq) ([]slang.Expression, []slang.Expression, bool) {
+func (p *ExprParser) parseMap(toks slang.TokenSeq) slang.Expression {
+	typ, ok := p.ParseMapType(toks)
+	if !ok {
+		return nil
+	}
+
+	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
+		return nil
+	}
+
+	toks.Advance()
+
 	keys := []slang.Expression{}
 	vals := []slang.Expression{}
 
 	// check for empty map
 	if toks.Current().Is(slang.TokenRBRACKET) {
-		return keys, vals, true
+		return expressions.NewMap(typ.KeyType, keys, typ.ValueType, vals)
 	}
 
 	// first KV pair
 	k, v, ok := p.parseMapKVPair(toks)
 	if !ok {
-		return []slang.Expression{}, []slang.Expression{}, false
+		return nil
 	}
 
 	keys = append(keys, k)
@@ -153,14 +134,18 @@ func (p *ExprParser) parseMapKeyVals(
 
 		k, v, ok := p.parseMapKVPair(toks)
 		if !ok {
-			return []slang.Expression{}, []slang.Expression{}, false
+			return nil
 		}
 
 		keys = append(keys, k)
 		vals = append(vals, v)
 	}
 
-	return keys, vals, true
+	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
+		return nil
+	}
+
+	return expressions.NewMap(typ.KeyType, keys, typ.ValueType, vals)
 }
 
 func (p *ExprParser) parseMapKVPair(toks slang.TokenSeq) (key, val slang.Expression, ok bool) {

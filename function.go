@@ -4,7 +4,7 @@ type Function interface {
 	GetComment() string
 
 	GetParamNames() []string
-	GetParamType(name string) (string, bool)
+	GetParamType(name string) (Type, bool)
 
-	GetReturnTypes() []string
+	GetReturnTypes() []Type
 }

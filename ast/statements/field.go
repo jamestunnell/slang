@@ -7,11 +7,11 @@ import (
 type Field struct {
 	*Base
 
-	Name      string `json:"name"`
-	ValueType string `json:"valueType"`
+	Name      string     `json:"name"`
+	ValueType slang.Type `json:"valueType"`
 }
 
-func NewField(name, valueType string) *Field {
+func NewField(name string, valueType slang.Type) *Field {
 	return &Field{
 		Base:      NewBase(slang.StatementFIELD),
 		Name:      name,
@@ -25,5 +25,9 @@ func (f *Field) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return f.Name == f2.Name && f.ValueType == f2.ValueType
+	if !f.ValueType.IsEqual(f2.ValueType) {
+		return false
+	}
+
+	return f.Name == f2.Name
 }

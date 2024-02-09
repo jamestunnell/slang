@@ -38,8 +38,8 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				field Y float
 			}`,
 			Statements: []slang.Statement{
-				statements.NewField("X", "myMod.myType"),
-				statements.NewField("Y", "float"),
+				statements.NewField("X", ast.NewBasicType("myMod", "myType")),
+				statements.NewField("Y", ast.NewBasicType("float")),
 			},
 		},
 		{
@@ -49,8 +49,8 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				method Y(a int){}
 			}`,
 			Statements: []slang.Statement{
-				statements.NewMethod("X", ast.NewFunction([]*ast.Param{}, []string{})),
-				statements.NewMethod("Y", ast.NewFunction([]*ast.Param{ast.NewParam("a", "int")}, []string{})),
+				statements.NewMethod("X", ast.NewFunction([]slang.Param{}, []slang.Type{})),
+				statements.NewMethod("Y", ast.NewFunction([]slang.Param{ast.NewParam("a", ast.NewBasicType("int"))}, []slang.Type{})),
 			},
 		},
 		{
@@ -62,8 +62,11 @@ func TestClassBodyParserSuccess(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewMethod("sub", ast.NewFunction(
-					[]*ast.Param{{Name: "x", Type: "int"}, {Name: "y", Type: "int"}},
-					[]string{"int"},
+					[]slang.Param{
+						ast.NewParam("x", ast.NewBasicType("int")),
+						ast.NewParam("y", ast.NewBasicType("int")),
+					},
+					[]slang.Type{ast.NewBasicType("int")},
 					statements.NewReturnVal(sub(id("x"), id("y"))),
 				)),
 			},
@@ -74,7 +77,7 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				var x int
 			}`,
 			Statements: []slang.Statement{
-				statements.NewVar("x", "int"),
+				statements.NewVar("x", ast.NewBasicType("int")),
 			},
 		},
 		// {

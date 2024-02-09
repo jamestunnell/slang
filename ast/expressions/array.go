@@ -8,14 +8,14 @@ import (
 type Array struct {
 	*Base
 
-	ValueType string             `json:"valueType"`
+	ValueType slang.Type         `json:"valueType"`
 	Values    []slang.Expression `json:"values"`
 }
 
-func NewArray(valType string, vals ...slang.Expression) slang.Expression {
+func NewArray(valTyp slang.Type, vals ...slang.Expression) slang.Expression {
 	return &Array{
 		Base:      NewBase(slang.ExprARRAY),
-		ValueType: valType,
+		ValueType: valTyp,
 		Values:    vals,
 	}
 }
@@ -26,7 +26,7 @@ func (a *Array) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if a.ValueType != a2.ValueType {
+	if !a.ValueType.IsEqual(a2.ValueType) {
 		return false
 	}
 

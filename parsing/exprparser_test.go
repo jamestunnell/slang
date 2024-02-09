@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
@@ -56,16 +57,30 @@ func TestExprParser(t *testing.T) {
 		`"${x} is a ${y}"`: expressions.NewConcat(str(""), id("x"), str(" is a "), id("y"), str("")),
 
 		// map literal value
-		`[string]int{"a": 1, "b": 2}`: m("string", exprs(str("a"), str("b")), "int", exprs(i(1), i(2))),
+		`[string]int{"a": 1, "b": 2}`: m(
+			ast.NewBasicType("string"),
+			exprs(str("a"), str("b")),
+			ast.NewBasicType("int"),
+			exprs(i(1), i(2)),
+		),
 
-		// // nested map values
-		// `[string][string]int{"a": {"b": 2}}`: m(exprs(str("a")), exprs(m(exprs(str("b")), exprs(i(2))))),
+		// nested map values
+		`[string][string]int{"a": [string]int{"b": 2}}`: m(
+			ast.NewBasicType("string"),
+			exprs(str("a")),
+			ast.NewMapType(ast.NewBasicType("string"), ast.NewBasicType("int")),
+			exprs(m(ast.NewBasicType("string"), exprs(str("b")), ast.NewBasicType("int"), exprs(i(2)))),
+		),
 
 		// array literal value
-		`[]int{1, 2, 3}`: ary("int", i(1), i(2), i(3)),
+		`[]int{1, 2, 3}`: ary(ast.NewBasicType("int"), i(1), i(2), i(3)),
 
-		// // nested array values
-		// `["abc", ["xyz"]]`: ary(str("abc"), ary(str("xyz"))),
+		// nested array values
+		`[][]string{[]string{"a", "b", "c"}, []string{"x", "y", "z"}}`: ary(
+			ast.NewArrayType(ast.NewBasicType("string")),
+			ary(ast.NewBasicType("string"), str("a"), str("b"), str("c")),
+			ary(ast.NewBasicType("string"), str("x"), str("y"), str("z")),
+		),
 
 		// access map/array element
 		`myContainer[myKey]`: elem(id("myContainer"), id("myKey")),
@@ -164,7 +179,7 @@ func not(val slang.Expression) slang.Expression {
 	return expressions.NewNot(val)
 }
 
-func ary(valType string, vals ...slang.Expression) slang.Expression {
+func ary(valType slang.Type, vals ...slang.Expression) slang.Expression {
 	return expressions.NewArray(valType, vals...)
 }
 
@@ -172,8 +187,8 @@ func exprs(vals ...slang.Expression) []slang.Expression {
 	return vals
 }
 
-func m(keyType string, keys []slang.Expression,
-	valType string, vals []slang.Expression) slang.Expression {
+func m(keyType slang.Type, keys []slang.Expression,
+	valType slang.Type, vals []slang.Expression) slang.Expression {
 	return expressions.NewMap(keyType, keys, valType, vals)
 }
 

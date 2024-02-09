@@ -4,7 +4,7 @@ import "fmt"
 
 type Param interface {
 	GetName() string
-	GetType() string
+	GetType() Type
 }
 
 func ParamString(p Param) string {

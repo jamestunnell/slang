@@ -36,11 +36,11 @@ func TestFileParserGlobalVars(t *testing.T) {
 	`)
 	expected := []slang.Statement{
 		statements.NewUse("rand"),
-		statements.NewVar("x", "int"),
-		statements.NewVar("y", "int"),
+		statements.NewVar("x", ast.NewBasicType("int")),
+		statements.NewVar("y", ast.NewBasicType("int")),
 		statements.NewFunc("init", ast.NewFunction(
-			[]*ast.Param{},
-			[]string{},
+			[]slang.Param{},
+			[]slang.Type{},
 			statements.NewAssign(
 				expressions.NewIdentifier("x"),
 				expressions.NewCall(
@@ -55,15 +55,15 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		)),
 		statements.NewFunc("GetX", ast.NewFunction(
-			[]*ast.Param{},
-			[]string{"int"},
+			[]slang.Param{},
+			[]slang.Type{ast.NewBasicType("int")},
 			statements.NewReturnVal(
 				expressions.NewIdentifier("x"),
 			),
 		)),
 		statements.NewFunc("GetY", ast.NewFunction(
-			[]*ast.Param{},
-			[]string{"int"},
+			[]slang.Param{},
+			[]slang.Type{ast.NewBasicType("int")},
 			statements.NewReturnVal(
 				expressions.NewIdentifier("y"),
 			),
@@ -109,12 +109,12 @@ func TestFileParserClassWithTest(t *testing.T) {
 	expected := []slang.Statement{
 		statements.NewUse("test"),
 		statements.NewClass("Accumulator", "",
-			statements.NewField("total", "float"),
+			statements.NewField("total", ast.NewBasicType("float")),
 			statements.NewMethod(
 				"Add",
 				ast.NewFunction(
-					[]*ast.Param{ast.NewParam("x", "float")},
-					[]string{},
+					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
+					[]slang.Type{},
 					statements.NewAssign(
 						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
@@ -129,8 +129,8 @@ func TestFileParserClassWithTest(t *testing.T) {
 			statements.NewMethod(
 				"Mul",
 				ast.NewFunction(
-					[]*ast.Param{ast.NewParam("x", "float")},
-					[]string{},
+					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
+					[]slang.Type{},
 					statements.NewAssign(
 						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
@@ -145,8 +145,8 @@ func TestFileParserClassWithTest(t *testing.T) {
 			statements.NewMethod(
 				"Total",
 				ast.NewFunction(
-					[]*ast.Param{},
-					[]string{"float"},
+					[]slang.Param{},
+					[]slang.Type{ast.NewBasicType("float")},
 					statements.NewReturnVal(
 						expressions.NewAccessMember(
 							expressions.NewIdentifier("this"), "total"),
@@ -155,8 +155,8 @@ func TestFileParserClassWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("TestAccumulator", ast.NewFunction(
-			[]*ast.Param{ast.NewParam("t", "test.Test")},
-			[]string{},
+			[]slang.Param{ast.NewParam("t", ast.NewBasicType("test", "Test"))},
+			[]slang.Type{},
 			statements.NewAssign(
 				expressions.NewIdentifier("accum"),
 				expressions.NewCall(

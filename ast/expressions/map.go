@@ -8,15 +8,15 @@ import (
 type Map struct {
 	*Base
 
-	KeyType   string             `json:"keyType"`
+	KeyType   slang.Type         `json:"keyType"`
 	Keys      []slang.Expression `json:"keys"`
-	ValueType string             `json:"valueType"`
+	ValueType slang.Type         `json:"valueType"`
 	Values    []slang.Expression `json:"values"`
 }
 
 func NewMap(
-	keyType string, keys []slang.Expression,
-	valType string, vals []slang.Expression) *Map {
+	keyType slang.Type, keys []slang.Expression,
+	valType slang.Type, vals []slang.Expression) *Map {
 	return &Map{
 		Base:      NewBase(slang.ExprMAP),
 		KeyType:   keyType,
@@ -32,11 +32,11 @@ func (m *Map) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if m.KeyType != m2.KeyType {
+	if !m.KeyType.IsEqual(m2.KeyType) {
 		return false
 	}
 
-	if m.ValueType != m2.ValueType {
+	if !m.ValueType.IsEqual(m2.ValueType) {
 		return false
 	}
 

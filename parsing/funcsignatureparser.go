@@ -8,21 +8,21 @@ import (
 type FuncSignatureParser struct {
 	*ParserBase
 
-	Params      []*ast.Param
-	ReturnTypes []string
+	Params      []slang.Param
+	ReturnTypes []slang.Type
 }
 
 func NewFuncSignatureParser() *FuncSignatureParser {
 	return &FuncSignatureParser{
 		ParserBase:  NewParserBase(),
-		Params:      []*ast.Param{},
-		ReturnTypes: []string{},
+		Params:      []slang.Param{},
+		ReturnTypes: []slang.Type{},
 	}
 }
 
 func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
-	p.Params = []*ast.Param{}
-	p.ReturnTypes = []string{}
+	p.Params = []slang.Param{}
+	p.ReturnTypes = []slang.Type{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
 		return false
@@ -30,8 +30,8 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	p.Params = []*ast.Param{}
-	p.ReturnTypes = []string{}
+	p.Params = []slang.Param{}
+	p.ReturnTypes = []slang.Type{}
 
 	if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {
 		return false

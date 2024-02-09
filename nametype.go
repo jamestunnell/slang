@@ -2,14 +2,14 @@ package slang
 
 type NameType struct {
 	Name string `json:"name"`
-	Type string `json:"type"`
+	Type Type   `json:"type"`
 }
 
 func (nt *NameType) GetName() string {
 	return nt.Name
 }
 
-func (nt *NameType) GetType() string {
+func (nt *NameType) GetType() Type {
 	return nt.Type
 }
 
