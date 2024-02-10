@@ -16,28 +16,24 @@ func TestMarshalJSON(t *testing.T) {
 	a := expressions.NewIdentifier("a")
 	b := expressions.NewIdentifier("b")
 
+	testMarshalJSON(t, expressions.NewAccessElem(a, b))
+	testMarshalJSON(t, expressions.NewAccessMember(a, "myMember"))
 	testMarshalJSON(t, expressions.NewAdd(a, b))
-	testMarshalJSON(t, expressions.NewArray(a, b))
+	testMarshalJSON(t, expressions.NewArray(ast.NewBasicType("int"), a, b))
 	testMarshalJSON(t, expressions.NewBool(true))
 	testMarshalJSON(t, expressions.NewDivide(a, b))
 	testMarshalJSON(t, expressions.NewEqual(a, b))
 	testMarshalJSON(t, expressions.NewFloat(0.0))
 	testMarshalJSON(t, expressions.NewFunc(
-		ast.NewFunction([]*slang.NameType{}, []string{"bool"})))
+		ast.NewFunction([]slang.Param{}, []slang.Type{ast.NewBasicType("bool")})))
 	testMarshalJSON(t, expressions.NewCall(a))
 	testMarshalJSON(t, expressions.NewGreater(a, b))
 	testMarshalJSON(t, expressions.NewGreaterEqual(a, b))
 	testMarshalJSON(t, expressions.NewIdentifier("x"))
-	testMarshalJSON(t, expressions.NewIf(
-		expressions.NewLessEqual(a, b), []slang.Statement{}))
-	testMarshalJSON(t, expressions.NewIfElse(
-		expressions.NewLessEqual(a, b),
-		[]slang.Statement{},
-		[]slang.Statement{}))
 	testMarshalJSON(t, expressions.NewInteger(0))
 	testMarshalJSON(t, expressions.NewLess(a, b))
 	testMarshalJSON(t, expressions.NewLessEqual(a, b))
-	testMarshalJSON(t, expressions.NewMemberAccess(a, "myMember"))
+
 	testMarshalJSON(t, expressions.NewMultiply(a, b))
 	testMarshalJSON(t, expressions.NewNegative(a))
 	testMarshalJSON(t, expressions.NewNot(a))

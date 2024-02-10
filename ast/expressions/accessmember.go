@@ -4,23 +4,23 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type MemberAccess struct {
+type AccessMember struct {
 	*Base
 
 	Object slang.Expression `json:"object"`
 	Member string           `json:"member"`
 }
 
-func NewMemberAccess(object slang.Expression, member string) slang.Expression {
-	return &MemberAccess{
-		Base:   NewBase(slang.ExprMEMBERACCESS),
+func NewAccessMember(object slang.Expression, member string) slang.Expression {
+	return &AccessMember{
+		Base:   NewBase(slang.ExprACCESSMEMBER),
 		Object: object,
 		Member: member,
 	}
 }
 
-func (c *MemberAccess) Equal(other slang.Expression) bool {
-	c2, ok := other.(*MemberAccess)
+func (c *AccessMember) Equal(other slang.Expression) bool {
+	c2, ok := other.(*AccessMember)
 	if !ok {
 		return false
 	}

@@ -8,44 +8,44 @@ import (
 type FuncSignatureParser struct {
 	*ParserBase
 
-	Params      []*ast.Param
-	ReturnTypes []string
+	Params      []slang.Param
+	ReturnTypes []slang.Type
 }
 
 func NewFuncSignatureParser() *FuncSignatureParser {
 	return &FuncSignatureParser{
 		ParserBase:  NewParserBase(),
-		Params:      []*ast.Param{},
-		ReturnTypes: []string{},
+		Params:      []slang.Param{},
+		ReturnTypes: []slang.Type{},
 	}
 }
 
-func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
-	p.Params = []*ast.Param{}
-	p.ReturnTypes = []string{}
+func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
+	p.Params = []slang.Param{}
+	p.ReturnTypes = []slang.Type{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
-		return
+		return false
 	}
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	p.Params = []*ast.Param{}
-	p.ReturnTypes = []string{}
+	p.Params = []slang.Param{}
+	p.ReturnTypes = []slang.Type{}
 
 	if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {
-		return
+		return false
 	}
 
 	for !toks.Current().Is(slang.TokenRPAREN) {
 		if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
-			return
+			return false
 		}
 
 		toks.Advance()
 
 		if !p.parseParam(toks) {
-			return
+			return false
 		}
 	}
 
@@ -67,29 +67,31 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) {
 	switch toks.Current().Type() {
 	case slang.TokenSYMBOL:
 		if !addRetType() {
-			return
+			return false
 		}
 	case slang.TokenLPAREN:
 		toks.Advance()
 
 		if !addRetType() {
-			return
+			return false
 		}
 
 		for !toks.Current().Is(slang.TokenRPAREN) {
 			if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
-				return
+				return false
 			}
 
 			toks.Advance()
 
 			if !addRetType() {
-				return
+				return false
 			}
 		}
 
 		toks.Advance()
 	}
+
+	return true
 }
 
 func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {

@@ -21,8 +21,10 @@ func NewExprParser(prec Precedence) *ExprParser {
 	}
 }
 
-func (p *ExprParser) Run(toks slang.TokenSeq) {
+func (p *ExprParser) Run(toks slang.TokenSeq) bool {
 	p.Expr = p.parseExpression(toks, p.prec)
+
+	return p.Expr != nil
 }
 
 func (p *ExprParser) findPrefixParseFn(
@@ -51,9 +53,7 @@ func (p *ExprParser) findPrefixParseFn(
 	case slang.TokenLPAREN:
 		prefixParse = p.parseGroupedExpression
 	case slang.TokenLBRACKET:
-		prefixParse = p.parseArray
-	case slang.TokenIF:
-		prefixParse = p.parseIfExpression
+		prefixParse = p.parseArrayOrMap
 	case slang.TokenFUNC:
 		prefixParse = p.parseFuncLiteral
 	}
@@ -66,6 +66,10 @@ func (p *ExprParser) findInfixParseFn(
 	var infixParse infixParseFn
 
 	switch tokType {
+	case slang.TokenAND:
+		infixParse = p.parseAnd
+	case slang.TokenOR:
+		infixParse = p.parseOr
 	case slang.TokenPLUS:
 		infixParse = p.parseAdd
 	case slang.TokenMINUS:
@@ -87,11 +91,11 @@ func (p *ExprParser) findInfixParseFn(
 	case slang.TokenGREATEREQUAL:
 		infixParse = p.parseGreaterEqual
 	case slang.TokenDOT:
-		infixParse = p.parseMemberAccess
+		infixParse = p.parseAccessMember
 	case slang.TokenLPAREN:
 		infixParse = p.parseCall
 	case slang.TokenLBRACKET:
-		infixParse = p.parseIndex
+		infixParse = p.parseAccessElem
 	}
 
 	return infixParse, infixParse != nil

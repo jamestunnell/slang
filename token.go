@@ -50,12 +50,14 @@ func (loc SourceLocation) String() string {
 }
 
 const (
-	TokenASSIGN TokenType = iota
+	TokenAND TokenType = iota
+	TokenASSIGN
 	TokenBANG
 	TokenCLASS
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
+	TokenCONST
 	TokenDOLLARLBRACE
 	TokenDOT
 	TokenELSE
@@ -81,6 +83,7 @@ const (
 	TokenMINUSMINUS
 	TokenMODULE
 	TokenNEWLINE
+	TokenOR
 	TokenNOTEQUAL
 	TokenPLUS
 	TokenPLUSEQUAL
@@ -97,6 +100,7 @@ const (
 	TokenSTRING
 	TokenSYMBOL
 	TokenTRUE
+	TokenVAR
 	TokenVERBATIMSTRING
 	TokenUSE
 )
@@ -105,6 +109,8 @@ func (tt TokenType) String() string {
 	var str string
 
 	switch tt {
+	case TokenAND:
+		str = "AND"
 	case TokenASSIGN:
 		str = "ASSIGN"
 	case TokenBANG:
@@ -115,6 +121,10 @@ func (tt TokenType) String() string {
 		str = "COLON"
 	case TokenCOMMA:
 		str = "COMMA"
+	case TokenCOMMENT:
+		str = "COMMENT"
+	case TokenCONST:
+		str = "CONST"
 	case TokenDOT:
 		str = "DOT"
 	case TokenIF:
@@ -165,6 +175,8 @@ func (tt TokenType) String() string {
 		str = "NEWLINE"
 	case TokenNOTEQUAL:
 		str = "NOTEQUAL"
+	case TokenOR:
+		str = "OR"
 	case TokenPLUS:
 		str = "PLUS"
 	case TokenPLUSEQUAL:
@@ -199,6 +211,8 @@ func (tt TokenType) String() string {
 		str = "VERBATIMSTRING"
 	case TokenUSE:
 		str = "USE"
+	case TokenVAR:
+		str = "VAR"
 	}
 
 	return str

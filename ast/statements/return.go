@@ -6,24 +6,18 @@ import (
 
 type Return struct {
 	*Base
-
-	Value slang.Expression `json:"value"`
 }
 
-func NewReturn(value slang.Expression) *Return {
+func NewReturn() *Return {
 	return &Return{
-		Base:  NewBase(slang.StatementRETURN),
-		Value: value,
+		Base: NewBase(slang.StatementRETURN),
 	}
 }
 
 func (r *Return) Equal(other slang.Statement) bool {
-	r2, ok := other.(*Return)
-	if !ok {
-		return false
-	}
+	_, ok := other.(*Return)
 
-	return r2.Value.Equal(r.Value)
+	return ok
 }
 
 // func (st *Return) Eval(env *slang.Environment) (slang.Object, error) {

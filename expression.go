@@ -11,7 +11,10 @@ type Expression interface {
 }
 
 const (
-	ExprADD ExprType = iota
+	ExprACCESSELEM ExprType = iota
+	ExprACCESSMEMBER
+	ExprADD
+	ExprAND
 	ExprARRAY
 	ExprBOOL
 	ExprCALL
@@ -23,17 +26,16 @@ const (
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
-	ExprIF
-	ExprIFELSE
-	ExprINDEX
 	ExprINTEGER
+	ExprKEY
 	ExprLESS
 	ExprLESSEQUAL
-	ExprMEMBERACCESS
+	ExprMAP
 	ExprMULTIPLY
 	ExprNEGATIVE
 	ExprNOT
 	ExprNOTEQUAL
+	ExprOR
 	ExprSUBTRACT
 	ExprSTRING
 )
@@ -60,8 +62,14 @@ func (et ExprType) String() string {
 	var str string
 
 	switch et {
+	case ExprACCESSELEM:
+		str = "ACCESSELEM"
+	case ExprACCESSMEMBER:
+		str = "ACCESSMEMBER"
 	case ExprADD:
 		str = "ADD"
+	case ExprAND:
+		str = "AND"
 	case ExprARRAY:
 		str = "ARRAY"
 	case ExprBOOL:
@@ -84,20 +92,16 @@ func (et ExprType) String() string {
 		str = "GREATEREQUAL"
 	case ExprIDENTIFIER:
 		str = "IDENTIFIER"
-	case ExprIF:
-		str = "IF"
-	case ExprIFELSE:
-		str = "IFELSE"
-	case ExprINDEX:
-		str = "INDEX"
 	case ExprINTEGER:
 		str = "INTEGER"
+	case ExprKEY:
+		str = "KEY"
 	case ExprLESS:
 		str = "LESS"
 	case ExprLESSEQUAL:
 		str = "LESSEQUAL"
-	case ExprMEMBERACCESS:
-		str = "MEMBERACCESS"
+	case ExprMAP:
+		str = "MAP"
 	case ExprMULTIPLY:
 		str = "MULTIPLY"
 	case ExprNEGATIVE:
@@ -106,6 +110,8 @@ func (et ExprType) String() string {
 		str = "NOT"
 	case ExprNOTEQUAL:
 		str = "NOTEQUAL"
+	case ExprOR:
+		str = "OR"
 	case ExprSUBTRACT:
 		str = "SUBTRACT"
 	case ExprSTRING:

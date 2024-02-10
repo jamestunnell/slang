@@ -8,6 +8,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
@@ -17,6 +18,7 @@ type bodyParserSuccessTest struct {
 	TestName   string
 	Input      string
 	Statements []slang.Statement
+	ErrorCount int
 }
 
 func TestClassBodyParserFailure(t *testing.T) {
@@ -37,8 +39,8 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				field Y float
 			}`,
 			Statements: []slang.Statement{
-				statements.NewField("X", "myMod.myType"),
-				statements.NewField("Y", "float"),
+				statements.NewField("X", ast.NewBasicType("myMod", "myType")),
+				statements.NewField("Y", ast.NewBasicType("float")),
 			},
 		},
 		{
@@ -48,8 +50,8 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				method Y(a int){}
 			}`,
 			Statements: []slang.Statement{
-				statements.NewMethod("X", ast.NewFunction([]*ast.Param{}, []string{})),
-				statements.NewMethod("Y", ast.NewFunction([]*ast.Param{ast.NewParam("a", "int")}, []string{})),
+				statements.NewMethod("X", ast.NewFunction([]slang.Param{}, []slang.Type{})),
+				statements.NewMethod("Y", ast.NewFunction([]slang.Param{ast.NewParam("a", ast.NewBasicType("int"))}, []slang.Type{})),
 			},
 		},
 		{
@@ -61,12 +63,43 @@ func TestClassBodyParserSuccess(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewMethod("sub", ast.NewFunction(
-					[]*ast.Param{{Name: "x", Type: "int"}, {Name: "y", Type: "int"}},
-					[]string{"int"},
-					statements.NewReturn(sub(id("x"), id("y"))),
+					[]slang.Param{
+						ast.NewParam("x", ast.NewBasicType("int")),
+						ast.NewParam("y", ast.NewBasicType("int")),
+					},
+					[]slang.Type{ast.NewBasicType("int")},
+					statements.NewReturnVal(sub(id("x"), id("y"))),
 				)),
 			},
 		},
+		{
+			TestName: "vars&consts",
+			Input: `{
+				var a int
+				const b = "hello"
+				var c float
+				const d = 12 
+			}`,
+			Statements: []slang.Statement{
+				statements.NewVar("a", ast.NewBasicType("int")),
+				statements.NewConst("b", expressions.NewString("hello")),
+				statements.NewVar("c", ast.NewBasicType("float")),
+				statements.NewConst("d", expressions.NewInteger(12)),
+			},
+		},
+		// {
+		// 	TestName: "bad one-line statements are ignored",
+		// 	Input: `{
+		// 		field x int
+		// 		field y 3
+		// 		field z float
+		// 	}`,
+		// 	Statements: []slang.Statement{
+		// 		statements.NewField("x", "int"),
+		// 		statements.NewField("z", "float"),
+		// 	},
+		// 	ErrorCount: 1,
+		// },
 	}
 
 	for _, test := range tests {
@@ -89,9 +122,9 @@ func testBodyParserSuccess(
 		l := lexer.New(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
-		p.Run(seq)
+		assert.True(t, p.Run(seq))
 
-		if !assert.Empty(t, p.GetErrors()) {
+		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
 			logParseErrs(t, p.GetErrors())
 
 			return
@@ -107,7 +140,7 @@ func testClassBodyParserFail(t *testing.T, testName, input string) {
 		l := lexer.New(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 
-		p.Run(seq)
+		assert.False(t, p.Run(seq))
 
 		assert.NotEmpty(t, p.GetErrors)
 	})

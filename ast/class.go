@@ -62,14 +62,14 @@ func (c *Class) GetFieldNames() []string {
 	return names
 }
 
-func (c *Class) GetFieldType(name string) (string, bool) {
+func (c *Class) GetFieldType(name string) (slang.Type, bool) {
 	for _, field := range c.Fields {
 		if name == field.Name {
 			return field.Type, true
 		}
 	}
 
-	return "", false
+	return nil, false
 }
 
 func (c *Class) GetMethodNames() []string {

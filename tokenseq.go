@@ -6,6 +6,7 @@ type TokenSeq interface {
 	Next() *Token
 
 	Advance()
+	AdvanceUntil(types ...TokenType)
 	AdvanceSkip(skipTypes ...TokenType)
 	Skip(skipTypes ...TokenType)
 }

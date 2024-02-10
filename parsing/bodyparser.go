@@ -9,10 +9,12 @@ type BodyParserBase struct {
 
 	Statements []slang.Statement
 
-	parseStatement func(slang.TokenSeq) bool
+	parseStatement ParseStmtFunc
 }
 
-func NewBodyParserBase(parseStatement func(slang.TokenSeq) bool) *BodyParserBase {
+type ParseStmtFunc func(slang.TokenSeq) slang.Statement
+
+func NewBodyParserBase(parseStatement ParseStmtFunc) *BodyParserBase {
 	return &BodyParserBase{
 		ParserBase:     NewParserBase(),
 		Statements:     []slang.Statement{},
@@ -24,36 +26,39 @@ func (p *BodyParserBase) GetStatements() []slang.Statement {
 	return p.Statements
 }
 
-func (p *BodyParserBase) ParseStatement(toks slang.TokenSeq, sp StatementParser) bool {
+func (p *BodyParserBase) ParseStatement(
+	toks slang.TokenSeq,
+	sp StatementParser,
+) slang.Statement {
 	if !p.RunSubParser(toks, sp) {
-		return false
+		return nil
 	}
 
-	p.Statements = append(p.Statements, sp.GetStatement())
-
-	return true
+	return sp.GetStatement()
 }
 
-func (p *BodyParserBase) Run(toks slang.TokenSeq) {
+func (p *BodyParserBase) Run(toks slang.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-		return
+		return false
 	}
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	for !toks.Current().Is(slang.TokenRBRACE) {
-		if !p.parseStatement(toks) {
-			return
+		if st := p.parseStatement(toks); st != nil {
+			p.Statements = append(p.Statements, st)
 		}
 
 		if !p.ExpectToken(toks.Current(), slang.TokenNEWLINE, slang.TokenRBRACE) {
-			return
+			return false
 		}
 
 		toks.Skip(slang.TokenNEWLINE)
 	}
 
 	toks.Advance()
+
+	return true
 }

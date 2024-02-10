@@ -1,6 +1,7 @@
 package parsing_test
 
 import (
+	"encoding/json"
 	"io"
 	"strings"
 	"testing"
@@ -13,117 +14,246 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFileParser(t *testing.T) {
+func TestFileParserGlobalVars(t *testing.T) {
 	file := strings.NewReader(`
-		use "first/path"
-			
-		use "path/number/2"
-		use "path-3"
+		use "rand"
 
-		class AmountAdder {
-			field Amount float
+		var x int
+		var y int
 
-			method AddAmount(x float) float {
-				return this.Amount + x
-			}
-
-			method ChangeAmount(amt float) {
-				this.Amount = amt
-			}
+		func init() {
+			x = rand.Int()
+			y = rand.Int()
 		}
 
-		func TestAmountAdder(t test.Test) {
-			aa = AmountAdder.New()
+		func GetX() int {
+			return x
+		}
 
-			aa.ChangeAmount(2.5)
-
-			result = aa.AddAmount(12.0)
-
-			t.AssertAlmostEq(result, 14.5)
+		func GetY() int {
+			return y
 		}
 	`)
 	expected := []slang.Statement{
-		statements.NewUse("first/path"),
-		statements.NewUse("path/number/2"),
-		statements.NewUse("path-3"),
-		statements.NewClass("AmountAdder", "",
-			statements.NewField("Amount", "float"),
+		statements.NewUse("rand"),
+		statements.NewVar("x", ast.NewBasicType("int")),
+		statements.NewVar("y", ast.NewBasicType("int")),
+		statements.NewFunc("init", ast.NewFunction(
+			[]slang.Param{},
+			[]slang.Type{},
+			statements.NewAssign(
+				expressions.NewIdentifier("x"),
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
+				),
+			),
+			statements.NewAssign(
+				expressions.NewIdentifier("y"),
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
+				),
+			),
+		)),
+		statements.NewFunc("GetX", ast.NewFunction(
+			[]slang.Param{},
+			[]slang.Type{ast.NewBasicType("int")},
+			statements.NewReturnVal(
+				expressions.NewIdentifier("x"),
+			),
+		)),
+		statements.NewFunc("GetY", ast.NewFunction(
+			[]slang.Param{},
+			[]slang.Type{ast.NewBasicType("int")},
+			statements.NewReturnVal(
+				expressions.NewIdentifier("y"),
+			),
+		)),
+	}
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+}
+
+func TestFileParserGlobalConst(t *testing.T) {
+	file := strings.NewReader(`
+		const myConst = 25.7
+		var x int
+	`)
+	expected := []slang.Statement{
+		statements.NewConst("myConst", expressions.NewFloat(25.7)),
+		statements.NewVar("x", ast.NewBasicType("int")),
+	}
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+}
+
+func TestFileParserClassWithTest(t *testing.T) {
+	file := strings.NewReader(`
+		use "test"
+
+		class Accumulator {
+			field total float
+
+			method Add(x float) {
+				this.total = this.total + x
+			}
+
+			method Mul(x float) {
+				this.total = this.total * x
+			}
+
+			method Total() float {
+				return this.total
+			}
+		}
+
+		func TestAccumulator(t test.Test) {
+			accum = Accumulator()
+			
+			accum.Add(2.0)
+			accum.Mul(2.0)
+
+			t.AssertAlmostEq(accum.Total(), 4.0)
+
+			accum.Add(1.0)
+			accum.Mul(0.5)
+
+			t.AssertAlmostEq(accum.Total(), 2.5)
+		}
+	`)
+	expected := []slang.Statement{
+		statements.NewUse("test"),
+		statements.NewClass("Accumulator", "",
+			statements.NewField("total", ast.NewBasicType("float")),
 			statements.NewMethod(
-				"AddAmount",
+				"Add",
 				ast.NewFunction(
-					[]*ast.Param{ast.NewParam("x", "float")},
-					[]string{"float"},
-					statements.NewReturn(
+					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
+					[]slang.Type{},
+					statements.NewAssign(
+						expressions.NewAccessMember(
+							expressions.NewIdentifier("this"), "total"),
 						expressions.NewAdd(
-							expressions.NewMemberAccess(
-								expressions.NewIdentifier("this"), "Amount"),
+							expressions.NewAccessMember(
+								expressions.NewIdentifier("this"), "total"),
 							expressions.NewIdentifier("x"),
 						),
 					),
 				),
 			),
 			statements.NewMethod(
-				"ChangeAmount",
+				"Mul",
 				ast.NewFunction(
-					[]*ast.Param{ast.NewParam("amt", "float")},
-					[]string{},
+					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
+					[]slang.Type{},
 					statements.NewAssign(
-						expressions.NewMemberAccess(
-							expressions.NewIdentifier("this"), "Amount"),
-						expressions.NewIdentifier("amt"),
+						expressions.NewAccessMember(
+							expressions.NewIdentifier("this"), "total"),
+						expressions.NewMultiply(
+							expressions.NewAccessMember(
+								expressions.NewIdentifier("this"), "total"),
+							expressions.NewIdentifier("x"),
+						),
+					),
+				),
+			),
+			statements.NewMethod(
+				"Total",
+				ast.NewFunction(
+					[]slang.Param{},
+					[]slang.Type{ast.NewBasicType("float")},
+					statements.NewReturnVal(
+						expressions.NewAccessMember(
+							expressions.NewIdentifier("this"), "total"),
 					),
 				),
 			),
 		),
-		statements.NewFunc("TestAmountAdder", ast.NewFunction(
-			[]*ast.Param{ast.NewParam("t", "test.Test")},
-			[]string{},
+		statements.NewFunc("TestAccumulator", ast.NewFunction(
+			[]slang.Param{ast.NewParam("t", ast.NewBasicType("test", "Test"))},
+			[]slang.Type{},
 			statements.NewAssign(
-				expressions.NewIdentifier("aa"),
+				expressions.NewIdentifier("accum"),
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("AmountAdder"), "New")),
+					expressions.NewIdentifier("Accumulator"),
+				),
 			),
 			statements.NewExpression(
 				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "ChangeAmount"),
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewPositionalArg(expressions.NewCall(
+						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
+					)),
+					expressions.NewPositionalArg(expressions.NewFloat(4.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
+					expressions.NewPositionalArg(expressions.NewFloat(1.0)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
+					expressions.NewPositionalArg(expressions.NewFloat(0.5)),
+				),
+			),
+			statements.NewExpression(
+				expressions.NewCall(
+					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
+					expressions.NewPositionalArg(expressions.NewCall(
+						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
+					)),
 					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
-				),
-			),
-			statements.NewAssign(
-				expressions.NewIdentifier("result"),
-				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("aa"), "AddAmount"),
-					expressions.NewPositionalArg(expressions.NewFloat(12.0)),
-				),
-			),
-			statements.NewExpression(
-				expressions.NewCall(
-					expressions.NewMemberAccess(expressions.NewIdentifier("t"), "AssertAlmostEq"),
-					expressions.NewPositionalArg(expressions.NewIdentifier("result")),
-					expressions.NewPositionalArg(expressions.NewFloat(14.5)),
 				),
 			),
 		)),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected)
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
 }
+
+// func TestFileParserBadOnelineStatements(t *testing.T) {
+// 	file := strings.NewReader(`
+// 		use "xyz"
+// 		use what
+
+// 		var x int
+// 		var y 3
+// 	`)
+// 	expected := []slang.Statement{
+// 		statements.NewUse("xyz"),
+// 		statements.NewVar("x", "int"),
+// 	}
+// 	testFileParserSuccess(t, "just a class statement", file, expected, 2)
+// }
 
 func testFileParserSuccess(
 	t *testing.T,
 	name string,
 	file io.Reader,
-	expected []slang.Statement,
+	expectedStmts []slang.Statement,
+	expectedErrCount int,
 ) {
 	t.Run(name, func(t *testing.T) {
 		stmts, parseErrs := parsing.ParseFile(file)
 
-		if !assert.Empty(t, parseErrs) {
+		if !assert.Len(t, parseErrs, expectedErrCount) {
 			logParseErrs(t, parseErrs)
 
 			return
 		}
 
-		verifyStatemnts(t, expected, stmts)
+		verifyStatemnts(t, expectedStmts, stmts)
 	})
 }
 
@@ -133,7 +263,12 @@ func verifyStatemnts(t *testing.T, expected, actual []slang.Statement) {
 	}
 
 	for i, stmt := range expected {
-		assert.True(t, stmt.Equal(actual[i]), "statment %d not equal", i)
+		if !assert.True(t, stmt.Equal(actual[i])) {
+			actualD, _ := json.Marshal(actual[i])
+			expectedD, _ := json.Marshal(stmt)
+
+			t.Logf("statment %d not equal: \nactual: %s\nexpected: %s", i, string(actualD), string(expectedD))
+		}
 	}
 }
 

@@ -2,7 +2,6 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
 )
 
 type FileParser struct {
@@ -18,42 +17,46 @@ func NewFileParser() *FileParser {
 	}
 }
 
-func (p *FileParser) Run(toks slang.TokenSeq) {
+func (p *FileParser) Run(toks slang.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
 	for !toks.Current().Is(slang.TokenEOF) {
 		toks.Skip(slang.TokenNEWLINE)
 
-		if !p.parseStatement(toks) {
-			return
+		if st := p.parseStatement(toks); st != nil {
+			p.Statements = append(p.Statements, st)
 		}
 
 		toks.Skip(slang.TokenNEWLINE)
 	}
+
+	return true
 }
 
-func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
+func (p *FileParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	var sp StatementParser
 
 	switch toks.Current().Type() {
 	case slang.TokenCLASS:
 		sp = NewClassStatementParser()
+	case slang.TokenCONST:
+		sp = NewConstStatementParser()
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
+	case slang.TokenVAR:
+		sp = NewVarStatementParser()
 	case slang.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
-		err := customerrs.NewErrWrongTokenType(
-			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS)
+		p.TokenErr(
+			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS, slang.TokenVAR)
 
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		return nil
 	}
 
 	if !p.RunSubParser(toks, sp) {
-		return false
+		return nil
 	}
 
-	p.Statements = append(p.Statements, sp.GetStatement())
-
-	return true
+	return sp.GetStatement()
 }

@@ -8,7 +8,7 @@ import (
 type ReturnStatementParser struct {
 	*ParserBase
 
-	ReturnStmt *statements.Return
+	ReturnStmt slang.Statement
 }
 
 func NewReturnStatementParser() *ReturnStatementParser {
@@ -19,17 +19,25 @@ func (p *ReturnStatementParser) GetStatement() slang.Statement {
 	return p.ReturnStmt
 }
 
-func (p *ReturnStatementParser) Run(toks slang.TokenSeq) {
+func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenRETURN) {
-		return
+		return false
 	}
 
 	toks.Advance()
 
-	exprParser := NewExprParser(PrecedenceLOWEST)
-	if !p.RunSubParser(toks, exprParser) {
-		return
+	if toks.Current().Is(slang.TokenNEWLINE, slang.TokenRBRACE) {
+		p.ReturnStmt = statements.NewReturn()
+
+		return true
 	}
 
-	p.ReturnStmt = statements.NewReturn(exprParser.Expr)
+	exprParser := NewExprParser(PrecedenceLOWEST)
+	if !p.RunSubParser(toks, exprParser) {
+		return false
+	}
+
+	p.ReturnStmt = statements.NewReturnVal(exprParser.Expr)
+
+	return true
 }

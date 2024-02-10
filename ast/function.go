@@ -6,12 +6,12 @@ import (
 
 type Function struct {
 	Comment     string            `json:"comment"`
-	Params      []*Param          `json:"params"`
-	ReturnTypes []string          `json:"returnTypes"`
+	Params      []slang.Param     `json:"params"`
+	ReturnTypes []slang.Type      `json:"returnTypes"`
 	Statements  []slang.Statement `json:"statements"`
 }
 
-func NewFunction(params []*Param, returnTypes []string, body ...slang.Statement) *Function {
+func NewFunction(params []slang.Param, returnTypes []slang.Type, body ...slang.Statement) *Function {
 	return &Function{
 		Params:      params,
 		ReturnTypes: returnTypes,
@@ -29,7 +29,11 @@ func (fn *Function) Equal(other *Function) bool {
 	}
 
 	for i, param := range fn.Params {
-		if !param.Equal(other.Params[i]) {
+		if param.GetName() != other.Params[i].GetName() {
+			return false
+		}
+
+		if !param.GetType().IsEqual(other.Params[i].GetType()) {
 			return false
 		}
 	}
@@ -39,7 +43,7 @@ func (fn *Function) Equal(other *Function) bool {
 	}
 
 	for i, retType := range fn.ReturnTypes {
-		if retType != other.ReturnTypes[i] {
+		if !retType.IsEqual(other.ReturnTypes[i]) {
 			return false
 		}
 	}
@@ -65,22 +69,22 @@ func (fn *Function) GetParamNames() []string {
 	names := make([]string, len(fn.Params))
 
 	for i, param := range fn.Params {
-		names[i] = param.Name
+		names[i] = param.GetName()
 	}
 
 	return names
 }
 
-func (fn *Function) GetParamType(name string) (string, bool) {
+func (fn *Function) GetParamType(name string) (slang.Type, bool) {
 	for _, param := range fn.Params {
-		if name == param.Name {
-			return param.Type, true
+		if name == param.GetName() {
+			return param.GetType(), true
 		}
 	}
 
-	return "", false
+	return nil, false
 }
 
-func (fn *Function) GetReturnTypes() []string {
+func (fn *Function) GetReturnTypes() []slang.Type {
 	return fn.ReturnTypes
 }

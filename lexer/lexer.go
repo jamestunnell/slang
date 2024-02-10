@@ -383,20 +383,28 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 	str := b.String()
 
 	switch str {
+	case tokens.StrAND:
+		l.emit(tokens.AND(), loc)
 	case tokens.StrCLASS:
 		l.emit(tokens.CLASS(), loc)
+	case tokens.StrCONST:
+		l.emit(tokens.CONST(), loc)
 	case tokens.StrELSE:
 		l.emit(tokens.ELSE(), loc)
 	case tokens.StrFALSE:
 		l.emit(tokens.FALSE(), loc)
 	case tokens.StrFIELD:
 		l.emit(tokens.FIELD(), loc)
+	case tokens.StrVAR:
+		l.emit(tokens.VAR(), loc)
 	case tokens.StrFUNC:
 		l.emit(tokens.FUNC(), loc)
 	case tokens.StrIF:
 		l.emit(tokens.IF(), loc)
 	case tokens.StrMETHOD:
 		l.emit(tokens.METHOD(), loc)
+	case tokens.StrOR:
+		l.emit(tokens.OR(), loc)
 	case tokens.StrRETURN:
 		l.emit(tokens.RETURN(), loc)
 	case tokens.StrTRUE:

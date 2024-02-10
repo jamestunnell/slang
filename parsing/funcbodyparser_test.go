@@ -4,17 +4,33 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/parsing"
 )
 
-func TestCondBodyParser(t *testing.T) {
+func TestFuncBodyParser(t *testing.T) {
 	tests := []*bodyParserSuccessTest{
 		{
 			TestName:   "empty",
 			Input:      `{}`,
 			Statements: []slang.Statement{},
+		},
+		{
+			TestName: "vars&consts",
+			Input: `{
+				var a int
+				const b = "hello"
+				var c float
+				const d = 12 
+			}`,
+			Statements: []slang.Statement{
+				statements.NewVar("a", ast.NewBasicType("int")),
+				statements.NewConst("b", expressions.NewString("hello")),
+				statements.NewVar("c", ast.NewBasicType("float")),
+				statements.NewConst("d", expressions.NewInteger(12)),
+			},
 		},
 		{
 			TestName: "assign to object field",
@@ -25,11 +41,11 @@ func TestCondBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewAssign(
-					expressions.NewMemberAccess(expressions.NewIdentifier("this"), "X"),
+					expressions.NewAccessMember(expressions.NewIdentifier("this"), "X"),
 					expressions.NewInteger(2),
 				),
 				statements.NewAssign(
-					expressions.NewMemberAccess(expressions.NewIdentifier("person"), "Name"),
+					expressions.NewAccessMember(expressions.NewIdentifier("person"), "Name"),
 					expressions.NewString("Jill"),
 				),
 			},
@@ -42,7 +58,7 @@ func TestCondBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewExpression(
 					expressions.NewCall(
-						expressions.NewMemberAccess(expressions.NewIdentifier("this"), "MyMethod")),
+						expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
 				),
 			},
 		},
@@ -53,9 +69,9 @@ func TestCondBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewExpression(
-					expressions.NewMemberAccess(
+					expressions.NewAccessMember(
 						expressions.NewCall(
-							expressions.NewMemberAccess(
+							expressions.NewAccessMember(
 								expressions.NewIdentifier("a"),
 								"b",
 							),
@@ -68,9 +84,9 @@ func TestCondBodyParser(t *testing.T) {
 			},
 		},
 		{
-			TestName: "assign nested string interpolation",
+			TestName: "assign string interpolation",
 			Input: `{
-				myVar = "${word} is a ${if word.Size() < 10 {"short"} else {"not short"}} word"
+				myVar = "${word} is a ${fanciness.String()} word"
 			}`,
 			Statements: []slang.Statement{
 				statements.NewAssign(
@@ -79,15 +95,8 @@ func TestCondBodyParser(t *testing.T) {
 						expressions.NewString(""),
 						expressions.NewIdentifier("word"),
 						expressions.NewString(" is a "),
-						expressions.NewIfElse(
-							expressions.NewLess(
-								expressions.NewCall(
-									expressions.NewMemberAccess(expressions.NewIdentifier("word"), "Size")),
-								expressions.NewInteger(10),
-							),
-							[]slang.Statement{statements.NewExpression(expressions.NewString("short"))},
-							[]slang.Statement{statements.NewExpression(expressions.NewString("not short"))},
-						),
+						expressions.NewCall(
+							expressions.NewAccessMember(expressions.NewIdentifier("fanciness"), "String")),
 						expressions.NewString(" word"),
 					),
 				),
@@ -96,12 +105,12 @@ func TestCondBodyParser(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		testCondBodyParserSuccess(t, test)
+		testFuncBodyParserSuccess(t, test)
 	}
 }
 
-func testCondBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.BodyParser { return parsing.NewCondBodyParser() }
+func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
+	newParser := func() parsing.BodyParser { return parsing.NewFuncBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }
