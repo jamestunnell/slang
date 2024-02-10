@@ -4,24 +4,28 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type FuncBodyParser struct {
+type CondBodyParser struct {
 	*BodyParserBase
 }
 
-func NewFuncBodyParser() *FuncBodyParser {
-	p := &FuncBodyParser{}
+func NewCondBodyParser() *CondBodyParser {
+	p := &CondBodyParser{}
 
 	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
 
 	return p
 }
 
-func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
+func (p *CondBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	var sp StatementParser
 
 	switch toks.Current().Type() {
+	case slang.TokenBREAK:
+		sp = NewBreakStatementParser()
 	case slang.TokenCONST:
 		sp = NewConstStatementParser()
+	case slang.TokenCONTINUE:
+		sp = NewContinueStatementParser()
 	case slang.TokenIF:
 		sp = NewIfStatementParser()
 	case slang.TokenFOREACH:

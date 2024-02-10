@@ -53,11 +53,13 @@ const (
 	TokenAND TokenType = iota
 	TokenASSIGN
 	TokenBANG
+	TokenBREAK
 	TokenCLASS
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
 	TokenCONST
+	TokenCONTINUE
 	TokenDOLLARLBRACE
 	TokenDOT
 	TokenELSE
@@ -66,11 +68,13 @@ const (
 	TokenFALSE
 	TokenFIELD
 	TokenFLOAT
+	TokenFOREACH
 	TokenFUNC
 	TokenGREATER
 	TokenGREATEREQUAL
 	TokenIF
 	TokenILLEGAL
+	TokenIN
 	TokenINT
 	TokenLBRACE
 	TokenLBRACKET
@@ -115,6 +119,8 @@ func (tt TokenType) String() string {
 		str = "ASSIGN"
 	case TokenBANG:
 		str = "BANG"
+	case TokenBREAK:
+		str = "BREAK"
 	case TokenCLASS:
 		str = "CLASS"
 	case TokenCOLON:
@@ -125,10 +131,10 @@ func (tt TokenType) String() string {
 		str = "COMMENT"
 	case TokenCONST:
 		str = "CONST"
+	case TokenCONTINUE:
+		str = "CONTINUE"
 	case TokenDOT:
 		str = "DOT"
-	case TokenIF:
-		str = "IF"
 	case TokenELSE:
 		str = "ELSE"
 	case TokenEOF:
@@ -141,14 +147,20 @@ func (tt TokenType) String() string {
 		str = "FIELD"
 	case TokenFLOAT:
 		str = "FLOAT"
+	case TokenFOREACH:
+		str = "FOREACH"
 	case TokenFUNC:
 		str = "FUNC"
 	case TokenGREATER:
 		str = "GREATER"
 	case TokenGREATEREQUAL:
 		str = "GREATEREQUAL"
+	case TokenIF:
+		str = "IF"
 	case TokenILLEGAL:
 		str = "ILLEGAL"
+	case TokenIN:
+		str = "IN"
 	case TokenINT:
 		str = "INT"
 	case TokenLBRACE:

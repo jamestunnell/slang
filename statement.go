@@ -13,10 +13,13 @@ type Statement interface {
 const (
 	StatementASSIGN StatementType = iota
 	StatementBLOCK
+	StatementBREAK
 	StatementCLASS
 	StatementCONST
+	StatementCONTINUE
 	StatementEXPRESSION
 	StatementFIELD
+	StatementFOREACH
 	StatementVAR
 	StatementFUNC
 	StatementIF

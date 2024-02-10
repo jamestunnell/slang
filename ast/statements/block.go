@@ -8,7 +8,7 @@ type Block struct {
 	Statements []slang.Statement
 }
 
-func NewBlock(stmts []slang.Statement) *Block {
+func NewBlock(stmts ...slang.Statement) *Block {
 	return &Block{
 		Base:       NewBase(slang.StatementBLOCK),
 		Statements: stmts,

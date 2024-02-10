@@ -22,6 +22,10 @@ func (p *IfStatementParser) GetStatement() slang.Statement {
 }
 
 func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), slang.TokenIF) {
+		return false
+	}
+
 	toks.Advance()
 
 	condParser := NewExprParser(PrecedenceLOWEST)
@@ -29,12 +33,12 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	ifBodyParser := NewFuncBodyParser()
+	ifBodyParser := NewCondBodyParser()
 	if !p.RunSubParser(toks, ifBodyParser) {
 		return false
 	}
 
-	ifBlock := statements.NewBlock(ifBodyParser.Statements)
+	ifBlock := statements.NewBlock(ifBodyParser.Statements...)
 
 	if !toks.Current().Is(slang.TokenELSE) {
 		p.Stmt = statements.NewIf(condParser.Expr, ifBlock)
@@ -44,12 +48,12 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 
 	toks.Advance()
 
-	elseBodyParser := NewFuncBodyParser()
+	elseBodyParser := NewCondBodyParser()
 	if !p.RunSubParser(toks, elseBodyParser) {
 		return false
 	}
 
-	elseBlock := statements.NewBlock(elseBodyParser.Statements)
+	elseBlock := statements.NewBlock(elseBodyParser.Statements...)
 
 	p.Stmt = statements.NewIfElse(condParser.Expr, ifBlock, elseBlock)
 
