@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/parsing"
@@ -15,6 +16,21 @@ func TestFuncBodyParser(t *testing.T) {
 			TestName:   "empty",
 			Input:      `{}`,
 			Statements: []slang.Statement{},
+		},
+		{
+			TestName: "vars&consts",
+			Input: `{
+				var a int
+				const b = "hello"
+				var c float
+				const d = 12 
+			}`,
+			Statements: []slang.Statement{
+				statements.NewVar("a", ast.NewBasicType("int")),
+				statements.NewConst("b", expressions.NewString("hello")),
+				statements.NewVar("c", ast.NewBasicType("float")),
+				statements.NewConst("d", expressions.NewInteger(12)),
+			},
 		},
 		{
 			TestName: "assign to object field",

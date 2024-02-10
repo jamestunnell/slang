@@ -387,6 +387,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.AND(), loc)
 	case tokens.StrCLASS:
 		l.emit(tokens.CLASS(), loc)
+	case tokens.StrCONST:
+		l.emit(tokens.CONST(), loc)
 	case tokens.StrELSE:
 		l.emit(tokens.ELSE(), loc)
 	case tokens.StrFALSE:

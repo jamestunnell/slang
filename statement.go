@@ -14,6 +14,7 @@ const (
 	StatementASSIGN StatementType = iota
 	StatementBLOCK
 	StatementCLASS
+	StatementCONST
 	StatementEXPRESSION
 	StatementFIELD
 	StatementVAR
@@ -27,6 +28,7 @@ const (
 
 	StrASSIGN     = "ASSIGN"
 	StrCLASS      = "CLASS"
+	StrCONST      = "CONST"
 	StrEXPRESSION = "EXPRESSION"
 	StrIF         = "IF"
 	StrIFELSE     = "IFELSE"

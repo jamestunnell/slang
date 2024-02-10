@@ -72,6 +72,18 @@ func TestFileParserGlobalVars(t *testing.T) {
 	testFileParserSuccess(t, "just a class statement", file, expected, 0)
 }
 
+func TestFileParserGlobalConst(t *testing.T) {
+	file := strings.NewReader(`
+		const myConst = 25.7
+		var x int
+	`)
+	expected := []slang.Statement{
+		statements.NewConst("myConst", expressions.NewFloat(25.7)),
+		statements.NewVar("x", ast.NewBasicType("int")),
+	}
+	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+}
+
 func TestFileParserClassWithTest(t *testing.T) {
 	file := strings.NewReader(`
 		use "test"

@@ -8,6 +8,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexer"
 	"github.com/jamestunnell/slang/parsing"
@@ -72,12 +73,18 @@ func TestClassBodyParserSuccess(t *testing.T) {
 			},
 		},
 		{
-			TestName: "vars",
+			TestName: "vars&consts",
 			Input: `{
-				var x int
+				var a int
+				const b = "hello"
+				var c float
+				const d = 12 
 			}`,
 			Statements: []slang.Statement{
-				statements.NewVar("x", ast.NewBasicType("int")),
+				statements.NewVar("a", ast.NewBasicType("int")),
+				statements.NewConst("b", expressions.NewString("hello")),
+				statements.NewVar("c", ast.NewBasicType("float")),
+				statements.NewConst("d", expressions.NewInteger(12)),
 			},
 		},
 		// {

@@ -39,6 +39,8 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	switch toks.Current().Type() {
 	case slang.TokenCLASS:
 		sp = NewClassStatementParser()
+	case slang.TokenCONST:
+		sp = NewConstStatementParser()
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
 	case slang.TokenVAR:

@@ -57,6 +57,7 @@ const (
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
+	TokenCONST
 	TokenDOLLARLBRACE
 	TokenDOT
 	TokenELSE
@@ -120,6 +121,10 @@ func (tt TokenType) String() string {
 		str = "COLON"
 	case TokenCOMMA:
 		str = "COMMA"
+	case TokenCOMMENT:
+		str = "COMMENT"
+	case TokenCONST:
+		str = "CONST"
 	case TokenDOT:
 		str = "DOT"
 	case TokenIF:
