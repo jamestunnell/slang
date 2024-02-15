@@ -9,13 +9,16 @@ type BinaryOperation struct {
 
 	Left  slang.Expression `json:"left"`
 	Right slang.Expression `json:"right"`
+
+	opMethod string
 }
 
-func NewBinaryOperation(typ slang.ExprType, Left, Right slang.Expression) *BinaryOperation {
+func NewBinaryOperation(typ slang.ExprType, opMethod string, Left, Right slang.Expression) *BinaryOperation {
 	return &BinaryOperation{
-		Base:  NewBase(typ),
-		Left:  Left,
-		Right: Right,
+		Base:     NewBase(typ),
+		Left:     Left,
+		Right:    Right,
+		opMethod: opMethod,
 	}
 }
 
@@ -32,19 +35,19 @@ func (binop *BinaryOperation) Equal(other slang.Expression) bool {
 	return binop.Left.Equal(binop2.Left) && binop.Right.Equal(binop2.Right)
 }
 
-// func (bo *BinaryOperation) Eval(env *slang.Environment) (slang.Object, error) {
-// 	a, err := bo.Left.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+func (bo *BinaryOperation) Eval(env slang.Environment) (slang.Object, error) {
+	l, err := bo.Left.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	b, err := bo.Right.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+	r, err := bo.Right.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return a.Send(bo.Operator.MethodName(), b)
-// }
+	return l.Send(bo.opMethod, r)
+}
 
 // // func (bo *BinaryOperation) String() string {
 // // 	return fmt.Sprintf("%s %s %s", bo.Left, bo.Operator, bo.Right)

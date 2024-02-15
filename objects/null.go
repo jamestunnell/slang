@@ -15,10 +15,18 @@ const (
 
 var null = &Null{}
 
-// var nullClass = NewBuiltInClass(ClassNULL)
+var typeNULL = NewFundType(strNULL)
 
 func NULL() *Null {
 	return null
+}
+
+func (obj *Null) Get(name string) (slang.Object, bool) {
+	return nil, false
+}
+
+func (obj *Null) Set(name string, val slang.Object) {
+	// ignore set
 }
 
 func (obj *Null) Equal(other slang.Object) bool {
@@ -30,10 +38,6 @@ func (obj *Null) Equal(other slang.Object) bool {
 func (obj *Null) Inspect() string {
 	return StrNULL
 }
-
-// func (obj *Null) Class() Class {
-// 	return nullClass
-// }
 
 // func (obj *Null) Truthy() bool {
 // 	return false

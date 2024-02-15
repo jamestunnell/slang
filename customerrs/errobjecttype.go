@@ -3,10 +3,10 @@ package customerrs
 import "fmt"
 
 type ErrObjectType struct {
-	expected, actual fmt.Stringer
+	expected, actual string
 }
 
-func NewErrObjectType(expected, actual fmt.Stringer) *ErrObjectType {
+func NewErrObjectType(expected, actual string) *ErrObjectType {
 	return &ErrObjectType{
 		expected: expected,
 		actual:   actual,

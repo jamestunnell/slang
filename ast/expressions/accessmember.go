@@ -2,6 +2,7 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type AccessMember struct {
@@ -28,21 +29,16 @@ func (c *AccessMember) Equal(other slang.Expression) bool {
 	return c2.Object.Equal(c.Object) && c2.Member == c.Member
 }
 
-// func (c *Member) Eval(env *slang.Environment) (slang.Object, error) {
-// 	obj, err := c.Object.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+func (c *AccessMember) Eval(env slang.Environment) (slang.Object, error) {
+	obj, err := c.Object.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	vals := make([]slang.Object, len(c.Arguments))
-// 	for i := 0; i < len(c.Arguments); i++ {
-// 		val, err := c.Arguments[i].Eval(env)
-// 		if err != nil {
-// 			return objects.NULL(), err
-// 		}
+	memberVal, found := obj.Get(c.Member)
+	if !found {
+		return nil, customerrs.NewErrObjectNotFound(c.Member)
+	}
 
-// 		vals[i] = val
-// 	}
-
-// 	return obj.Send(c.MethodName.Name, vals...)
-// }
+	return memberVal, nil
+}

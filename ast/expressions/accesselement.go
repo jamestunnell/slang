@@ -28,16 +28,16 @@ func (c *AccessElem) Equal(other slang.Expression) bool {
 	return c2.Container.Equal(c.Container) && c2.Key.Equal(c.Key)
 }
 
-// func (expr *AccessElem) Eval(env *slang.Environment) (slang.Object, error) {
-// 	ary, err := expr.Array.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+func (expr *AccessElem) Eval(env slang.Environment) (slang.Object, error) {
+	container, err := expr.Container.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	idx, err := expr.AccessElem.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+	key, err := expr.Key.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return ary.Send(slang.MethodINDEX, idx)
-// }
+	return container.Send(slang.MethodELEM, key)
+}

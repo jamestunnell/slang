@@ -3,5 +3,5 @@ package expressions
 import "github.com/jamestunnell/slang"
 
 func NewMultiply(left, right slang.Expression) slang.Expression {
-	return NewBinaryOperation(slang.ExprMULTIPLY, left, right)
+	return NewBinaryOperation(slang.ExprMULTIPLY, slang.MethodMUL, left, right)
 }

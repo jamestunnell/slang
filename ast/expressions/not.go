@@ -9,14 +9,5 @@ type Not struct {
 }
 
 func NewNot(val slang.Expression) slang.Expression {
-	return NewUnaryOperation(slang.ExprNOT, val)
+	return NewUnaryOperation(slang.ExprNOT, slang.MethodNOT, val)
 }
-
-// func (expr *Not) Eval(env *slang.Environment) (slang.Object, error) {
-// 	obj, err := expr.Value.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
-
-// 	return obj.Send(slang.MethodNOT)
-// }

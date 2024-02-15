@@ -7,7 +7,7 @@ type StatementType int
 type Statement interface {
 	Type() StatementType
 	Equal(Statement) bool
-	// Eval(env *objecsts.Environment) (objects.Object, error)
+	Eval(env Environment) (Object, error)
 }
 
 const (

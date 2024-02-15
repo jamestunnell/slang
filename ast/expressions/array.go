@@ -2,6 +2,7 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/objects"
 	"golang.org/x/exp/slices"
 )
 
@@ -33,16 +34,16 @@ func (a *Array) Equal(other slang.Expression) bool {
 	return slices.EqualFunc(a.Values, a2.Values, expressionsEqual)
 }
 
-// func (expr *Array) Eval(env *slang.Environment) (slang.Object, error) {
-// 	vals := make([]slang.Object, len(expr.Elements))
-// 	for i := 0; i < len(expr.Elements); i++ {
-// 		val, err := expr.Elements[i].Eval(env)
-// 		if err != nil {
-// 			return objects.NULL(), err
-// 		}
+func (expr *Array) Eval(env slang.Environment) (slang.Object, error) {
+	vals := make([]slang.Object, len(expr.Values))
+	for i, valExpr := range expr.Values {
+		val, err := valExpr.Eval(env)
+		if err != nil {
+			return nil, err
+		}
 
-// 		vals[i] = val
-// 	}
+		vals[i] = val
+	}
 
-// 	return objects.NewArray(vals...), nil
-// }
+	return objects.NewArray(vals...), nil
+}

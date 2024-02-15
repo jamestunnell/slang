@@ -8,12 +8,15 @@ type UnaryOperation struct {
 	*Base
 
 	Value slang.Expression `json:"value"`
+
+	opMethod string
 }
 
-func NewUnaryOperation(typ slang.ExprType, val slang.Expression) *UnaryOperation {
+func NewUnaryOperation(typ slang.ExprType, opMethod string, val slang.Expression) *UnaryOperation {
 	return &UnaryOperation{
-		Base:  NewBase(typ),
-		Value: val,
+		Base:     NewBase(typ),
+		Value:    val,
+		opMethod: opMethod,
 	}
 }
 
@@ -30,19 +33,14 @@ func (op *UnaryOperation) Equal(other slang.Expression) bool {
 	return op.Value.Equal(op2.Value)
 }
 
-// func (bo *UnaryOperation) Eval(env *slang.Environment) (slang.Object, error) {
-// 	a, err := bo.Left.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+func (bo *UnaryOperation) Eval(env slang.Environment) (slang.Object, error) {
+	val, err := bo.Value.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	b, err := bo.Right.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
-
-// 	return a.Send(bo.Operator.MethodName(), b)
-// }
+	return val.Send(bo.opMethod)
+}
 
 // // func (bo *UnaryOperation) String() string {
 // // 	return fmt.Sprintf("%s %s %s", bo.Left, bo.Operator, bo.Right)

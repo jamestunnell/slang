@@ -28,13 +28,25 @@ func (a *Assign) Equal(other slang.Statement) bool {
 	return a.Target.Equal(a2.Target) && a2.Value.Equal(a.Value)
 }
 
-// func (st *Assign) Eval(env *slang.Environment) (slang.Object, error) {
-// 	obj, err := st.Value.Eval(env)
+// func (st *Assign) Eval(env slang.Environment) (slang.Object, error) {
+// 	valObj, err := st.Value.Eval(env)
 // 	if err != nil {
-// 		return objects.NULL(), err
+// 		return nil, err
 // 	}
 
-// 	env.Set(st.ident.Name, obj)
+// 	switch tgt := st.Target.(type) {
+// 	case *expressions.AccessMember:
+// 		tgtObj, err := tgt.Object.Eval(env)
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-// 	return obj, nil
+// 		tgtObj.Set(tgt.Member, valObj)
+// 	case *expressions.Identifier:
+// 		env.Set(tgt.Name, valObj)
+// 	default:
+// 		return nil, customerrs.NewErrAssignNonIdent(st.Target)
+// 	}
+
+// 	return objects.NULL(), nil
 // }

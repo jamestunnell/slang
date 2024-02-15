@@ -23,3 +23,7 @@ func (c *Const[T]) Equal(other slang.Expression) bool {
 
 	return c2.Value == c.Value
 }
+
+func (c *Const[T]) Eval(env slang.Environment) (slang.Object, error) {
+	// TODO
+}

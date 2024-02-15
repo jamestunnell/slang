@@ -2,6 +2,7 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
 type Identifier struct {
@@ -26,15 +27,11 @@ func (i *Identifier) Equal(other slang.Expression) bool {
 	return i2.Name == i.Name
 }
 
-// func (expr *Identifier) Eval(env *slang.Environment) (slang.Object, error) {
-// 	obj, found := env.Get(expr.Name)
-// 	if !found {
-// 		obj, found = objects.FindBuiltInFn(expr.Name)
+func (expr *Identifier) Eval(env slang.Environment) (slang.Object, error) {
+	obj, found := env.Get(expr.Name)
+	if !found {
+		return nil, customerrs.NewErrObjectNotFound(expr.Name)
+	}
 
-// 		if !found {
-// 			return nil, customerrs.NewErrObjectNotFound(expr.Name)
-// 		}
-// 	}
-
-// 	return obj, nil
-// }
+	return obj, nil
+}

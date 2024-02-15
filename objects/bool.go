@@ -9,6 +9,8 @@ import (
 )
 
 type Bool struct {
+	*slang.EnvBase
+
 	Value bool
 }
 
@@ -16,8 +18,24 @@ const ClassBOOL = "Bool"
 
 // var boolClass = NewBuiltInClass(ClassBOOL)
 
+var (
+	objFalse = NewBool(false)
+	objTrue  = NewBool(true)
+)
+
 func NewBool(val bool) slang.Object {
-	return &Bool{Value: val}
+	return &Bool{
+		EnvBase: slang.NewEnvBase(nil),
+		Value:   val,
+	}
+}
+
+func TRUE() slang.Object {
+	return objTrue
+}
+
+func FALSE() slang.Object {
+	return objFalse
 }
 
 func (obj *Bool) Equal(other slang.Object) bool {

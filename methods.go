@@ -1,6 +1,9 @@
 package slang
 
 const (
+	// callable methods
+	MethodCALL = "call"
+
 	// unary methods
 	MethodNEG = "neg"
 	MethodABS = "abs"
@@ -26,10 +29,14 @@ const (
 	MethodAND = "and"
 	MethodOR  = "or"
 
-	MethodCALL = "call"
+	// string methods
+	MethodCONCAT = "concat"
+
+	// container methods
+	MethodELEM = "elem"
+	MethodSIZE = "size"
 
 	// array methods
-	MethodSIZE  = "size"
 	MethodINDEX = "index"
 	MethodFIRST = "first"
 	MethodLAST  = "last"

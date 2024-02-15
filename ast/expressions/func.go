@@ -3,6 +3,8 @@ package expressions
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/objects"
 )
 
 type Func struct {
@@ -26,8 +28,10 @@ func (f *Func) Equal(other slang.Expression) bool {
 	return f.Function.Equal(f2.Function)
 }
 
-// func (expr *Func) Eval(env *slang.Environment) (slang.Object, error) {
-// 	f := objects.NewFunction(expr.Params, expr.Body, env)
+func (expr *Func) Eval(env slang.Environment) (slang.Object, error) {
+	body := statements.NewBlock(expr.Statements)
 
-// 	return f, nil
-// }
+	f := objects.NewFunction(expr.Params, body, env)
+
+	return f, nil
+}

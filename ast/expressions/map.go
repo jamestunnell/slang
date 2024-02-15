@@ -46,3 +46,7 @@ func (m *Map) Equal(other slang.Expression) bool {
 
 	return slices.EqualFunc(m.Values, m2.Values, expressionsEqual)
 }
+
+func (m *Map) Eval(env slang.Environment) (slang.Object, error) {
+	// TODO
+}

@@ -7,7 +7,7 @@ type ExprType int
 type Expression interface {
 	Type() ExprType
 	Equal(Expression) bool
-	// Eval(env *objects.Environment) (objects.Object, error)
+	Eval(env Environment) (Object, error)
 }
 
 const (

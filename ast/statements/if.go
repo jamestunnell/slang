@@ -2,6 +2,7 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/objects"
 )
 
 type If struct {
@@ -32,15 +33,15 @@ func (i *If) Equal(other slang.Statement) bool {
 	return i.Block.Equal(i2.Block)
 }
 
-// func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {
-// 	res, err := expr.Condition.Eval(env)
-// 	if err != nil {
-// 		return objects.NULL(), err
-// 	}
+func (expr *If) Eval(env slang.Environment) (slang.Object, error) {
+	res, err := expr.Condition.Eval(env)
+	if err != nil {
+		return nil, err
+	}
 
-// 	if res.Truthy() {
-// 		return expr.Consequence.Eval(slang.NewEnvironment(env))
-// 	}
+	if res.Equal(objects.TRUE()) {
+		return expr.Block.Eval(slang.NewEnvBase(env))
+	}
 
-// 	return objects.NULL(), nil
-// }
+	return objects.NULL(), nil
+}

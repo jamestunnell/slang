@@ -41,17 +41,19 @@ func (obj *Int) Inspect() string {
 // 	return true
 // }
 
-func (obj *Int) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+func (obj *Int) Send(method string, args ...slang.Object) (slang.Object, error) {
 	// // an added instance method would override a standard one
-	// if m, found := intClass.GetInstanceMethod(methodName); found {
+	// if m, found := intClass.GetInstanceMethod(method); found {
 	// 	return m.Run(args)
 	// }
 
-	switch methodName {
-	case slang.MethodNEG:
-		return NewInt(-obj.Value), nil
-	case slang.MethodABS:
-		return NewInt(intAbs(obj.Value)), nil
+	switch method {
+	case slang.MethodNEG, slang.MethodABS:
+		if err := checkArgCount(args, 0); err != nil {
+			return nil, err
+		}
+
+		return obj.sendZero(method)
 	case slang.MethodADD, slang.MethodSUB, slang.MethodMUL, slang.MethodDIV,
 		slang.MethodEQ, slang.MethodNEQ, slang.MethodLT, slang.MethodLEQ,
 		slang.MethodGT, slang.MethodGEQ:
@@ -60,15 +62,24 @@ func (obj *Int) Send(methodName string, args ...slang.Object) (slang.Object, err
 		}
 
 		if _, isFlt := args[0].(*Float); isFlt {
-			return NewFloat(float64(obj.Value)).Send(methodName, args[0])
+			return NewFloat(float64(obj.Value)).Send(method, args[0])
 		}
 
-		return obj.sendOne(methodName, args[0])
+		return obj.sendOne(method, args[0])
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassINT)
+	err := customerrs.NewErrMethodUndefined(method, ClassINT)
 
 	return nil, err
+}
+
+func (obj *Int) sendZero(method string) (slang.Object, error) {
+	switch method {
+	case slang.MethodNEG:
+		return NewInt(-obj.Value), nil
+	case slang.MethodABS:
+		return NewInt(intAbs(obj.Value)), nil
+	}
 }
 
 func (obj *Int) sendOne(method string, arg slang.Object) (slang.Object, error) {
