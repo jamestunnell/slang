@@ -14,12 +14,12 @@ func NewReturn() *Return {
 	}
 }
 
-func (r *Return) Equal(other slang.Statement) bool {
+func (r *Return) IsEqual(other slang.Statement) bool {
 	_, ok := other.(*Return)
 
 	return ok
 }
 
-// func (st *Return) Eval(env *slang.Environment) (slang.Object, error) {
-// 	return st.value.Eval(env)
-// }
+func (st *Return) Eval(env slang.Environment) (slang.Objects, error) {
+	return slang.Objects{}, nil
+}

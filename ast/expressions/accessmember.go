@@ -20,13 +20,13 @@ func NewAccessMember(object slang.Expression, member string) slang.Expression {
 	}
 }
 
-func (c *AccessMember) Equal(other slang.Expression) bool {
+func (c *AccessMember) IsEqual(other slang.Expression) bool {
 	c2, ok := other.(*AccessMember)
 	if !ok {
 		return false
 	}
 
-	return c2.Object.Equal(c.Object) && c2.Member == c.Member
+	return c2.Object.IsEqual(c.Object) && c2.Member == c.Member
 }
 
 func (c *AccessMember) Eval(env slang.Environment) (slang.Object, error) {

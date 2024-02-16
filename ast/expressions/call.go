@@ -25,13 +25,13 @@ func NewCall(
 	}
 }
 
-func (c *Call) Equal(other slang.Expression) bool {
+func (c *Call) IsEqual(other slang.Expression) bool {
 	c2, ok := other.(*Call)
 	if !ok {
 		return false
 	}
 
-	if !c2.Function.Equal(c.Function) {
+	if !c2.Function.IsEqual(c.Function) {
 		return false
 	}
 
@@ -66,5 +66,5 @@ func (expr *Call) Eval(env slang.Environment) (slang.Object, error) {
 }
 
 func expressionsEqual(a, b slang.Expression) bool {
-	return a.Equal(b)
+	return a.IsEqual(b)
 }

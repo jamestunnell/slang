@@ -19,13 +19,13 @@ func NewAccessElem(container, key slang.Expression) slang.Expression {
 	}
 }
 
-func (c *AccessElem) Equal(other slang.Expression) bool {
+func (c *AccessElem) IsEqual(other slang.Expression) bool {
 	c2, ok := other.(*AccessElem)
 	if !ok {
 		return false
 	}
 
-	return c2.Container.Equal(c.Container) && c2.Key.Equal(c.Key)
+	return c2.Container.IsEqual(c.Container) && c2.Key.IsEqual(c.Key)
 }
 
 func (expr *AccessElem) Eval(env slang.Environment) (slang.Object, error) {

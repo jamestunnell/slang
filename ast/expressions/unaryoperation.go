@@ -20,7 +20,7 @@ func NewUnaryOperation(typ slang.ExprType, opMethod string, val slang.Expression
 	}
 }
 
-func (op *UnaryOperation) Equal(other slang.Expression) bool {
+func (op *UnaryOperation) IsEqual(other slang.Expression) bool {
 	op2, ok := other.(*UnaryOperation)
 	if !ok {
 		return false
@@ -30,7 +30,7 @@ func (op *UnaryOperation) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return op.Value.Equal(op2.Value)
+	return op.Value.IsEqual(op2.Value)
 }
 
 func (bo *UnaryOperation) Eval(env slang.Environment) (slang.Object, error) {

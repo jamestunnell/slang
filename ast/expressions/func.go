@@ -19,7 +19,7 @@ func NewFunc(fn *ast.Function) *Func {
 	}
 }
 
-func (f *Func) Equal(other slang.Expression) bool {
+func (f *Func) IsEqual(other slang.Expression) bool {
 	f2, ok := other.(*Func)
 	if !ok {
 		return false

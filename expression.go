@@ -5,9 +5,9 @@ import "encoding/json"
 type ExprType int
 
 type Expression interface {
-	Type() ExprType
-	Equal(Expression) bool
-	Eval(env *Environment) (Object, error)
+	GetType() ExprType
+	IsEqual(Expression) bool
+	Eval(env Environment) (Object, error)
 }
 
 const (

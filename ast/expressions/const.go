@@ -15,7 +15,7 @@ func NewConst[T comparable](typ slang.ExprType, val T) *Const[T] {
 	}
 }
 
-func (c *Const[T]) Equal(other slang.Expression) bool {
+func (c *Const[T]) IsEqual(other slang.Expression) bool {
 	c2, ok := other.(*Const[T])
 	if !ok {
 		return false

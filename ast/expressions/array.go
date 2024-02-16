@@ -21,7 +21,7 @@ func NewArray(valTyp slang.Type, vals ...slang.Expression) slang.Expression {
 	}
 }
 
-func (a *Array) Equal(other slang.Expression) bool {
+func (a *Array) IsEqual(other slang.Expression) bool {
 	a2, ok := other.(*Array)
 	if !ok {
 		return false

@@ -12,6 +12,6 @@ func NewBase(typ slang.StatementType) *Base {
 	return &Base{StmtType: typ}
 }
 
-func (b *Base) Type() slang.StatementType {
+func (b *Base) GetType() slang.StatementType {
 	return b.StmtType
 }

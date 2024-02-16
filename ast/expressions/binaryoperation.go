@@ -22,7 +22,7 @@ func NewBinaryOperation(typ slang.ExprType, opMethod string, Left, Right slang.E
 	}
 }
 
-func (binop *BinaryOperation) Equal(other slang.Expression) bool {
+func (binop *BinaryOperation) IsEqual(other slang.Expression) bool {
 	binop2, ok := other.(*BinaryOperation)
 	if !ok {
 		return false
@@ -32,7 +32,7 @@ func (binop *BinaryOperation) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return binop.Left.Equal(binop2.Left) && binop.Right.Equal(binop2.Right)
+	return binop.Left.IsEqual(binop2.Left) && binop.Right.IsEqual(binop2.Right)
 }
 
 func (bo *BinaryOperation) Eval(env slang.Environment) (slang.Object, error) {

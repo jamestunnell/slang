@@ -20,28 +20,28 @@ func NewIf(cond slang.Expression, ifBlock slang.Statement) *If {
 	}
 }
 
-func (i *If) Equal(other slang.Statement) bool {
+func (i *If) IsEqual(other slang.Statement) bool {
 	i2, ok := other.(*If)
 	if !ok {
 		return false
 	}
 
-	if !i.Condition.Equal(i2.Condition) {
+	if !i.Condition.IsEqual(i2.Condition) {
 		return false
 	}
 
-	return i.Block.Equal(i2.Block)
+	return i.Block.IsEqual(i2.Block)
 }
 
-func (expr *If) Eval(env slang.Environment) (slang.Object, error) {
+func (expr *If) Eval(env slang.Environment) (slang.Objects, error) {
 	res, err := expr.Condition.Eval(env)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.Equal(objects.TRUE()) {
-		return expr.Block.Eval(slang.NewEnvBase(env))
+	if res.IsEqual(objects.TRUE()) {
+		return expr.Block.Eval(slang.NewEnv(env))
 	}
 
-	return objects.NULL(), nil
+	return slang.Objects{objects.NULL()}, nil
 }

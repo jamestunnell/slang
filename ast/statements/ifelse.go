@@ -22,32 +22,32 @@ func NewIfElse(cond slang.Expression, ifBlock, elseBlock slang.Statement) *IfEls
 	}
 }
 
-func (i *IfElse) Equal(other slang.Statement) bool {
+func (i *IfElse) IsEqual(other slang.Statement) bool {
 	i2, ok := other.(*IfElse)
 	if !ok {
 		return false
 	}
 
-	if !i.Condition.Equal(i2.Condition) {
+	if !i.Condition.IsEqual(i2.Condition) {
 		return false
 	}
 
-	if !i.IfBlock.Equal(i2.IfBlock) {
+	if !i.IfBlock.IsEqual(i2.IfBlock) {
 		return false
 	}
 
-	return i.ElseBlock.Equal(i2.ElseBlock)
+	return i.ElseBlock.IsEqual(i2.ElseBlock)
 }
 
-func (expr *IfElse) Eval(env slang.Environment) (slang.Object, error) {
+func (expr *IfElse) Eval(env slang.Environment) (slang.Objects, error) {
 	res, err := expr.Condition.Eval(env)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.Equal(objects.TRUE()) {
-		return expr.IfBlock.Eval(slang.NewEnvBase(env))
+	if res.IsEqual(objects.TRUE()) {
+		return expr.IfBlock.Eval(slang.NewEnv(env))
 	}
 
-	return expr.ElseBlock.Eval(slang.NewEnvBase(env))
+	return expr.ElseBlock.Eval(slang.NewEnv(env))
 }

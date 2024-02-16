@@ -5,8 +5,8 @@ import "encoding/json"
 type StatementType int
 
 type Statement interface {
-	Type() StatementType
-	Equal(Statement) bool
+	GetType() StatementType
+	IsEqual(Statement) bool
 	Eval(env Environment) (Objects, error)
 }
 

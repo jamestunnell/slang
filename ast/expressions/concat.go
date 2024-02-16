@@ -22,7 +22,7 @@ func NewConcat(exprs ...slang.Expression) *Concat {
 	}
 }
 
-func (c *Concat) Equal(other slang.Expression) bool {
+func (c *Concat) IsEqual(other slang.Expression) bool {
 	c2, ok := other.(*Concat)
 	if !ok {
 		return false

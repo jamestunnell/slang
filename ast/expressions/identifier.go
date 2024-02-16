@@ -18,7 +18,7 @@ func NewIdentifier(name string) *Identifier {
 	}
 }
 
-func (i *Identifier) Equal(other slang.Expression) bool {
+func (i *Identifier) IsEqual(other slang.Expression) bool {
 	i2, ok := other.(*Identifier)
 	if !ok {
 		return false
