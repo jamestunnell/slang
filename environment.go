@@ -1,24 +1,24 @@
 package slang
 
 type Environment interface {
-	Get(name string) (Object, bool)
-	Set(name string, obj Object)
+	Get(string) (Object, bool)
+	Set(string, Object)
 }
 
-type EnvBase struct {
+type Env struct {
 	parent Environment
 
 	objects map[string]Object
 }
 
-func NewEnvBase(parent Environment) *EnvBase {
-	return &EnvBase{
+func NewEnv(parent Environment) *Env {
+	return &Env{
 		parent:  parent,
 		objects: map[string]Object{},
 	}
 }
 
-func (env *EnvBase) Get(name string) (Object, bool) {
+func (env *Env) Get(name string) (Object, bool) {
 	if obj, found := env.objects[name]; found {
 		return obj, true
 	}
@@ -30,6 +30,6 @@ func (env *EnvBase) Get(name string) (Object, bool) {
 	return nil, false
 }
 
-func (env *EnvBase) Set(name string, obj Object) {
+func (env *Env) Set(name string, obj Object) {
 	env.objects[name] = obj
 }

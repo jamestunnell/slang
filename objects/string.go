@@ -1,25 +1,62 @@
 package objects
 
 import (
-	"reflect"
+	"fmt"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 )
 
 type String struct {
+	*Base
+
 	Value string
 }
 
-const ClassSTRING = "String"
+type strBinOp int
 
-// var strClass = NewBuiltInClass(ClassSTRING)
+const (
+	strClassName = "Bool"
 
-func NewString(val string) slang.Object {
-	return &String{Value: val}
+	strOpADD strBinOp = iota
+	strOpEQ
+	strOpNEQ
+	strOpLT
+	strOpLEQ
+	strOpGT
+	strOpGEQ
+)
+
+var strClass *BuiltInClass
+
+func init() {
+	strClass = NewBuiltInClass(
+		types.NewPrimitiveType(strClassName),
+		map[string]slang.MethodFunc{
+			slang.MethodSIZE: strSIZE,
+			slang.MethodADD:  strADD,
+			slang.MethodEQ:   strEQ,
+			slang.MethodNEQ:  strNEQ,
+			slang.MethodLT:   strLT,
+			slang.MethodLEQ:  strLEQ,
+			slang.MethodGT:   strGT,
+			slang.MethodGEQ:  strGEQ,
+		},
+	)
 }
 
-func (obj *String) Equal(other slang.Object) bool {
+func NewString(val string) slang.Object {
+	return &String{
+		Base:  NewBase(strClass),
+		Value: val,
+	}
+}
+
+func (obj *String) Inspect() string {
+	return fmt.Sprintf("\"%s\"", obj.Value)
+}
+
+func (obj *String) IsEqual(other slang.Object) bool {
 	obj2, ok := other.(*String)
 	if !ok {
 		return false
@@ -28,69 +65,72 @@ func (obj *String) Equal(other slang.Object) bool {
 	return obj.Value == obj2.Value
 }
 
-func (obj *String) Inspect() string {
-	return obj.Value
+func strSIZE(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return slang.Objects{NewInt(int64(len(obj.(*String).Value)))}, nil
 }
 
-// func (obj *String) Class() Class {
-// 	return strClass
-// }
+func strADD(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpADD, obj, args)
+}
 
-// func (obj *String) Truthy() bool {
-// 	return true
-// }
+func strEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpEQ, obj, args)
+}
 
-func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := strClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
+func strNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpNEQ, obj, args)
+}
 
-	switch methodName {
-	case slang.MethodSIZE:
-		sz := NewInt(int64(len(obj.Value)))
-		return sz, nil
-	case slang.MethodADD,
-		slang.MethodEQ, slang.MethodNEQ,
-		slang.MethodLT, slang.MethodLEQ,
-		slang.MethodGT, slang.MethodGEQ:
+func strLT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpLT, obj, args)
+}
 
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
+func strLEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpLEQ, obj, args)
+}
 
-		return obj.sendOne(methodName, args[0])
+func strGT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpGT, obj, args)
+}
+
+func strGEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return strBinaryOp(strOpGEQ, obj, args)
+}
+
+func strBinaryOp(
+	op strBinOp,
+	obj slang.Object,
+	args slang.Objects,
+) (slang.Objects, error) {
+	left := obj.(*String)
+
+	if err := checkArgCount(args, 1); err != nil {
+		return slang.Objects{}, err
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
-
-	return nil, err
-}
-
-func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	flt, ok := arg.(*String)
-	if !ok {
-		return nil, customerrs.NewErrArgType(ClassSTRING, reflect.TypeOf(arg).String())
+	right, err := CheckType[*String](args[0])
+	if err != nil {
+		return slang.Objects{}, err
 	}
 
 	var ret slang.Object
 
-	switch method {
-	case slang.MethodADD:
-		ret = NewString(obj.Value + flt.Value)
-	case slang.MethodEQ:
-		ret = NewBool(obj.Value == flt.Value)
-	case slang.MethodNEQ:
-		ret = NewBool(obj.Value != flt.Value)
-	case slang.MethodLT:
-		ret = NewBool(obj.Value < flt.Value)
-	case slang.MethodLEQ:
-		ret = NewBool(obj.Value <= flt.Value)
-	case slang.MethodGT:
-		ret = NewBool(obj.Value > flt.Value)
-	case slang.MethodGEQ:
-		ret = NewBool(obj.Value >= flt.Value)
+	switch op {
+	case strOpADD:
+		ret = NewString(left.Value + right.Value)
+	case strOpEQ:
+		ret = NewBool(left.Value == right.Value)
+	case strOpNEQ:
+		ret = NewBool(left.Value != right.Value)
+	case strOpLT:
+		ret = NewBool(left.Value < right.Value)
+	case strOpLEQ:
+		ret = NewBool(left.Value <= right.Value)
+	case strOpGT:
+		ret = NewBool(left.Value > right.Value)
+	case strOpGEQ:
+		ret = NewBool(left.Value >= right.Value)
 	}
 
-	return ret, nil
+	return slang.Objects{ret}, nil
 }

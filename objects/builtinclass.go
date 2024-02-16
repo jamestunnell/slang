@@ -1,29 +1,34 @@
 package objects
 
-// type BuiltInClass struct {
-// 	name            string
-// 	instanceMethods map[string]Method
-// }
+import (
+	"github.com/jamestunnell/slang"
+)
 
-// func NewBuiltInClass(name string) *BuiltInClass {
-// 	return &BuiltInClass{
-// 		name:            name,
-// 		instanceMethods: map[string]Method{},
-// 	}
-// }
+type BuiltInClass struct {
+	*slang.Env
 
-// func (c *BuiltInClass) Name() string {
-// 	return c.name
-// }
+	Type    slang.Type
+	Methods map[string]slang.MethodFunc
+}
 
-// func (c *BuiltInClass) GetInstanceMethod(methodName string) (Method, bool) {
-// 	if method, found := c.instanceMethods[methodName]; found {
-// 		return method, true
-// 	}
+func NewBuiltInClass(
+	typ slang.Type,
+	methods map[string]slang.MethodFunc,
+) *BuiltInClass {
+	return &BuiltInClass{
+		Type:    typ,
+		Methods: methods,
+	}
+}
 
-// 	return nil, false
-// }
+func (c *BuiltInClass) GetType() slang.Type {
+	return c.Type
+}
 
-// func (c *BuiltInClass) AddInstanceMethod(methodName string, method Method) {
-// 	c.instanceMethods[methodName] = method
-// }
+func (c *BuiltInClass) GetMethod(name string) (slang.MethodFunc, bool) {
+	if m, found := c.Methods[name]; found {
+		return m, true
+	}
+
+	return nil, false
+}

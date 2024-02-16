@@ -1,22 +1,43 @@
 package objects
 
 import (
-	"reflect"
 	"strconv"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 )
 
 type Bool struct {
-	*slang.EnvBase
+	*Base
 
 	Value bool
 }
 
-const ClassBOOL = "Bool"
+type boolBinOp int
 
-// var boolClass = NewBuiltInClass(ClassBOOL)
+const (
+	boolClassName = "Bool"
+
+	boolOpEQ boolBinOp = iota
+	boolOpNEQ
+	boolOpAND
+	boolOpOR
+)
+
+var boolClass *BuiltInClass
+
+func init() {
+	boolClass = NewBuiltInClass(
+		types.NewPrimitiveType(boolClassName),
+		map[string]slang.MethodFunc{
+			slang.MethodNOT: boolNOT,
+			slang.MethodEQ:  boolEQ,
+			slang.MethodNEQ: boolNEQ,
+			slang.MethodAND: boolAND,
+			slang.MethodOR:  boolOR,
+		},
+	)
+}
 
 var (
 	objFalse = NewBool(false)
@@ -25,8 +46,8 @@ var (
 
 func NewBool(val bool) slang.Object {
 	return &Bool{
-		EnvBase: slang.NewEnvBase(nil),
-		Value:   val,
+		Base:  NewBase(boolClass),
+		Value: val,
 	}
 }
 
@@ -38,7 +59,7 @@ func FALSE() slang.Object {
 	return objFalse
 }
 
-func (obj *Bool) Equal(other slang.Object) bool {
+func (obj *Bool) IsEqual(other slang.Object) bool {
 	obj2, ok := other.(*Bool)
 	if !ok {
 		return false
@@ -51,41 +72,54 @@ func (obj *Bool) Inspect() string {
 	return strconv.FormatBool(obj.Value)
 }
 
-func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := boolClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
+func boolNOT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return slang.Objects{NewBool(!obj.(*Bool).Value)}, nil
+}
 
-	switch methodName {
-	case slang.MethodNOT:
-		return NewBool(!obj.Value), nil
-	case slang.MethodEQ, slang.MethodNEQ, slang.MethodAND, slang.MethodOR:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
+func boolEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return boolBinaryOp(boolOpEQ, obj, args)
+}
 
-		arg, ok := args[0].(*Bool)
-		if !ok {
-			return nil, customerrs.NewErrArgType(ClassBOOL, reflect.TypeOf(args[0]).String())
-		}
+func boolNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return boolBinaryOp(boolOpNEQ, obj, args)
+}
 
-		var ret slang.Object
-		switch methodName {
-		case slang.MethodEQ:
-			ret = NewBool(obj.Value == arg.Value)
-		case slang.MethodNEQ:
-			ret = NewBool(obj.Value != arg.Value)
-		case slang.MethodAND:
-			ret = NewBool(obj.Value && arg.Value)
-		case slang.MethodOR:
-			ret = NewBool(obj.Value || arg.Value)
-		}
+func boolAND(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return boolBinaryOp(boolOpAND, obj, args)
+}
 
-		return ret, nil
+func boolOR(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	return boolBinaryOp(boolOpOR, obj, args)
+}
+
+func boolBinaryOp(
+	op boolBinOp,
+	obj slang.Object,
+	args slang.Objects,
+) (slang.Objects, error) {
+	left := obj.(*Bool)
+
+	if err := checkArgCount(args, 1); err != nil {
+		return slang.Objects{}, err
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
+	right, err := CheckType[*Bool](args[0])
+	if err != nil {
+		return slang.Objects{}, err
+	}
 
-	return nil, err
+	var ret slang.Object
+
+	switch op {
+	case boolOpEQ:
+		ret = NewBool(left.Value == right.Value)
+	case boolOpNEQ:
+		ret = NewBool(left.Value != right.Value)
+	case boolOpAND:
+		ret = NewBool(left.Value && right.Value)
+	case boolOpOR:
+		ret = NewBool(left.Value || right.Value)
+	}
+
+	return slang.Objects{ret}, nil
 }

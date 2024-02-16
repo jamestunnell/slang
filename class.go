@@ -1,11 +1,10 @@
 package slang
 
+type MethodFunc func(obj Object, args Objects) (Objects, error)
+
 type Class interface {
-	GetComment() string
+	Environment
 
-	GetFieldNames() []string
-	GetFieldType(name string) (string, bool)
-
-	GetMethodNames() []string
-	GetMethod(name string) (Function, bool)
+	GetType() Type
+	GetMethod(name string) (MethodFunc, bool)
 }

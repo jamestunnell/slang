@@ -1,6 +1,6 @@
 package slang
 
-type Function interface {
+type FunctionInfo interface {
 	GetComment() string
 
 	GetParamNames() []string

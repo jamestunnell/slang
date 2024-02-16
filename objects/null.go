@@ -2,34 +2,36 @@ package objects
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 )
 
 type Null struct {
+	*Base
 }
 
 const (
-	StrNULL   = "null"
-	ClassNULL = "Null"
+	StrNULL       = "null"
+	nullClassName = "Null"
 )
 
-var null = &Null{}
+var nullClass *BuiltInClass
 
-var typeNULL = NewFundType(strNULL)
+func init() {
+	nullClass = NewBuiltInClass(
+		types.NewPrimitiveType(nullClassName),
+		map[string]slang.MethodFunc{},
+	)
+}
+
+var null = &Null{
+	Base: NewBase(nullClass),
+}
 
 func NULL() *Null {
 	return null
 }
 
-func (obj *Null) Get(name string) (slang.Object, bool) {
-	return nil, false
-}
-
-func (obj *Null) Set(name string, val slang.Object) {
-	// ignore set
-}
-
-func (obj *Null) Equal(other slang.Object) bool {
+func (obj *Null) IsEqual(other slang.Object) bool {
 	_, ok := other.(*Null)
 
 	return ok
@@ -37,17 +39,4 @@ func (obj *Null) Equal(other slang.Object) bool {
 
 func (obj *Null) Inspect() string {
 	return StrNULL
-}
-
-// func (obj *Null) Truthy() bool {
-// 	return false
-// }
-
-func (obj *Null) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // I guess we could add instance methods to the null class?
-	// if m, found := nullClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
-
-	return nil, customerrs.NewErrMethodUndefined(methodName, ClassNULL)
 }

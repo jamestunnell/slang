@@ -1,21 +1,12 @@
 package slang
 
 type Object interface {
-	Equal(Object) bool
+	Environment
+
+	GetClass() Class
+
+	IsEqual(Object) bool
 	Inspect() string
-	Send(method string, args ...Object) (Object, error)
 }
 
-func ObjectsEqual(a, b []Object) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for idx, obj := range a {
-		if !obj.Equal(b[idx]) {
-			return false
-		}
-	}
-
-	return true
-}
+type Objects []Object
