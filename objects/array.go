@@ -2,97 +2,108 @@ package objects
 
 import (
 	"errors"
-	"reflect"
+	"fmt"
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 	"golang.org/x/exp/slices"
 )
 
 type Array struct {
+	*Base
+
 	Elements []slang.Object
 }
 
-const ClassARRAY = "Array"
+const aryClassName = "Array"
 
-var (
-	errArrayEmpty = errors.New("array is empty")
-	// aryClass      = NewBuiltInClass(ClassARRAY)
-)
+var errArrayEmpty = errors.New("array is empty")
+var aryClass *BuiltInClass
 
-func NewArray(vals ...slang.Object) slang.Object {
-	return &Array{Elements: vals}
+func init() {
+	aryClass = NewBuiltInClass(
+		types.NewPrimitiveType(aryClassName),
+		map[string]slang.MethodFunc{
+			slang.MethodFIRST: aryFIRST,
+			slang.MethodLAST:  aryLAST,
+			slang.MethodSIZE:  arySIZE,
+			slang.MethodELEM:  aryELEM,
+		},
+	)
 }
 
-func (obj *Array) Equal(other slang.Object) bool {
+func NewArray(vals ...slang.Object) slang.Object {
+	return &Array{
+		Base:     NewBase(aryClass),
+		Elements: vals,
+	}
+}
+
+func (obj *Array) IsEqual(other slang.Object) bool {
 	obj2, ok := other.(*Array)
 	if !ok {
 		return false
 	}
 
 	return slices.EqualFunc(obj.Elements, obj2.Elements, func(o1, o2 slang.Object) bool {
-		return o1.Equal(o2)
+		return o1.IsEqual(o2)
 	})
 }
 
-// func (obj *Array) Class() Class {
-// 	return aryClass
-// }
-
 func (obj *Array) Inspect() string {
-	return "[...]"
+	return fmt.Sprintf("[]{%d elements}", len(obj.Elements))
 }
 
-// func (obj *Array) Truthy() bool {
-// 	return true
-// }
-
-func (obj *Array) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := aryClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
-
-	switch methodName {
-	case slang.MethodFIRST, slang.MethodLAST, slang.MethodSIZE:
-		if err := checkArgCount(args, 0); err != nil {
-			return nil, err
-		}
-
-		if len(obj.Elements) == 0 {
-			return nil, errArrayEmpty
-		}
-
-		switch methodName {
-		case slang.MethodFIRST:
-			return obj.Elements[0], nil
-		case slang.MethodLAST:
-			return obj.Elements[len(obj.Elements)-1], nil
-		case slang.MethodSIZE:
-			return NewInt(int64(len(obj.Elements))), nil
-		}
-	case slang.MethodINDEX:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
-
-		return obj.Index(args[0])
+func arySIZE(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassARRAY)
-
-	return nil, err
+	return slang.Objects{NewInt(int64(len(obj.(*Array).Elements)))}, nil
 }
 
-func (obj *Array) Index(arg slang.Object) (slang.Object, error) {
-	idx, ok := arg.(*Int)
-	if !ok {
-		return nil, customerrs.NewErrArgType("Integer", reflect.TypeOf(arg).String())
+func aryFIRST(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
 
-	if int(idx.Value) >= len(obj.Elements) {
-		return nil, customerrs.NewErrArrayBounds(idx.Value, int64(len(obj.Elements)))
+	ary := obj.(*Array)
+
+	if len(ary.Elements) == 0 {
+		return nil, errArrayEmpty
 	}
 
-	return obj.Elements[idx.Value], nil
+	return slang.Objects{ary.Elements[0]}, nil
+}
+
+func aryLAST(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
+	}
+
+	ary := obj.(*Array)
+	n := len(ary.Elements)
+
+	if n == 0 {
+		return nil, errArrayEmpty
+	}
+
+	return slang.Objects{ary.Elements[n-1]}, nil
+}
+
+func aryELEM(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	idx, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	ary := obj.(*Array)
+	n := int64(len(ary.Elements))
+
+	if idx.Value >= n {
+		return nil, customerrs.NewErrArrayBounds(idx.Value, n)
+	}
+
+	return slang.Objects{ary.Elements[idx.Value]}, nil
 }

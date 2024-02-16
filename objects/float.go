@@ -2,26 +2,50 @@ package objects
 
 import (
 	"math"
-	"reflect"
 	"strconv"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 )
 
 type Float struct {
+	*Base
+
 	Value float64
 }
 
-const ClassFLOAT = "Float"
+const floatClassName = "Float"
 
-// var fltClass = NewBuiltInClass(ClassFLOAT)
+var floatClass *BuiltInClass
 
-func NewFloat(val float64) *Float {
-	return &Float{Value: val}
+func init() {
+	floatClass = NewBuiltInClass(
+		types.NewPrimitiveType(floatClassName),
+		map[string]slang.MethodFunc{
+			slang.MethodNEG: floatNEG,
+			slang.MethodABS: floatABS,
+			slang.MethodADD: floatADD,
+			slang.MethodSUB: floatSUB,
+			slang.MethodMUL: floatMUL,
+			slang.MethodDIV: floatDIV,
+			slang.MethodEQ:  floatEQ,
+			slang.MethodNEQ: floatNEQ,
+			slang.MethodLT:  floatLT,
+			slang.MethodLEQ: floatLEQ,
+			slang.MethodGT:  floatGT,
+			slang.MethodGEQ: floatGEQ,
+		},
+	)
 }
 
-func (obj *Float) Equal(other slang.Object) bool {
+func NewFloat(val float64) *Float {
+	return &Float{
+		Base:  NewBase(floatClass),
+		Value: val,
+	}
+}
+
+func (obj *Float) IsEqual(other slang.Object) bool {
 	obj2, ok := other.(*Float)
 	if !ok {
 		return false
@@ -34,70 +58,110 @@ func (obj *Float) Inspect() string {
 	return strconv.FormatFloat(obj.Value, 'g', -1, 64)
 }
 
-// func (obj *Float) Class() Class {
-// 	return fltClass
-// }
-
-// func (obj *Float) Truthy() bool {
-// 	return true
-// }
-
-func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := fltClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
-
-	switch methodName {
-	case slang.MethodNEG:
-		return NewFloat(-obj.Value), nil
-	case slang.MethodABS:
-		return NewFloat(math.Abs(obj.Value)), nil
-	case slang.MethodADD, slang.MethodSUB, slang.MethodMUL, slang.MethodDIV,
-		slang.MethodEQ, slang.MethodNEQ, slang.MethodLT, slang.MethodLEQ,
-		slang.MethodGT, slang.MethodGEQ:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
-
-		return obj.sendOne(methodName, args[0])
+func floatNEG(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassFLOAT)
-
-	return nil, err
+	return slang.Objects{NewFloat(-obj.(*Float).Value)}, nil
 }
 
-func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	flt, ok := arg.(*Float)
-	if !ok {
-		return nil, customerrs.NewErrArgType(ClassFLOAT, reflect.TypeOf(arg).String())
+func floatABS(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
 
-	var ret slang.Object
+	newValue := math.Abs(obj.(*Float).Value)
 
-	switch method {
-	case slang.MethodADD:
-		ret = NewFloat(obj.Value + flt.Value)
-	case slang.MethodSUB:
-		ret = NewFloat(obj.Value - flt.Value)
-	case slang.MethodMUL:
-		ret = NewFloat(obj.Value * flt.Value)
-	case slang.MethodDIV:
-		ret = NewFloat(obj.Value / flt.Value)
-	case slang.MethodEQ:
-		ret = NewBool(obj.Value == flt.Value)
-	case slang.MethodNEQ:
-		ret = NewBool(obj.Value != flt.Value)
-	case slang.MethodLT:
-		ret = NewBool(obj.Value < flt.Value)
-	case slang.MethodLEQ:
-		ret = NewBool(obj.Value <= flt.Value)
-	case slang.MethodGT:
-		ret = NewBool(obj.Value > flt.Value)
-	case slang.MethodGEQ:
-		ret = NewBool(obj.Value >= flt.Value)
+	return slang.Objects{NewFloat(newValue)}, nil
+}
+
+func floatADD(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
 	}
 
-	return ret, nil
+	return slang.Objects{NewFloat(obj.(*Float).Value + arg.Value)}, nil
+}
+
+func floatSUB(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewFloat(obj.(*Float).Value - arg.Value)}, nil
+}
+
+func floatMUL(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewFloat(obj.(*Float).Value * arg.Value)}, nil
+}
+
+func floatDIV(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewFloat(obj.(*Float).Value / arg.Value)}, nil
+}
+
+func floatEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value == arg.Value)}, nil
+}
+
+func floatNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value != arg.Value)}, nil
+}
+
+func floatLT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value < arg.Value)}, nil
+}
+
+func floatLEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value <= arg.Value)}, nil
+}
+
+func floatGT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value > arg.Value)}, nil
+}
+
+func floatGEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Float](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Float).Value >= arg.Value)}, nil
 }

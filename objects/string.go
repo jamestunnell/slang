@@ -13,19 +13,7 @@ type String struct {
 	Value string
 }
 
-type strBinOp int
-
-const (
-	strClassName = "Bool"
-
-	strOpADD strBinOp = iota
-	strOpEQ
-	strOpNEQ
-	strOpLT
-	strOpLEQ
-	strOpGT
-	strOpGEQ
-)
+const strClassName = "Bool"
 
 var strClass *BuiltInClass
 
@@ -66,71 +54,72 @@ func (obj *String) IsEqual(other slang.Object) bool {
 }
 
 func strSIZE(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
+	}
+
 	return slang.Objects{NewInt(int64(len(obj.(*String).Value)))}, nil
 }
 
 func strADD(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpADD, obj, args)
-}
-
-func strEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpEQ, obj, args)
-}
-
-func strNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpNEQ, obj, args)
-}
-
-func strLT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpLT, obj, args)
-}
-
-func strLEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpLEQ, obj, args)
-}
-
-func strGT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpGT, obj, args)
-}
-
-func strGEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
-	return strBinaryOp(strOpGEQ, obj, args)
-}
-
-func strBinaryOp(
-	op strBinOp,
-	obj slang.Object,
-	args slang.Objects,
-) (slang.Objects, error) {
-	left := obj.(*String)
-
-	if err := checkArgCount(args, 1); err != nil {
-		return slang.Objects{}, err
-	}
-
-	right, err := CheckType[*String](args[0])
+	arg, err := CheckOneArg[*String](args)
 	if err != nil {
 		return slang.Objects{}, err
 	}
 
-	var ret slang.Object
+	return slang.Objects{NewString(obj.(*String).Value + arg.Value)}, nil
+}
 
-	switch op {
-	case strOpADD:
-		ret = NewString(left.Value + right.Value)
-	case strOpEQ:
-		ret = NewBool(left.Value == right.Value)
-	case strOpNEQ:
-		ret = NewBool(left.Value != right.Value)
-	case strOpLT:
-		ret = NewBool(left.Value < right.Value)
-	case strOpLEQ:
-		ret = NewBool(left.Value <= right.Value)
-	case strOpGT:
-		ret = NewBool(left.Value > right.Value)
-	case strOpGEQ:
-		ret = NewBool(left.Value >= right.Value)
+func strEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
 	}
 
-	return slang.Objects{ret}, nil
+	return slang.Objects{NewBool(obj.(*String).Value == arg.Value)}, nil
+}
+
+func strNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*String).Value != arg.Value)}, nil
+}
+
+func strLT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*String).Value < arg.Value)}, nil
+}
+
+func strLEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*String).Value <= arg.Value)}, nil
+}
+
+func strGT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*String).Value > arg.Value)}, nil
+}
+
+func strGEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*String](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*String).Value >= arg.Value)}, nil
 }

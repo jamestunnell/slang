@@ -1,26 +1,50 @@
 package objects
 
 import (
-	"reflect"
 	"strconv"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/types"
 )
 
 type Int struct {
+	*Base
+
 	Value int64
 }
 
-const ClassINT = "Int"
+const intClassName = "Int"
 
-// var intClass = NewBuiltInClass(ClassINT)
+var intClass *BuiltInClass
 
-func NewInt(val int64) slang.Object {
-	return &Int{Value: val}
+func init() {
+	intClass = NewBuiltInClass(
+		types.NewPrimitiveType(intClassName),
+		map[string]slang.MethodFunc{
+			slang.MethodNEG: intNEG,
+			slang.MethodABS: intABS,
+			slang.MethodADD: intADD,
+			slang.MethodSUB: intSUB,
+			slang.MethodMUL: intMUL,
+			slang.MethodDIV: intDIV,
+			slang.MethodEQ:  intEQ,
+			slang.MethodNEQ: intNEQ,
+			slang.MethodLT:  intLT,
+			slang.MethodLEQ: intLEQ,
+			slang.MethodGT:  intGT,
+			slang.MethodGEQ: intGEQ,
+		},
+	)
 }
 
-func (obj *Int) Equal(other slang.Object) bool {
+func NewInt(val int64) slang.Object {
+	return &Int{
+		Base:  NewBase(intClass),
+		Value: val,
+	}
+}
+
+func (obj *Int) IsEqual(other slang.Object) bool {
 	obj2, ok := other.(*Int)
 	if !ok {
 		return false
@@ -33,88 +57,117 @@ func (obj *Int) Inspect() string {
 	return strconv.FormatInt(obj.Value, 10)
 }
 
-// func (obj *Int) Class() Class {
-// 	return intClass
-// }
-
-// func (obj *Int) Truthy() bool {
-// 	return true
-// }
-
-func (obj *Int) Send(method string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := intClass.GetInstanceMethod(method); found {
-	// 	return m.Run(args)
-	// }
-
-	switch method {
-	case slang.MethodNEG, slang.MethodABS:
-		if err := checkArgCount(args, 0); err != nil {
-			return nil, err
-		}
-
-		return obj.sendZero(method)
-	case slang.MethodADD, slang.MethodSUB, slang.MethodMUL, slang.MethodDIV,
-		slang.MethodEQ, slang.MethodNEQ, slang.MethodLT, slang.MethodLEQ,
-		slang.MethodGT, slang.MethodGEQ:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
-
-		if _, isFlt := args[0].(*Float); isFlt {
-			return NewFloat(float64(obj.Value)).Send(method, args[0])
-		}
-
-		return obj.sendOne(method, args[0])
+func intNEG(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
 
-	err := customerrs.NewErrMethodUndefined(method, ClassINT)
-
-	return nil, err
+	return slang.Objects{NewInt(-obj.(*Int).Value)}, nil
 }
 
-func (obj *Int) sendZero(method string) (slang.Object, error) {
-	switch method {
-	case slang.MethodNEG:
-		return NewInt(-obj.Value), nil
-	case slang.MethodABS:
-		return NewInt(intAbs(obj.Value)), nil
+func intABS(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	if err := CheckArgCount(args, 0); err != nil {
+		return nil, err
 	}
+
+	newValue := intAbs(obj.(*Int).Value)
+
+	return slang.Objects{NewInt(newValue)}, nil
 }
 
-func (obj *Int) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	otherInt, ok := arg.(*Int)
-	if !ok {
-		return nil, customerrs.NewErrArgType(ClassINT, reflect.TypeOf(arg).String())
+func intADD(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
 	}
 
-	var ret slang.Object
-
-	switch method {
-	case slang.MethodADD:
-		ret = NewInt(obj.Value + otherInt.Value)
-	case slang.MethodSUB:
-		ret = NewInt(obj.Value - otherInt.Value)
-	case slang.MethodMUL:
-		ret = NewInt(obj.Value * otherInt.Value)
-	case slang.MethodDIV:
-		ret = NewInt(obj.Value / otherInt.Value)
-	case slang.MethodEQ:
-		ret = NewBool(obj.Value == otherInt.Value)
-	case slang.MethodNEQ:
-		ret = NewBool(obj.Value != otherInt.Value)
-	case slang.MethodLT:
-		ret = NewBool(obj.Value < otherInt.Value)
-	case slang.MethodLEQ:
-		ret = NewBool(obj.Value <= otherInt.Value)
-	case slang.MethodGT:
-		ret = NewBool(obj.Value > otherInt.Value)
-	case slang.MethodGEQ:
-		ret = NewBool(obj.Value >= otherInt.Value)
-	}
-
-	return ret, nil
+	return slang.Objects{NewInt(obj.(*Int).Value + arg.Value)}, nil
 }
+
+func intSUB(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewInt(obj.(*Int).Value - arg.Value)}, nil
+}
+
+func intMUL(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewInt(obj.(*Int).Value * arg.Value)}, nil
+}
+
+func intDIV(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewInt(obj.(*Int).Value / arg.Value)}, nil
+}
+
+func intEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value == arg.Value)}, nil
+}
+
+func intNEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value != arg.Value)}, nil
+}
+
+func intLT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value < arg.Value)}, nil
+}
+
+func intLEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value <= arg.Value)}, nil
+}
+
+func intGT(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value > arg.Value)}, nil
+}
+
+func intGEQ(obj slang.Object, args slang.Objects) (slang.Objects, error) {
+	arg, err := CheckOneArg[*Int](args)
+	if err != nil {
+		return slang.Objects{}, err
+	}
+
+	return slang.Objects{NewBool(obj.(*Int).Value >= arg.Value)}, nil
+}
+
+// 		if _, isFlt := args[0].(*Float); isFlt {
+// 			return NewFloat(float64(obj.Value)).Send(method, args[0])
+// 		}
 
 func intAbs(val int64) int64 {
 	if val > 0 {
@@ -122,12 +175,4 @@ func intAbs(val int64) int64 {
 	}
 
 	return -val
-}
-
-func checkArgCount(args []slang.Object, count int) error {
-	if len(args) != count {
-		return customerrs.NewErrArgCount(count, len(args))
-	}
-
-	return nil
 }
