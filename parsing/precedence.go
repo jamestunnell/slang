@@ -1,6 +1,8 @@
 package parsing
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang/lexing"
+)
 
 type Precedence int
 
@@ -16,25 +18,25 @@ const (
 	PrecedenceDOTCALLIDX            // a.b.c, myFunction(X), myArray[0]
 )
 
-var precedences = map[slang.TokenType]Precedence{
-	slang.TokenOR:           PrecedenceOR,
-	slang.TokenAND:          PrecedenceAND,
-	slang.TokenEQUAL:        PrecedenceEQUALITY,
-	slang.TokenNOTEQUAL:     PrecedenceEQUALITY,
-	slang.TokenLESS:         PrecedenceRELATIONAL,
-	slang.TokenLESSEQUAL:    PrecedenceRELATIONAL,
-	slang.TokenGREATER:      PrecedenceRELATIONAL,
-	slang.TokenGREATEREQUAL: PrecedenceRELATIONAL,
-	slang.TokenPLUS:         PrecedenceADDSUB,
-	slang.TokenMINUS:        PrecedenceADDSUB,
-	slang.TokenSLASH:        PrecedenceMULDIVREM,
-	slang.TokenSTAR:         PrecedenceMULDIVREM,
-	slang.TokenDOT:          PrecedenceDOTCALLIDX,
-	slang.TokenLPAREN:       PrecedenceDOTCALLIDX,
-	slang.TokenLBRACKET:     PrecedenceDOTCALLIDX,
+var precedences = map[lexing.TokenType]Precedence{
+	lexing.TokenOR:           PrecedenceOR,
+	lexing.TokenAND:          PrecedenceAND,
+	lexing.TokenEQUAL:        PrecedenceEQUALITY,
+	lexing.TokenNOTEQUAL:     PrecedenceEQUALITY,
+	lexing.TokenLESS:         PrecedenceRELATIONAL,
+	lexing.TokenLESSEQUAL:    PrecedenceRELATIONAL,
+	lexing.TokenGREATER:      PrecedenceRELATIONAL,
+	lexing.TokenGREATEREQUAL: PrecedenceRELATIONAL,
+	lexing.TokenPLUS:         PrecedenceADDSUB,
+	lexing.TokenMINUS:        PrecedenceADDSUB,
+	lexing.TokenSLASH:        PrecedenceMULDIVREM,
+	lexing.TokenSTAR:         PrecedenceMULDIVREM,
+	lexing.TokenDOT:          PrecedenceDOTCALLIDX,
+	lexing.TokenLPAREN:       PrecedenceDOTCALLIDX,
+	lexing.TokenLBRACKET:     PrecedenceDOTCALLIDX,
 }
 
-func TokenPrecedence(tokType slang.TokenType) Precedence {
+func TokenPrecedence(tokType lexing.TokenType) Precedence {
 	if p, ok := precedences[tokType]; ok {
 		return p
 	}

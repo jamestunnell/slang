@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type BreakStatementParser struct {
@@ -21,8 +22,8 @@ func (p *BreakStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *BreakStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenBREAK) {
+func (p *BreakStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenBREAK) {
 		return false
 	}
 

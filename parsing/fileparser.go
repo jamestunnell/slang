@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type FileParser struct {
@@ -17,39 +18,39 @@ func NewFileParser() *FileParser {
 	}
 }
 
-func (p *FileParser) Run(toks slang.TokenSeq) bool {
+func (p *FileParser) Run(toks lexing.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
-	for !toks.Current().Is(slang.TokenEOF) {
-		toks.Skip(slang.TokenNEWLINE)
+	for !toks.Current().Is(lexing.TokenEOF) {
+		toks.Skip(lexing.TokenNEWLINE)
 
 		if st := p.parseStatement(toks); st != nil {
 			p.Statements = append(p.Statements, st)
 		}
 
-		toks.Skip(slang.TokenNEWLINE)
+		toks.Skip(lexing.TokenNEWLINE)
 	}
 
 	return true
 }
 
-func (p *FileParser) parseStatement(toks slang.TokenSeq) slang.Statement {
+func (p *FileParser) parseStatement(toks lexing.TokenSeq) slang.Statement {
 	var sp StatementParser
 
-	switch toks.Current().Type() {
-	case slang.TokenCLASS:
+	switch toks.Current().Type {
+	case lexing.TokenCLASS:
 		sp = NewClassStatementParser()
-	case slang.TokenCONST:
+	case lexing.TokenCONST:
 		sp = NewConstStatementParser()
-	case slang.TokenFUNC:
+	case lexing.TokenFUNC:
 		sp = NewFuncStatementParser()
-	case slang.TokenVAR:
+	case lexing.TokenVAR:
 		sp = NewVarStatementParser()
-	case slang.TokenUSE:
+	case lexing.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
 		p.TokenErr(
-			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS, slang.TokenVAR)
+			toks.Current(), lexing.TokenUSE, lexing.TokenFUNC, lexing.TokenCLASS, lexing.TokenVAR)
 
 		return nil
 	}

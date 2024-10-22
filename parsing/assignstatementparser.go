@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type AssignStatementParser struct {
@@ -19,17 +20,17 @@ func (p *AssignStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *AssignStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *AssignStatementParser) Run(toks lexing.TokenSeq) bool {
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenASSIGN) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenASSIGN) {
 		return false
 	}
 
-	toks.AdvanceSkip(slang.TokenNEWLINE)
+	toks.AdvanceSkip(lexing.TokenNEWLINE)
 
 	valueParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, valueParser) {

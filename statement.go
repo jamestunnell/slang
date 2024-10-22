@@ -50,7 +50,7 @@ func StatementsEqual(a, b []Statement) bool {
 	}
 
 	for idx, stmt := range a {
-		if !stmt.Equal(b[idx]) {
+		if !stmt.IsEqual(b[idx]) {
 			return false
 		}
 	}

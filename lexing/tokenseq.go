@@ -1,4 +1,4 @@
-package slang
+package lexing
 
 type TokenSeq interface {
 	Previous() *Token

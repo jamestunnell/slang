@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ReturnStatementParser struct {
@@ -19,14 +20,14 @@ func (p *ReturnStatementParser) GetStatement() slang.Statement {
 	return p.ReturnStmt
 }
 
-func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenRETURN) {
+func (p *ReturnStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenRETURN) {
 		return false
 	}
 
 	toks.Advance()
 
-	if toks.Current().Is(slang.TokenNEWLINE, slang.TokenRBRACE) {
+	if toks.Current().Is(lexing.TokenNEWLINE, lexing.TokenRBRACE) {
 		p.ReturnStmt = statements.NewReturn()
 
 		return true

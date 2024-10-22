@@ -23,7 +23,7 @@ func (e *Expression) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return e2.Value.Equal(e.Value)
+	return e2.Value.IsEqual(e.Value)
 }
 
 // func (st *Expression) Eval(env *slang.Environment) (slang.Object, error) {

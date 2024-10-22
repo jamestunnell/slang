@@ -1,16 +1,16 @@
 package parsing
 
 import (
-	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type TokenSeq struct {
-	lexer slang.Lexer
+	lexer lexing.Lexer
 
-	current, prev, next *slang.Token
+	current, prev, next *lexing.Token
 }
 
-func NewTokenSeq(l slang.Lexer) *TokenSeq {
+func NewTokenSeq(l lexing.Lexer) *TokenSeq {
 	current := l.NextToken()
 	next := l.NextToken()
 
@@ -21,25 +21,25 @@ func NewTokenSeq(l slang.Lexer) *TokenSeq {
 	}
 }
 
-func (seq *TokenSeq) Previous() *slang.Token {
+func (seq *TokenSeq) Previous() *lexing.Token {
 	return seq.prev
 }
 
-func (seq *TokenSeq) Current() *slang.Token {
+func (seq *TokenSeq) Current() *lexing.Token {
 	return seq.current
 }
 
 // CurrIndex() int
-func (seq *TokenSeq) Next() *slang.Token {
+func (seq *TokenSeq) Next() *lexing.Token {
 	return seq.next
 }
 
-// func (seq *TokenSeq) Skip(types ...slang.TokenType) {
-// 	if slices.Contains(types, slang.TokenEOF) {
+// func (seq *TokenSeq) Skip(types ...lexing.TokenType) {
+// 	if slices.Contains(types, lexing.TokenEOF) {
 // 		log.Fatal().Msg("cannot skip EOF")
 // 	}
 
-// 	for !slices.Contains(types, seq.tokens[seq.current].Info.Type()) {
+// 	for !slices.Contains(types, seq.tokens[seq.current].Info.Type) {
 // 		seq.Advance()
 // 	}
 // }
@@ -50,20 +50,20 @@ func (seq *TokenSeq) Advance() {
 	seq.next = seq.lexer.NextToken()
 }
 
-func (seq *TokenSeq) AdvanceUntil(types ...slang.TokenType) {
-	types = append([]slang.TokenType{slang.TokenEOF}, types...)
+func (seq *TokenSeq) AdvanceUntil(types ...lexing.TokenType) {
+	types = append([]lexing.TokenType{lexing.TokenEOF}, types...)
 
 	for !seq.current.Is(types...) {
 		seq.Advance()
 	}
 }
 
-func (seq *TokenSeq) AdvanceSkip(skipTypes ...slang.TokenType) {
+func (seq *TokenSeq) AdvanceSkip(skipTypes ...lexing.TokenType) {
 	seq.Advance()
 	seq.Skip(skipTypes...)
 }
 
-func (seq *TokenSeq) Skip(skipTypes ...slang.TokenType) {
+func (seq *TokenSeq) Skip(skipTypes ...lexing.TokenType) {
 	for seq.current.Is(skipTypes...) {
 		seq.Advance()
 	}

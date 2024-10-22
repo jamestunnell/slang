@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ExprParser struct {
@@ -11,8 +12,8 @@ type ExprParser struct {
 	Expr slang.Expression
 }
 
-type prefixParseFn func(slang.TokenSeq) slang.Expression
-type infixParseFn func(slang.TokenSeq, slang.Expression) slang.Expression
+type prefixParseFn func(lexing.TokenSeq) slang.Expression
+type infixParseFn func(lexing.TokenSeq, slang.Expression) slang.Expression
 
 func NewExprParser(prec Precedence) *ExprParser {
 	return &ExprParser{
@@ -21,40 +22,40 @@ func NewExprParser(prec Precedence) *ExprParser {
 	}
 }
 
-func (p *ExprParser) Run(toks slang.TokenSeq) bool {
+func (p *ExprParser) Run(toks lexing.TokenSeq) bool {
 	p.Expr = p.parseExpression(toks, p.prec)
 
 	return p.Expr != nil
 }
 
 func (p *ExprParser) findPrefixParseFn(
-	tokType slang.TokenType) (prefixParseFn, bool) {
+	tokType lexing.TokenType) (prefixParseFn, bool) {
 	var prefixParse prefixParseFn
 
 	switch tokType {
-	case slang.TokenSYMBOL:
+	case lexing.TokenSYMBOL:
 		prefixParse = p.parseIdentifier
-	case slang.TokenINT:
+	case lexing.TokenINT:
 		prefixParse = p.parseInteger
-	case slang.TokenFLOAT:
+	case lexing.TokenFLOAT:
 		prefixParse = p.parseFloat
-	case slang.TokenSTRING:
+	case lexing.TokenSTRING:
 		prefixParse = p.parseString
-	case slang.TokenVERBATIMSTRING:
+	case lexing.TokenVERBATIMSTRING:
 		prefixParse = p.parseVerbatimString
-	case slang.TokenTRUE:
+	case lexing.TokenTRUE:
 		prefixParse = p.parseTrue
-	case slang.TokenFALSE:
+	case lexing.TokenFALSE:
 		prefixParse = p.parseFalse
-	case slang.TokenMINUS:
+	case lexing.TokenMINUS:
 		prefixParse = p.parseNegative
-	case slang.TokenBANG:
+	case lexing.TokenBANG:
 		prefixParse = p.parseNot
-	case slang.TokenLPAREN:
+	case lexing.TokenLPAREN:
 		prefixParse = p.parseGroupedExpression
-	case slang.TokenLBRACKET:
+	case lexing.TokenLBRACKET:
 		prefixParse = p.parseArrayOrMap
-	case slang.TokenFUNC:
+	case lexing.TokenFUNC:
 		prefixParse = p.parseFuncLiteral
 	}
 
@@ -62,39 +63,39 @@ func (p *ExprParser) findPrefixParseFn(
 }
 
 func (p *ExprParser) findInfixParseFn(
-	tokType slang.TokenType) (infixParseFn, bool) {
+	tokType lexing.TokenType) (infixParseFn, bool) {
 	var infixParse infixParseFn
 
 	switch tokType {
-	case slang.TokenAND:
+	case lexing.TokenAND:
 		infixParse = p.parseAnd
-	case slang.TokenOR:
+	case lexing.TokenOR:
 		infixParse = p.parseOr
-	case slang.TokenPLUS:
+	case lexing.TokenPLUS:
 		infixParse = p.parseAdd
-	case slang.TokenMINUS:
+	case lexing.TokenMINUS:
 		infixParse = p.parseSubtract
-	case slang.TokenSTAR:
+	case lexing.TokenSTAR:
 		infixParse = p.parseMultiply
-	case slang.TokenSLASH:
+	case lexing.TokenSLASH:
 		infixParse = p.parseDivide
-	case slang.TokenEQUAL:
+	case lexing.TokenEQUAL:
 		infixParse = p.parseEqual
-	case slang.TokenNOTEQUAL:
+	case lexing.TokenNOTEQUAL:
 		infixParse = p.parseNotEqual
-	case slang.TokenLESS:
+	case lexing.TokenLESS:
 		infixParse = p.parseLess
-	case slang.TokenLESSEQUAL:
+	case lexing.TokenLESSEQUAL:
 		infixParse = p.parseLessEqual
-	case slang.TokenGREATER:
+	case lexing.TokenGREATER:
 		infixParse = p.parseGreater
-	case slang.TokenGREATEREQUAL:
+	case lexing.TokenGREATEREQUAL:
 		infixParse = p.parseGreaterEqual
-	case slang.TokenDOT:
+	case lexing.TokenDOT:
 		infixParse = p.parseAccessMember
-	case slang.TokenLPAREN:
+	case lexing.TokenLPAREN:
 		infixParse = p.parseCall
-	case slang.TokenLBRACKET:
+	case lexing.TokenLBRACKET:
 		infixParse = p.parseAccessElem
 	}
 

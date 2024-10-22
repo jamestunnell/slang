@@ -4,6 +4,7 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type FuncStatementParser struct {
@@ -22,18 +23,18 @@ func (p *FuncStatementParser) GetStatement() slang.Statement {
 	return p.FuncStmt
 }
 
-func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenFUNC) {
+func (p *FuncStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenFUNC) {
 		return false
 	}
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenSYMBOL) {
 		return false
 	}
 
-	name := toks.Current().Value()
+	name := toks.Current().Value
 
 	toks.Advance()
 

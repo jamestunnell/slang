@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ForEachStmtParser struct {
@@ -21,35 +22,35 @@ func (p *ForEachStmtParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *ForEachStmtParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenFOREACH) {
+func (p *ForEachStmtParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenFOREACH) {
 		return false
 	}
 
 	toks.Advance()
 
 	// expect one or more var names
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenSYMBOL) {
 		return false
 	}
 
-	vars := []string{toks.Current().Value()}
+	vars := []string{toks.Current().Value}
 
 	toks.Advance()
 
-	for toks.Current().Is(slang.TokenCOMMA) {
+	for toks.Current().Is(lexing.TokenCOMMA) {
 		toks.Advance()
 
-		if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+		if !p.ExpectToken(toks.Current(), lexing.TokenSYMBOL) {
 			return false
 		}
 
-		vars = append(vars, toks.Current().Value())
+		vars = append(vars, toks.Current().Value)
 
 		toks.Advance()
 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenIN) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenIN) {
 		return false
 	}
 

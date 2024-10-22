@@ -32,11 +32,11 @@ func (f *ForEach) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if !f.Expr.Equal(f2.Expr) {
+	if !f.Expr.IsEqual(f2.Expr) {
 		return false
 	}
 
-	return f.Block.Equal(f2.Block)
+	return f.Block.IsEqual(f2.Block)
 }
 
 // func (expr *ForEach) Eval(env *slang.Environment) (slang.Object, error) {

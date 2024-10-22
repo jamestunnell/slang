@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ClassStatementParser struct {
@@ -19,14 +20,14 @@ func (p *ClassStatementParser) GetStatement() slang.Statement {
 	return p.ClassStmt
 }
 
-func (p *ClassStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenCLASS) {
+func (p *ClassStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenCLASS) {
 		return false
 	}
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenSYMBOL) {
 		return false
 	}
 

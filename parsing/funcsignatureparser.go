@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type FuncSignatureParser struct {
@@ -20,25 +21,25 @@ func NewFuncSignatureParser() *FuncSignatureParser {
 	}
 }
 
-func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
+func (p *FuncSignatureParser) Run(toks lexing.TokenSeq) bool {
 	p.Params = []slang.Param{}
 	p.ReturnTypes = []slang.Type{}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenLPAREN) {
 		return false
 	}
 
-	toks.AdvanceSkip(slang.TokenNEWLINE)
+	toks.AdvanceSkip(lexing.TokenNEWLINE)
 
 	p.Params = []slang.Param{}
 	p.ReturnTypes = []slang.Type{}
 
-	if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {
+	if !toks.Current().Is(lexing.TokenRPAREN) && !p.parseParam(toks) {
 		return false
 	}
 
-	for !toks.Current().Is(slang.TokenRPAREN) {
-		if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
+	for !toks.Current().Is(lexing.TokenRPAREN) {
+		if !p.ExpectToken(toks.Current(), lexing.TokenCOMMA) {
 			return false
 		}
 
@@ -64,20 +65,20 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 		return true
 	}
 
-	switch toks.Current().Type() {
-	case slang.TokenSYMBOL:
+	switch toks.Current().Type {
+	case lexing.TokenSYMBOL:
 		if !addRetType() {
 			return false
 		}
-	case slang.TokenLPAREN:
+	case lexing.TokenLPAREN:
 		toks.Advance()
 
 		if !addRetType() {
 			return false
 		}
 
-		for !toks.Current().Is(slang.TokenRPAREN) {
-			if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
+		for !toks.Current().Is(lexing.TokenRPAREN) {
+			if !p.ExpectToken(toks.Current(), lexing.TokenCOMMA) {
 				return false
 			}
 
@@ -94,12 +95,12 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 	return true
 }
 
-func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {
-	if !toks.Current().Is(slang.TokenSYMBOL) {
+func (p *FuncSignatureParser) parseParam(toks lexing.TokenSeq) bool {
+	if !toks.Current().Is(lexing.TokenSYMBOL) {
 		return false
 	}
 
-	name := toks.Current().Value()
+	name := toks.Current().Value
 
 	toks.Advance()
 

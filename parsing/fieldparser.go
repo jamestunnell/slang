@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type FieldParser struct {
@@ -19,8 +20,8 @@ func (p *FieldParser) GetStatement() slang.Statement {
 	return p.FieldStmt
 }
 
-func (p *FieldParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenFIELD) {
+func (p *FieldParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenFIELD) {
 		return false
 	}
 

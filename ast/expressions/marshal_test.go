@@ -43,7 +43,7 @@ func TestMarshalJSON(t *testing.T) {
 }
 
 func testMarshalJSON(t *testing.T, expr slang.Expression) {
-	t.Run(expr.Type().String(), func(t *testing.T) {
+	t.Run(expr.GetType().String(), func(t *testing.T) {
 		d, err := json.Marshal(expr)
 
 		require.NoError(t, err)
@@ -53,6 +53,6 @@ func testMarshalJSON(t *testing.T, expr slang.Expression) {
 		require.True(t, result.Exists())
 		require.Equal(t, gjson.String, result.Type)
 
-		assert.Equal(t, expr.Type().String(), result.String())
+		assert.Equal(t, expr.GetType().String(), result.String())
 	})
 }

@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type IfStatementParser struct {
@@ -21,8 +22,8 @@ func (p *IfStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenIF) {
+func (p *IfStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenIF) {
 		return false
 	}
 
@@ -40,7 +41,7 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 
 	ifBlock := statements.NewBlock(ifBodyParser.Statements...)
 
-	if !toks.Current().Is(slang.TokenELSE) {
+	if !toks.Current().Is(lexing.TokenELSE) {
 		p.Stmt = statements.NewIf(condParser.Expr, ifBlock)
 
 		return true

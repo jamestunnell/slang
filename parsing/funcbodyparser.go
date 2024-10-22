@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type FuncBodyParser struct {
@@ -16,19 +17,19 @@ func NewFuncBodyParser() *FuncBodyParser {
 	return p
 }
 
-func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
+func (p *FuncBodyParser) parseStatement(toks lexing.TokenSeq) slang.Statement {
 	var sp StatementParser
 
-	switch toks.Current().Type() {
-	case slang.TokenCONST:
+	switch toks.Current().Type {
+	case lexing.TokenCONST:
 		sp = NewConstStatementParser()
-	case slang.TokenIF:
+	case lexing.TokenIF:
 		sp = NewIfStatementParser()
-	case slang.TokenFOREACH:
+	case lexing.TokenFOREACH:
 		sp = NewForEachStmtParser()
-	case slang.TokenRETURN:
+	case lexing.TokenRETURN:
 		sp = NewReturnStatementParser()
-	case slang.TokenVAR:
+	case lexing.TokenVAR:
 		sp = NewVarStatementParser()
 	default:
 		sp = NewExprOrAssignStatementParser()

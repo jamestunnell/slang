@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	"github.com/akrennmair/slice"
-	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ErrWrongTokenType struct {
-	token         *slang.Token
-	expectedTypes []slang.TokenType
+	token         *lexing.Token
+	expectedTypes []lexing.TokenType
 }
 
 func NewErrWrongTokenType(
-	tok *slang.Token,
-	expectedTypes ...slang.TokenType,
+	tok *lexing.Token,
+	expectedTypes ...lexing.TokenType,
 ) *ErrWrongTokenType {
 	return &ErrWrongTokenType{
 		token:         tok,
@@ -24,9 +24,9 @@ func NewErrWrongTokenType(
 
 func (err *ErrWrongTokenType) Error() string {
 	const fmtStr = "%s token %s did not match any expected types %s"
-	expectedStr := slice.Map(err.expectedTypes, func(tokType slang.TokenType) string {
+	expectedStr := slice.Map(err.expectedTypes, func(tokType lexing.TokenType) string {
 		return tokType.String()
 	})
 
-	return fmt.Sprintf(fmtStr, err.token.Type(), err.token.Value(), expectedStr)
+	return fmt.Sprintf(fmtStr, err.token.Type, err.token.Value, expectedStr)
 }

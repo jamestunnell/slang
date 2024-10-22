@@ -49,7 +49,7 @@ func (obj *Function) IsEqual(other slang.Object) bool {
 		return false
 	}
 
-	if !obj.Body.Equal(obj2.Body) {
+	if !obj.Body.IsEqual(obj2.Body) {
 		return false
 	}
 

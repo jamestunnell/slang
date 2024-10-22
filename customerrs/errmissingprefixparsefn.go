@@ -3,14 +3,14 @@ package customerrs
 import (
 	"fmt"
 
-	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ErrMissingPrefixParseFn struct {
-	Type slang.TokenType
+	Type lexing.TokenType
 }
 
-func NewErrMissingPrefixParseFn(typ slang.TokenType) *ErrMissingPrefixParseFn {
+func NewErrMissingPrefixParseFn(typ lexing.TokenType) *ErrMissingPrefixParseFn {
 	return &ErrMissingPrefixParseFn{
 		Type: typ,
 	}

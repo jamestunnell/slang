@@ -1,9 +1,12 @@
 package parsing
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
+)
 
 type Parser interface {
-	Run(slang.TokenSeq) bool
+	Run(lexing.TokenSeq) bool
 
 	GetErrors() []*ParseErr
 }

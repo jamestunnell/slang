@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type BodyParserBase struct {
@@ -12,7 +13,7 @@ type BodyParserBase struct {
 	parseStatement ParseStmtFunc
 }
 
-type ParseStmtFunc func(slang.TokenSeq) slang.Statement
+type ParseStmtFunc func(lexing.TokenSeq) slang.Statement
 
 func NewBodyParserBase(parseStatement ParseStmtFunc) *BodyParserBase {
 	return &BodyParserBase{
@@ -27,7 +28,7 @@ func (p *BodyParserBase) GetStatements() []slang.Statement {
 }
 
 func (p *BodyParserBase) ParseStatement(
-	toks slang.TokenSeq,
+	toks lexing.TokenSeq,
 	sp StatementParser,
 ) slang.Statement {
 	if !p.RunSubParser(toks, sp) {
@@ -37,25 +38,25 @@ func (p *BodyParserBase) ParseStatement(
 	return sp.GetStatement()
 }
 
-func (p *BodyParserBase) Run(toks slang.TokenSeq) bool {
+func (p *BodyParserBase) Run(toks lexing.TokenSeq) bool {
 	p.Statements = []slang.Statement{}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenLBRACE) {
 		return false
 	}
 
-	toks.AdvanceSkip(slang.TokenNEWLINE)
+	toks.AdvanceSkip(lexing.TokenNEWLINE)
 
-	for !toks.Current().Is(slang.TokenRBRACE) {
+	for !toks.Current().Is(lexing.TokenRBRACE) {
 		if st := p.parseStatement(toks); st != nil {
 			p.Statements = append(p.Statements, st)
 		}
 
-		if !p.ExpectToken(toks.Current(), slang.TokenNEWLINE, slang.TokenRBRACE) {
+		if !p.ExpectToken(toks.Current(), lexing.TokenNEWLINE, lexing.TokenRBRACE) {
 			return false
 		}
 
-		toks.Skip(slang.TokenNEWLINE)
+		toks.Skip(lexing.TokenNEWLINE)
 	}
 
 	toks.Advance()

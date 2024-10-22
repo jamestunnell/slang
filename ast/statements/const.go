@@ -25,7 +25,7 @@ func (f *Const) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if !f.Value.Equal(f2.Value) {
+	if !f.Value.IsEqual(f2.Value) {
 		return false
 	}
 

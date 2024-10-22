@@ -1,4 +1,4 @@
-package slang
+package lexing
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 
 type TokenType int
 
-type TokenInfo interface {
-	Type() TokenType
-	Value() string
+type TokenInfo struct {
+	Type  TokenType
+	Value string
 }
 
 type SourceLocation struct {
@@ -18,14 +18,22 @@ type SourceLocation struct {
 }
 
 type Token struct {
-	Info     TokenInfo
+	*TokenInfo
+
 	Location SourceLocation
 }
 
-func NewToken(info TokenInfo, loc SourceLocation) *Token {
+func NewTokenInfo(typ TokenType, val string) *TokenInfo {
+	return &TokenInfo{
+		Type:  typ,
+		Value: val,
+	}
+}
+
+func NewToken(info *TokenInfo, loc SourceLocation) *Token {
 	return &Token{
-		Info:     info,
-		Location: loc,
+		TokenInfo: info,
+		Location:  loc,
 	}
 }
 
@@ -33,16 +41,8 @@ func NewLoc(line, col int) SourceLocation {
 	return SourceLocation{Line: line, Column: col}
 }
 
-func (tok *Token) Type() TokenType {
-	return tok.Info.Type()
-}
-
-func (tok *Token) Value() string {
-	return tok.Info.Value()
-}
-
 func (tok *Token) Is(tokTypes ...TokenType) bool {
-	return slices.Contains(tokTypes, tok.Info.Type())
+	return slices.Contains(tokTypes, tok.Type)
 }
 
 func (loc SourceLocation) String() string {

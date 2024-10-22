@@ -46,7 +46,7 @@ func ExpressionsEqual(a, b []Expression) bool {
 	}
 
 	for idx, expr := range a {
-		if !expr.Equal(b[idx]) {
+		if !expr.IsEqual(b[idx]) {
 			return false
 		}
 	}

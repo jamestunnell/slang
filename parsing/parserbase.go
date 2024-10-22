@@ -4,6 +4,7 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ParserBase struct {
@@ -21,8 +22,8 @@ func (p *ParserBase) GetErrors() []*ParseErr {
 }
 
 func (p *ParserBase) ExpectToken(
-	tok *slang.Token,
-	expectedTypes ...slang.TokenType) bool {
+	tok *lexing.Token,
+	expectedTypes ...lexing.TokenType) bool {
 	if !tok.Is(expectedTypes...) {
 		p.TokenErr(tok, expectedTypes...)
 
@@ -32,14 +33,14 @@ func (p *ParserBase) ExpectToken(
 	return true
 }
 
-func (p *ParserBase) TokenErr(tok *slang.Token, expectedTypes ...slang.TokenType) {
+func (p *ParserBase) TokenErr(tok *lexing.Token, expectedTypes ...lexing.TokenType) {
 	err := customerrs.NewErrWrongTokenType(tok, expectedTypes...)
 	parseErr := NewParseError(err, tok)
 
 	p.errors = append(p.errors, parseErr)
 }
 
-func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
+func (p *ParserBase) RunSubParser(toks lexing.TokenSeq, sub Parser) bool {
 	sub.Run(toks)
 
 	if len(sub.GetErrors()) > 0 {
@@ -51,38 +52,38 @@ func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
 	return true
 }
 
-func (p *ParserBase) ParseType(toks slang.TokenSeq) (slang.Type, bool) {
-	switch toks.Current().Type() {
-	case slang.TokenSYMBOL:
+func (p *ParserBase) ParseType(toks lexing.TokenSeq) (slang.Type, bool) {
+	switch toks.Current().Type {
+	case lexing.TokenSYMBOL:
 		return p.ParseBasicType(toks)
-	case slang.TokenLBRACKET:
-		if toks.Next().Is(slang.TokenRBRACKET) {
+	case lexing.TokenLBRACKET:
+		if toks.Next().Is(lexing.TokenRBRACKET) {
 			return p.ParseArrayType(toks)
 		}
 
 		return p.ParseMapType(toks)
 	}
 
-	p.TokenErr(toks.Current(), slang.TokenSYMBOL, slang.TokenLBRACKET)
+	p.TokenErr(toks.Current(), lexing.TokenSYMBOL, lexing.TokenLBRACKET)
 
 	return nil, false
 }
 
-func (p *ParserBase) ParseBasicType(toks slang.TokenSeq) (slang.Type, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+func (p *ParserBase) ParseBasicType(toks lexing.TokenSeq) (slang.Type, bool) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenSYMBOL) {
 		return nil, false
 	}
 
-	parts := []string{toks.Current().Value()}
+	parts := []string{toks.Current().Value}
 
 	toks.Advance()
 
-	for toks.Current().Is(slang.TokenDOT) {
-		if !p.ExpectToken(toks.Next(), slang.TokenSYMBOL) {
+	for toks.Current().Is(lexing.TokenDOT) {
+		if !p.ExpectToken(toks.Next(), lexing.TokenSYMBOL) {
 			return nil, false
 		}
 
-		parts = append(parts, toks.Next().Value())
+		parts = append(parts, toks.Next().Value)
 
 		toks.Advance()
 		toks.Advance()
@@ -91,9 +92,9 @@ func (p *ParserBase) ParseBasicType(toks slang.TokenSeq) (slang.Type, bool) {
 	return ast.NewBasicType(parts...), true
 }
 
-func (p *ParserBase) ParseArrayType(toks slang.TokenSeq) (*ast.ArrayType, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) ||
-		!p.ExpectToken(toks.Next(), slang.TokenRBRACKET) {
+func (p *ParserBase) ParseArrayType(toks lexing.TokenSeq) (*ast.ArrayType, bool) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenLBRACKET) ||
+		!p.ExpectToken(toks.Next(), lexing.TokenRBRACKET) {
 		return nil, false
 	}
 
@@ -108,8 +109,8 @@ func (p *ParserBase) ParseArrayType(toks slang.TokenSeq) (*ast.ArrayType, bool) 
 	return ast.NewArrayType(valType), true
 }
 
-func (p *ParserBase) ParseMapType(toks slang.TokenSeq) (*ast.MapType, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) {
+func (p *ParserBase) ParseMapType(toks lexing.TokenSeq) (*ast.MapType, bool) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenLBRACKET) {
 		return nil, false
 	}
 
@@ -120,7 +121,7 @@ func (p *ParserBase) ParseMapType(toks slang.TokenSeq) (*ast.MapType, bool) {
 		return nil, false
 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenRBRACKET) {
 		return nil, false
 	}
 
@@ -134,12 +135,12 @@ func (p *ParserBase) ParseMapType(toks slang.TokenSeq) (*ast.MapType, bool) {
 	return ast.NewMapType(keyType, valType), true
 }
 
-func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, slang.Type, bool) {
-	if !toks.Current().Is(slang.TokenSYMBOL) {
+func (p *ParserBase) ParseNameTypePair(toks lexing.TokenSeq) (string, slang.Type, bool) {
+	if !toks.Current().Is(lexing.TokenSYMBOL) {
 		return "", nil, false
 	}
 
-	name := toks.Current().Value()
+	name := toks.Current().Value
 
 	toks.Advance()
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type UseStatementParser struct {
@@ -24,14 +25,14 @@ func (p *UseStatementParser) GetStatement() slang.Statement {
 	return p.UseStmt
 }
 
-func (p *UseStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenUSE) {
+func (p *UseStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenUSE) {
 		return false
 	}
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), slang.TokenSTRING) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenSTRING) {
 		return false
 	}
 

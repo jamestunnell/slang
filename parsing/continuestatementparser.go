@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type ContinueStatementParser struct {
@@ -21,8 +22,8 @@ func (p *ContinueStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *ContinueStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenCONTINUE) {
+func (p *ContinueStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenCONTINUE) {
 		return false
 	}
 

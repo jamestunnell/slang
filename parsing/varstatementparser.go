@@ -3,6 +3,7 @@ package parsing
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 type VarStatementParser struct {
@@ -19,8 +20,8 @@ func (p *VarStatementParser) GetStatement() slang.Statement {
 	return p.VarStmt
 }
 
-func (p *VarStatementParser) Run(toks slang.TokenSeq) bool {
-	if !p.ExpectToken(toks.Current(), slang.TokenVAR) {
+func (p *VarStatementParser) Run(toks lexing.TokenSeq) bool {
+	if !p.ExpectToken(toks.Current(), lexing.TokenVAR) {
 		return false
 	}
 

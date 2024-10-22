@@ -1,13 +1,13 @@
 package parsing
 
-import "github.com/jamestunnell/slang"
+import "github.com/jamestunnell/slang/lexing"
 
 type ParseErr struct {
 	Error error
-	Token *slang.Token
+	Token *lexing.Token
 }
 
-func NewParseError(err error, tok *slang.Token) *ParseErr {
+func NewParseError(err error, tok *lexing.Token) *ParseErr {
 	return &ParseErr{
 		Error: err,
 		Token: tok,

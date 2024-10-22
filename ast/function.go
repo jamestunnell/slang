@@ -53,7 +53,7 @@ func (fn *Function) Equal(other *Function) bool {
 	}
 
 	for i, stmt := range fn.Statements {
-		if !stmt.Equal(other.Statements[i]) {
+		if !stmt.IsEqual(other.Statements[i]) {
 			return false
 		}
 	}
