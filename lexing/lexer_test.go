@@ -37,7 +37,7 @@ func TestLexer_AssignVerbatimString(t *testing.T) {
 	input := "myvar = `this \nis verbatim`"
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("myvar"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 7),
+		tok(lexing.EQUAL(), 1, 7),
 		tok(lexing.VERBATIMSTRING("this \nis verbatim"), 1, 9),
 	}
 
@@ -59,7 +59,7 @@ func TestLexer_SimpleStringInterp(t *testing.T) {
 func TestLexer_AssignNestedStringInterp(t *testing.T) {
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("myVar"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 7),
+		tok(lexing.EQUAL(), 1, 7),
 		tok(lexing.STRING("a "), 1, 9),
 		tok(lexing.DOLLARLBRACE(), 1, 12),
 		tok(lexing.IF(), 1, 14),
@@ -91,7 +91,7 @@ func TestLexer_WholeLineComment(t *testing.T) {
 func TestLexer_InlineComment(t *testing.T) {
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("x"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 3),
+		tok(lexing.EQUAL(), 1, 3),
 		tok(lexing.INT("10"), 1, 5),
 		tok(lexing.COMMENT("# this is why"), 1, 8),
 	}
@@ -102,7 +102,7 @@ func TestLexer_InlineComment(t *testing.T) {
 func TestLexer_AssignInt(t *testing.T) {
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("x"), 1, 4),
-		tok(lexing.ASSIGN(), 1, 5),
+		tok(lexing.EQUAL(), 1, 5),
 		tok(lexing.INT("5"), 1, 6),
 	}
 
@@ -114,11 +114,11 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("x"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 3),
+		tok(lexing.EQUAL(), 1, 3),
 		tok(lexing.INT("5"), 1, 5),
 		tok(lexing.NEWLINE(), 1, 6),
 		tok(lexing.SYMBOL("y"), 2, 1),
-		tok(lexing.ASSIGN(), 2, 3),
+		tok(lexing.EQUAL(), 2, 3),
 		tok(lexing.INT("10"), 2, 5),
 	}
 
@@ -162,7 +162,7 @@ func TestLexer_AssignClassField(t *testing.T) {
 		tok(lexing.SYMBOL("this"), 1, 1),
 		tok(lexing.DOT(), 1, 5),
 		tok(lexing.SYMBOL("MyField"), 1, 6),
-		tok(lexing.ASSIGN(), 1, 14),
+		tok(lexing.EQUAL(), 1, 14),
 		tok(lexing.INT("7"), 1, 16),
 	}
 
@@ -237,7 +237,7 @@ func TestLexer_OrExprCall(t *testing.T) {
 func TestLexer_FloatMath(t *testing.T) {
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("my_num"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 8),
+		tok(lexing.EQUAL(), 1, 8),
 		tok(lexing.LPAREN(), 1, 10),
 		tok(lexing.FLOAT("2.5"), 1, 11),
 		tok(lexing.PLUS(), 1, 15),
@@ -258,7 +258,7 @@ func TestLexer_AssignFunc(t *testing.T) {
 	input := "y = func(myName: uint) {\n\treturn 7\n}"
 	expected := []*lexing.Token{
 		tok(lexing.SYMBOL("y"), 1, 1),
-		tok(lexing.ASSIGN(), 1, 3),
+		tok(lexing.EQUAL(), 1, 3),
 		tok(lexing.FUNC(), 1, 5),
 		tok(lexing.LPAREN(), 1, 9),
 		tok(lexing.SYMBOL("myName"), 1, 10),

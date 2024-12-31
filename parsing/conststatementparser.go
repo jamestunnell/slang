@@ -35,7 +35,7 @@ func (p *ConstStatementParser) Run(toks lexing.TokenSeq) bool {
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), lexing.TokenASSIGN) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenEQUAL) {
 		return false
 	}
 

@@ -51,7 +51,6 @@ func (loc SourceLocation) String() string {
 
 const (
 	TokenAND TokenType = iota
-	TokenASSIGN
 	TokenBANG
 	TokenBREAK
 	TokenCLASS
@@ -65,6 +64,7 @@ const (
 	TokenELSE
 	TokenEOF
 	TokenEQUAL
+	TokenEQUALEQUAL
 	TokenFALSE
 	TokenFIELD
 	TokenFLOAT
@@ -83,24 +83,18 @@ const (
 	TokenLPAREN
 	TokenMETHOD
 	TokenMINUS
-	TokenMINUSEQUAL
-	TokenMINUSMINUS
 	TokenMODULE
 	TokenNEWLINE
 	TokenOR
 	TokenNOTEQUAL
 	TokenPLUS
-	TokenPLUSEQUAL
-	TokenPLUSPLUS
 	TokenRBRACE
 	TokenRBRACKET
 	TokenRETURN
 	TokenRPAREN
 	TokenSEMICOLON
 	TokenSLASH
-	TokenSLASHEQUAL
 	TokenSTAR
-	TokenSTAREQUAL
 	TokenSTRING
 	TokenSYMBOL
 	TokenTRUE
@@ -115,8 +109,6 @@ func (tt TokenType) String() string {
 	switch tt {
 	case TokenAND:
 		str = "AND"
-	case TokenASSIGN:
-		str = "ASSIGN"
 	case TokenBANG:
 		str = "BANG"
 	case TokenBREAK:
@@ -141,6 +133,8 @@ func (tt TokenType) String() string {
 		str = "EOF"
 	case TokenEQUAL:
 		str = "EQUAL"
+	case TokenEQUALEQUAL:
+		str = "EQUALEQUAL"
 	case TokenFALSE:
 		str = "FALSE"
 	case TokenFIELD:
@@ -179,10 +173,6 @@ func (tt TokenType) String() string {
 		str = "METHOD"
 	case TokenMINUS:
 		str = "MINUS"
-	case TokenMINUSEQUAL:
-		str = "MINUSEQUAL"
-	case TokenMINUSMINUS:
-		str = "MINUSMINUS"
 	case TokenNEWLINE:
 		str = "NEWLINE"
 	case TokenNOTEQUAL:
@@ -191,10 +181,6 @@ func (tt TokenType) String() string {
 		str = "OR"
 	case TokenPLUS:
 		str = "PLUS"
-	case TokenPLUSEQUAL:
-		str = "PLUSEQUAL"
-	case TokenPLUSPLUS:
-		str = "PLUSPLUS"
 	case TokenRBRACE:
 		str = "RBRACE"
 	case TokenRBRACKET:
@@ -207,12 +193,8 @@ func (tt TokenType) String() string {
 		str = "SEMICOLON"
 	case TokenSLASH:
 		str = "SLASH"
-	case TokenSLASHEQUAL:
-		str = "SLASHEQUAL"
 	case TokenSTAR:
 		str = "STAR"
-	case TokenSTAREQUAL:
-		str = "STAREQUAL"
 	case TokenSTRING:
 		str = "STRING"
 	case TokenSYMBOL:

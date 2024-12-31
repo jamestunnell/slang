@@ -21,7 +21,7 @@ const (
 var precedences = map[lexing.TokenType]Precedence{
 	lexing.TokenOR:           PrecedenceOR,
 	lexing.TokenAND:          PrecedenceAND,
-	lexing.TokenEQUAL:        PrecedenceEQUALITY,
+	lexing.TokenEQUALEQUAL:   PrecedenceEQUALITY,
 	lexing.TokenNOTEQUAL:     PrecedenceEQUALITY,
 	lexing.TokenLESS:         PrecedenceRELATIONAL,
 	lexing.TokenLESSEQUAL:    PrecedenceRELATIONAL,

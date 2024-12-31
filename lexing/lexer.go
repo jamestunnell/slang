@@ -156,13 +156,13 @@ func (l *lexer) readSymbol(loc SourceLocation) {
 	case '=':
 		tok = l.readEqual()
 	case '+':
-		tok = l.readPlus()
+		tok = PLUS()
 	case '-':
-		tok = l.readMinus()
+		tok = MINUS()
 	case '*':
-		tok = l.readStar()
+		tok = STAR()
 	case '/':
-		tok = l.readSlash()
+		tok = SLASH()
 	case '.':
 		tok = DOT()
 	case ',':
@@ -214,6 +214,16 @@ func (l *lexer) readSymbol(loc SourceLocation) {
 	}
 }
 
+func (l *lexer) readEqual() *TokenInfo {
+	if l.next == '=' {
+		l.advance()
+
+		return EQUALEQUAL()
+	}
+
+	return EQUAL()
+}
+
 func (l *lexer) readNot() *TokenInfo {
 	if l.next == '=' {
 		l.advance()
@@ -242,66 +252,6 @@ func (l *lexer) readGreater() *TokenInfo {
 	}
 
 	return GREATER()
-}
-
-func (l *lexer) readEqual() *TokenInfo {
-	if l.next == '=' {
-		l.advance()
-
-		return EQUAL()
-	}
-
-	return ASSIGN()
-}
-
-func (l *lexer) readPlus() *TokenInfo {
-	switch l.next {
-	case '=':
-		l.advance()
-
-		return PLUSEQUAL()
-	case '+':
-		l.advance()
-
-		return PLUSPLUS()
-	}
-
-	return PLUS()
-}
-
-func (l *lexer) readMinus() *TokenInfo {
-	switch l.next {
-	case '=':
-		l.advance()
-
-		return MINUSEQUAL()
-	case '-':
-		l.advance()
-
-		return MINUSMINUS()
-	}
-
-	return MINUS()
-}
-
-func (l *lexer) readStar() *TokenInfo {
-	if l.next == '=' {
-		l.advance()
-
-		return STAREQUAL()
-	}
-
-	return STAR()
-}
-
-func (l *lexer) readSlash() *TokenInfo {
-	if l.next == '=' {
-		l.advance()
-
-		return SLASHEQUAL()
-	}
-
-	return SLASH()
 }
 
 func (l *lexer) curLoc() SourceLocation {

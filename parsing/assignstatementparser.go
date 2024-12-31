@@ -26,7 +26,7 @@ func (p *AssignStatementParser) Run(toks lexing.TokenSeq) bool {
 		return false
 	}
 
-	if !p.ExpectToken(toks.Current(), lexing.TokenASSIGN) {
+	if !p.ExpectToken(toks.Current(), lexing.TokenEQUAL) {
 		return false
 	}
 
