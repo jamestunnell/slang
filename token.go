@@ -80,6 +80,7 @@ const (
 	TokenLBRACKET
 	TokenLESS
 	TokenLESSEQUAL
+	TokenLESSLESS
 	TokenLPAREN
 	TokenMETHOD
 	TokenMINUS
@@ -102,6 +103,7 @@ const (
 	TokenSTAR
 	TokenSTAREQUAL
 	TokenSTRING
+	TokenSTRUCT
 	TokenSYMBOL
 	TokenTRUE
 	TokenVAR
@@ -171,6 +173,8 @@ func (tt TokenType) String() string {
 		str = "LESS"
 	case TokenLESSEQUAL:
 		str = "LESSEQUAL"
+	case TokenLESSLESS:
+		str = "LESSLESS"
 	case TokenLPAREN:
 		str = "LPAREN"
 	case TokenMODULE:
@@ -215,6 +219,8 @@ func (tt TokenType) String() string {
 		str = "STAREQUAL"
 	case TokenSTRING:
 		str = "STRING"
+	case TokenSTRUCT:
+		str = "STRUCT"
 	case TokenSYMBOL:
 		str = "SYMBOL"
 	case TokenTRUE:

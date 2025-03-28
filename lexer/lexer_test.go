@@ -11,6 +11,64 @@ import (
 	"github.com/jamestunnell/slang/tokens"
 )
 
+func TestLexer_Example1(t *testing.T) {
+	input := `Person struct {
+		names []string
+		birthdate date
+	}`
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("Person"), 1, 1),
+		tok(tokens.STRUCT(), 1, 8),
+		tok(tokens.LBRACE(), 1, 15),
+		tok(tokens.NEWLINE(), 1, 16),
+
+		tok(tokens.SYMBOL("names"), 2, 3),
+		tok(tokens.LBRACKET(), 2, 9),
+		tok(tokens.RBRACKET(), 2, 10),
+		tok(tokens.SYMBOL("string"), 2, 11),
+		tok(tokens.NEWLINE(), 2, 17),
+
+		tok(tokens.SYMBOL("birthdate"), 3, 3),
+		tok(tokens.SYMBOL("date"), 3, 13),
+		tok(tokens.NEWLINE(), 3, 17),
+
+		tok(tokens.RBRACE(), 4, 2),
+	}
+
+	testLexer(t, input, expected...)
+}
+
+func TestLexer_Example2(t *testing.T) {
+	input := `run func(r Runner, run Run) {
+		r.runs << run
+	}`
+
+	expected := []*slang.Token{
+		tok(tokens.SYMBOL("run"), 1, 1),
+		tok(tokens.FUNC(), 1, 5),
+		tok(tokens.LPAREN(), 1, 9),
+		tok(tokens.SYMBOL("r"), 1, 10),
+		tok(tokens.SYMBOL("Runner"), 1, 12),
+		tok(tokens.COMMA(), 1, 18),
+		tok(tokens.SYMBOL("run"), 1, 20),
+		tok(tokens.SYMBOL("Run"), 1, 24),
+		tok(tokens.RPAREN(), 1, 27),
+		tok(tokens.LBRACE(), 1, 29),
+		tok(tokens.NEWLINE(), 1, 30),
+
+		tok(tokens.SYMBOL("r"), 2, 3),
+		tok(tokens.DOT(), 2, 4),
+		tok(tokens.SYMBOL("runs"), 2, 5),
+		tok(tokens.LESSLESS(), 2, 10),
+		tok(tokens.SYMBOL("run"), 2, 13),
+		tok(tokens.NEWLINE(), 2, 16),
+
+		tok(tokens.RBRACE(), 3, 2),
+	}
+
+	testLexer(t, input, expected...)
+}
+
 func TestLexer_IndentWithDigits(t *testing.T) {
 	testLexer(t, "var_1", tok(tokens.SYMBOL("var_1"), 1, 1))
 }

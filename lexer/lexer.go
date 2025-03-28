@@ -224,10 +224,15 @@ func (l *Lexer) readNot() slang.TokenInfo {
 }
 
 func (l *Lexer) readLess() slang.TokenInfo {
-	if l.next == '=' {
+	switch l.next {
+	case '=':
 		l.advance()
 
 		return tokens.LESSEQUAL()
+	case '<':
+		l.advance()
+
+		return tokens.LESSLESS()
 	}
 
 	return tokens.LESS()
@@ -413,6 +418,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.OR(), loc)
 	case tokens.StrRETURN:
 		l.emit(tokens.RETURN(), loc)
+	case tokens.StrSTRUCT:
+		l.emit(tokens.STRUCT(), loc)
 	case tokens.StrTRUE:
 		l.emit(tokens.TRUE(), loc)
 	case tokens.StrUSE:
