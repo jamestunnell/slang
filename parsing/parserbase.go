@@ -150,3 +150,32 @@ func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, slang.Type,
 
 	return name, typ, true
 }
+
+func (p *ParserBase) ParseNamesType(toks slang.TokenSeq) ([]string, slang.Type, bool) {
+	if !toks.Current().Is(slang.TokenSYMBOL) {
+		return []string{}, nil, false
+	}
+
+	names := []string{toks.Current().Value()}
+
+	toks.Advance()
+
+	for toks.Current().Is(slang.TokenCOMMA) {
+		if !p.ExpectToken(toks.Next(), slang.TokenSYMBOL) {
+			return []string{}, nil, false
+		}
+
+		toks.Advance()
+
+		names = append(names, toks.Current().Value())
+
+		toks.Advance()
+	}
+
+	typ, ok := p.ParseType(toks)
+	if !ok {
+		return []string{}, nil, false
+	}
+
+	return names, typ, true
+}

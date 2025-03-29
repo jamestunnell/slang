@@ -25,7 +25,7 @@ func (p *ClassBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 	case slang.TokenCONST:
 		sp = NewConstStatementParser()
 	case slang.TokenFIELD:
-		sp = NewFieldParser()
+		sp = NewClassFieldParser()
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
 	case slang.TokenMETHOD:

@@ -14,13 +14,6 @@ import (
 	"github.com/jamestunnell/slang/parsing"
 )
 
-type bodyParserSuccessTest struct {
-	TestName   string
-	Input      string
-	Statements []slang.Statement
-	ErrorCount int
-}
-
 func TestClassBodyParserFailure(t *testing.T) {
 	testClassBodyParserFail(t, "no input", "")
 }
@@ -39,8 +32,8 @@ func TestClassBodyParserSuccess(t *testing.T) {
 				field Y float
 			}`,
 			Statements: []slang.Statement{
-				statements.NewField("X", ast.NewBasicType("myMod", "myType")),
-				statements.NewField("Y", ast.NewBasicType("float")),
+				statements.NewClassField("X", ast.NewBasicType("myMod", "myType")),
+				statements.NewClassField("Y", ast.NewBasicType("float")),
 			},
 		},
 		{
@@ -111,27 +104,6 @@ func testClassBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
 	newParser := func() parsing.BodyParser { return parsing.NewClassBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
-}
-
-func testBodyParserSuccess(
-	t *testing.T,
-	test *bodyParserSuccessTest,
-	newParser func() parsing.BodyParser) {
-	t.Run(test.TestName, func(t *testing.T) {
-		p := newParser()
-		l := lexing.NewLexer(strings.NewReader(test.Input))
-		seq := parsing.NewTokenSeq(l)
-
-		assert.True(t, p.Run(seq))
-
-		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
-			logParseErrs(t, p.GetErrors())
-
-			return
-		}
-
-		verifyStatemnts(t, test.Statements, p.GetStatements())
-	})
 }
 
 func testClassBodyParserFail(t *testing.T, testName, input string) {

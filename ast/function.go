@@ -5,6 +5,7 @@ import (
 )
 
 type Function struct {
+	Name        string            `json:"name"`
 	Comment     string            `json:"comment"`
 	Params      []slang.Param     `json:"params"`
 	ReturnTypes []slang.Type      `json:"returnTypes"`
@@ -59,6 +60,10 @@ func (fn *Function) Equal(other *Function) bool {
 	}
 
 	return true
+}
+
+func (fn *Function) GetName() string {
+	return fn.Name
 }
 
 func (fn *Function) GetComment() string {

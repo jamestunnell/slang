@@ -4,23 +4,23 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type Field struct {
+type ClassField struct {
 	*Base
 
 	Name      string     `json:"name"`
 	ValueType slang.Type `json:"valueType"`
 }
 
-func NewField(name string, valueType slang.Type) *Field {
-	return &Field{
-		Base:      NewBase(slang.StatementFIELD),
+func NewClassField(name string, valueType slang.Type) *ClassField {
+	return &ClassField{
+		Base:      NewBase(slang.StatementCLASSFIELD),
 		Name:      name,
 		ValueType: valueType,
 	}
 }
 
-func (f *Field) Equal(other slang.Statement) bool {
-	f2, ok := other.(*Field)
+func (f *ClassField) Equal(other slang.Statement) bool {
+	f2, ok := other.(*ClassField)
 	if !ok {
 		return false
 	}

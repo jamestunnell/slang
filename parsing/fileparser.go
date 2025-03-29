@@ -27,6 +27,7 @@ func (p *FileParser) Run(toks slang.TokenSeq) bool {
 			p.Statements = append(p.Statements, st)
 		}
 
+		toks.AdvanceUntil(slang.TokenNEWLINE)
 		toks.Skip(slang.TokenNEWLINE)
 	}
 
@@ -43,13 +44,15 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) slang.Statement {
 		sp = NewConstStatementParser()
 	case slang.TokenFUNC:
 		sp = NewFuncStatementParser()
+	case slang.TokenSTRUCT:
+		sp = NewStructStatementParser()
 	case slang.TokenVAR:
 		sp = NewVarStatementParser()
 	case slang.TokenUSE:
 		sp = NewUseStatementParser()
 	default:
 		p.TokenErr(
-			toks.Current(), slang.TokenUSE, slang.TokenFUNC, slang.TokenCLASS, slang.TokenVAR)
+			toks.Current(), slang.TokenCONST, slang.TokenCLASS, slang.TokenFUNC, slang.TokenSTRUCT, slang.TokenUSE, slang.TokenVAR)
 
 		return nil
 	}

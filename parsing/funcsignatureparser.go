@@ -95,20 +95,14 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 }
 
 func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {
-	if !toks.Current().Is(slang.TokenSYMBOL) {
-		return false
-	}
-
-	name := toks.Current().Value()
-
-	toks.Advance()
-
-	typ, ok := p.ParseType(toks)
+	names, typ, ok := p.ParseNamesType(toks)
 	if !ok {
 		return false
 	}
 
-	p.Params = append(p.Params, ast.NewParam(name, typ))
+	for _, name := range names {
+		p.Params = append(p.Params, ast.NewParam(name, typ))
+	}
 
 	return true
 }

@@ -69,7 +69,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		)),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+	testFileParserSuccess(t, "global vars and funcs", file, expected, 0)
 }
 
 func TestFileParserGlobalConst(t *testing.T) {
@@ -81,7 +81,7 @@ func TestFileParserGlobalConst(t *testing.T) {
 		statements.NewConst("myConst", expressions.NewFloat(25.7)),
 		statements.NewVar("x", ast.NewBasicType("int")),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+	testFileParserSuccess(t, "global const", file, expected, 0)
 }
 
 func TestFileParserClassWithTest(t *testing.T) {
@@ -121,7 +121,7 @@ func TestFileParserClassWithTest(t *testing.T) {
 	expected := []slang.Statement{
 		statements.NewUse("test"),
 		statements.NewClass("Accumulator", "",
-			statements.NewField("total", ast.NewBasicType("float")),
+			statements.NewClassField("total", ast.NewBasicType("float")),
 			statements.NewMethod(
 				"Add",
 				ast.NewFunction(
@@ -219,23 +219,24 @@ func TestFileParserClassWithTest(t *testing.T) {
 			),
 		)),
 	}
-	testFileParserSuccess(t, "just a class statement", file, expected, 0)
+	testFileParserSuccess(t, "class with test", file, expected, 0)
 }
 
-// func TestFileParserBadOnelineStatements(t *testing.T) {
-// 	file := strings.NewReader(`
-// 		use "xyz"
-// 		use what
-
-// 		var x int
-// 		var y 3
-// 	`)
-// 	expected := []slang.Statement{
-// 		statements.NewUse("xyz"),
-// 		statements.NewVar("x", "int"),
-// 	}
-// 	testFileParserSuccess(t, "just a class statement", file, expected, 2)
-// }
+func TestFileParserStruct(t *testing.T) {
+	file := strings.NewReader(`
+		struct X {
+		  a, b int
+		  c string
+		}
+	`)
+	expected := []slang.Statement{
+		statements.NewStruct("X", "X has stuff",
+			statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
+			statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
+		),
+	}
+	testFileParserSuccess(t, "struct", file, expected, 0)
+}
 
 func testFileParserSuccess(
 	t *testing.T,

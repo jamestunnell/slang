@@ -47,6 +47,17 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 			ReturnTypes: []slang.Type{},
 		},
 		{
+			TestName: "two multi-name",
+			Input:    `(a, b int, c, d string)`,
+			Params: []slang.Param{
+				ast.NewParam("a", ast.NewBasicType("int")),
+				ast.NewParam("b", ast.NewBasicType("int")),
+				ast.NewParam("c", ast.NewBasicType("string")),
+				ast.NewParam("d", ast.NewBasicType("string")),
+			},
+			ReturnTypes: []slang.Type{},
+		},
+		{
 			TestName: "one param, one return type",
 			Input:    `(a int) int`,
 			Params: []slang.Param{

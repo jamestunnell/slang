@@ -2,21 +2,20 @@ package ast
 
 import (
 	"github.com/jamestunnell/slang"
-	"golang.org/x/exp/maps"
 )
 
 type Module struct {
-	Comment   string                    `json:"comment"`
-	Errors    []error                   `json:"errors"`
-	Classes   map[string]slang.Class    `json:"classes"`
-	Functions map[string]slang.Function `json:"functions"`
+	Comment   string           `json:"comment"`
+	Errors    []error          `json:"errors"`
+	Structs   []slang.Struct   `json:"structs"`
+	Functions []slang.Function `json:"functions"`
 }
 
 func NewModule() *Module {
 	return &Module{
 		Comment:   "",
-		Classes:   map[string]slang.Class{},
-		Functions: map[string]slang.Function{},
+		Structs:   []slang.Struct{},
+		Functions: []slang.Function{},
 		Errors:    []error{},
 	}
 }
@@ -86,28 +85,40 @@ func (m *Module) GetComment() string {
 	return m.Comment
 }
 
-func (m *Module) GetClassNames() []string {
-	return maps.Keys(m.Classes)
-}
-
-func (m *Module) GetClass(name string) (slang.Class, bool) {
-	c, found := m.Classes[name]
-	if !found {
-		return nil, false
+func (m *Module) GetStructNames() []string {
+	names := make([]string, len(m.Structs))
+	for i, s := range m.Structs {
+		names[i] = s.GetName()
 	}
 
-	return c, true
+	return names
+}
+
+func (m *Module) GetStruct(name string) (slang.Struct, bool) {
+	for _, s := range m.Structs {
+		if s.GetName() == name {
+			return s, true
+		}
+	}
+
+	return nil, false
 }
 
 func (m *Module) GetFunctionNames() []string {
-	return maps.Keys(m.Functions)
+	names := make([]string, len(m.Functions))
+	for i, s := range m.Functions {
+		names[i] = s.GetName()
+	}
+
+	return names
 }
 
 func (m *Module) GetFunction(name string) (slang.Function, bool) {
-	c, found := m.Functions[name]
-	if !found {
-		return nil, false
+	for _, f := range m.Functions {
+		if f.GetName() == name {
+			return f, true
+		}
 	}
 
-	return c, true
+	return nil, false
 }

@@ -18,7 +18,7 @@ const (
 	StatementCONST
 	StatementCONTINUE
 	StatementEXPRESSION
-	StatementFIELD
+	StatementCLASSFIELD
 	StatementFOREACH
 	StatementVAR
 	StatementFUNC
@@ -27,21 +27,25 @@ const (
 	StatementMETHOD
 	StatementRETURN
 	StatementRETURNVAL
+	StatementSTRUCT
+	StatementSTRUCTFIELD
 	StatementUSE
 
-	StrASSIGN     = "ASSIGN"
-	StrCLASS      = "CLASS"
-	StrCONST      = "CONST"
-	StrEXPRESSION = "EXPRESSION"
-	StrIF         = "IF"
-	StrIFELSE     = "IFELSE"
-	StrFIELD      = "FIELD"
-	StrFUNC       = "FUNC"
-	StrVAR        = "VAR"
-	StrMETHOD     = "METHOD"
-	StrRETURN     = "RETURN"
-	StrRETURNVAL  = "RETURNVAL"
-	StrUSE        = "USE"
+	StrASSIGN      = "ASSIGN"
+	StrCLASS       = "CLASS"
+	StrCLASSFIELD  = "CLASSFIELD"
+	StrCONST       = "CONST"
+	StrEXPRESSION  = "EXPRESSION"
+	StrIF          = "IF"
+	StrIFELSE      = "IFELSE"
+	StrFUNC        = "FUNC"
+	StrVAR         = "VAR"
+	StrMETHOD      = "METHOD"
+	StrRETURN      = "RETURN"
+	StrRETURNVAL   = "RETURNVAL"
+	StrSTRUCT      = "STRUCT"
+	StrSTRUCTFIELD = "STRUCTFIELD"
+	StrUSE         = "USE"
 )
 
 func StatementsEqual(a, b []Statement) bool {
@@ -70,14 +74,14 @@ func (st StatementType) String() string {
 		str = StrASSIGN
 	case StatementCLASS:
 		str = StrCLASS
+	case StatementCLASSFIELD:
+		str = StrCLASSFIELD
 	case StatementEXPRESSION:
 		str = StrEXPRESSION
 	case StatementIF:
 		str = StrIF
 	case StatementIFELSE:
 		str = StrIFELSE
-	case StatementFIELD:
-		str = StrFIELD
 	case StatementFUNC:
 		str = StrFUNC
 	case StatementMETHOD:
@@ -86,6 +90,10 @@ func (st StatementType) String() string {
 		str = StrRETURN
 	case StatementRETURNVAL:
 		str = StrRETURNVAL
+	case StatementSTRUCT:
+		str = StrSTRUCT
+	case StatementSTRUCTFIELD:
+		str = StrSTRUCTFIELD
 	case StatementUSE:
 		str = StrUSE
 	case StatementVAR:

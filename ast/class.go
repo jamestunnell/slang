@@ -25,7 +25,7 @@ func (c *Class) Equal(other *Class) bool {
 		return false
 	}
 
-	if len(c.Fields) != len(c.Fields) {
+	if len(c.Fields) != len(other.Fields) {
 		return false
 	}
 
