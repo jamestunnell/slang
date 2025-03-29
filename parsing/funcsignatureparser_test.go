@@ -8,7 +8,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
-	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 )
 
@@ -70,7 +70,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest) {
 	t.Run(test.TestName, func(t *testing.T) {
 		p := parsing.NewFuncSignatureParser()
-		l := lexer.New(strings.NewReader(test.Input))
+		l := lexing.NewLexer(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
 		p.Run(seq)
@@ -91,7 +91,7 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 func testFuncSignatureParserFail(t *testing.T, testName, input string) {
 	t.Run(testName, func(t *testing.T) {
 		p := parsing.NewFuncSignatureParser()
-		l := lexer.New(strings.NewReader(input))
+		l := lexing.NewLexer(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 
 		p.Run(seq)

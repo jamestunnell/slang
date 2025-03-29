@@ -5,11 +5,11 @@ import (
 	"io"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 func ParseFile(r io.Reader) ([]slang.Statement, []*ParseErr) {
-	l := lexer.New(bufio.NewReader(r))
+	l := lexing.NewLexer(bufio.NewReader(r))
 	toks := NewTokenSeq(l)
 	p := NewFileParser()
 

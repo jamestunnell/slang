@@ -1,4 +1,4 @@
-package lexer_test
+package lexing_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/tokens"
 )
 
@@ -337,7 +337,7 @@ func TestLexer_AssignFunc(t *testing.T) {
 }
 
 func testLexer(t *testing.T, input string, expected ...*slang.Token) {
-	toks := lexer.ScanString(input)
+	toks := lexing.ScanString(input)
 
 	require.Len(t, toks, len(expected))
 

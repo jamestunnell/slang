@@ -1,4 +1,4 @@
-package lexer
+package lexing
 
 import (
 	"io"
@@ -22,7 +22,7 @@ type Lexer struct {
 
 const eof = 0
 
-func New(scanner io.RuneScanner) slang.Lexer {
+func NewLexer(scanner io.RuneScanner) slang.Lexer {
 	l := &Lexer{
 		scanner:       scanner,
 		cur:           0,

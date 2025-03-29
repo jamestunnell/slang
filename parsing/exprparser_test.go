@@ -7,7 +7,7 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
-	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/stretchr/testify/assert"
 )
@@ -95,7 +95,7 @@ func TestExprParser(t *testing.T) {
 
 func testExprParser(t *testing.T, input string, expected slang.Expression) {
 	t.Run(input, func(t *testing.T) {
-		l := lexer.New(strings.NewReader(input))
+		l := lexing.NewLexer(strings.NewReader(input))
 		toks := parsing.NewTokenSeq(l)
 		p := parsing.NewExprParser(parsing.PrecedenceLOWEST)
 

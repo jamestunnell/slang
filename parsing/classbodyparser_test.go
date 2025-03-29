@@ -10,7 +10,7 @@ import (
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
-	"github.com/jamestunnell/slang/lexer"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 )
 
@@ -119,7 +119,7 @@ func testBodyParserSuccess(
 	newParser func() parsing.BodyParser) {
 	t.Run(test.TestName, func(t *testing.T) {
 		p := newParser()
-		l := lexer.New(strings.NewReader(test.Input))
+		l := lexing.NewLexer(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
 		assert.True(t, p.Run(seq))
@@ -137,7 +137,7 @@ func testBodyParserSuccess(
 func testClassBodyParserFail(t *testing.T, testName, input string) {
 	t.Run(testName, func(t *testing.T) {
 		p := parsing.NewClassBodyParser()
-		l := lexer.New(strings.NewReader(input))
+		l := lexing.NewLexer(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 
 		assert.False(t, p.Run(seq))
