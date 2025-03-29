@@ -39,7 +39,7 @@ func (p *StructStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	p.StructStmt = statements.NewStruct(name, "", structParser.Statements...)
+	p.StructStmt = statements.NewStruct(name, structParser.Statements...)
 
 	return true
 }

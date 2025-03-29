@@ -8,15 +8,13 @@ type Struct struct {
 	*Base
 
 	Name       string            `json:"name"`
-	Comment    string            `json:"comment"`
 	Statements []slang.Statement `json:"statements"`
 }
 
-func NewStruct(name, comment string, stmts ...slang.Statement) *Struct {
+func NewStruct(name string, stmts ...slang.Statement) *Struct {
 	return &Struct{
-		Base:       NewBase(slang.StatementCLASS),
+		Base:       NewBase(slang.StatementSTRUCT),
 		Name:       name,
-		Comment:    comment,
 		Statements: stmts,
 	}
 }

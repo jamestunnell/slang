@@ -153,10 +153,10 @@ func TestLexer_InlineComment(t *testing.T) {
 		tok(tokens.SYMBOL("x"), 1, 1),
 		tok(tokens.ASSIGN(), 1, 3),
 		tok(tokens.INT("10"), 1, 5),
-		tok(tokens.COMMENT("# this is why"), 1, 8),
+		tok(tokens.COMMENT("this is why"), 1, 8),
 	}
 
-	testLexer(t, `x = 10 # this is why`, expected...)
+	testLexer(t, `x = 10 // this is why`, expected...)
 }
 
 func TestLexer_AssignInt(t *testing.T) {
@@ -197,15 +197,15 @@ func TestLexer_Use(t *testing.T) {
 }
 
 func TestLexer_StructBlock(t *testing.T) {
-	const str = `class X {
+	const str = `struct X {
 		Y string
 	}`
 
 	expected := []*slang.Token{
-		tok(tokens.CLASS(), 1, 1),
-		tok(tokens.SYMBOL("X"), 1, 7),
-		tok(tokens.LBRACE(), 1, 9),
-		tok(tokens.NEWLINE(), 1, 10),
+		tok(tokens.STRUCT(), 1, 1),
+		tok(tokens.SYMBOL("X"), 1, 8),
+		tok(tokens.LBRACE(), 1, 10),
+		tok(tokens.NEWLINE(), 1, 11),
 		tok(tokens.SYMBOL("Y"), 2, 3),
 		tok(tokens.SYMBOL("string"), 2, 5),
 		tok(tokens.NEWLINE(), 2, 11),

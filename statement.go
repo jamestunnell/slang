@@ -17,12 +17,10 @@ const (
 	StatementASSIGN StatementType = iota
 	StatementBLOCK
 	StatementBREAK
-	StatementCLASS
 	StatementCOMMENT
 	StatementCONST
 	StatementCONTINUE
 	StatementEXPRESSION
-	StatementCLASSFIELD
 	StatementFOREACH
 	StatementVAR
 	StatementFUNC
@@ -36,8 +34,6 @@ const (
 	StatementUSE
 
 	StrASSIGN      = "ASSIGN"
-	StrCLASS       = "CLASS"
-	StrCLASSFIELD  = "CLASSFIELD"
 	StrCOMMENT     = "COMMENT"
 	StrCONST       = "CONST"
 	StrEXPRESSION  = "EXPRESSION"
@@ -77,10 +73,6 @@ func (st StatementType) String() string {
 	switch st {
 	case StatementASSIGN:
 		str = StrASSIGN
-	case StatementCLASS:
-		str = StrCLASS
-	case StatementCLASSFIELD:
-		str = StrCLASSFIELD
 	case StatementCOMMENT:
 		str = StrCOMMENT
 	case StatementCONST:

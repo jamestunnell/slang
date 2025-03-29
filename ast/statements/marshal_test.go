@@ -15,10 +15,12 @@ import (
 
 func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, statements.NewAssign(expressions.NewIdentifier("xyz"), expressions.NewInteger(5)))
-	testMarshalJSON(t, statements.NewClass("myclass", ""))
-	testMarshalJSON(t, statements.NewClassField("myfield", ast.NewBasicType("int")))
+	testMarshalJSON(t, statements.NewStruct("myclass",
+		statements.NewStructField([]string{"x"}, ast.NewBasicType("int")),
+		statements.NewStructField([]string{"y", "z"}, ast.NewBasicType("string")),
+	))
 	testMarshalJSON(t, statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("string")))
-	testMarshalJSON(t, statements.NewMethod("mymethod", ast.NewFunction([]slang.Param{}, []slang.Type{})))
+	testMarshalJSON(t, statements.NewFunc("myfunc", ast.NewFunction([]slang.Param{}, []slang.Type{})))
 	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInteger(7)))
 	testMarshalJSON(t, statements.NewUse("my/path"))
 }

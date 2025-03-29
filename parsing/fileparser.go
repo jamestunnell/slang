@@ -73,8 +73,6 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 
 func (p *FileParser) makeStmtParser(cur *slang.Token) StatementParser {
 	switch cur.Type() {
-	case slang.TokenCLASS:
-		return NewClassStatementParser()
 	case slang.TokenCONST:
 		return NewConstStatementParser()
 	case slang.TokenFUNC:
@@ -88,7 +86,7 @@ func (p *FileParser) makeStmtParser(cur *slang.Token) StatementParser {
 	}
 
 	p.TokenErr(
-		cur, slang.TokenCONST, slang.TokenCLASS, slang.TokenFUNC, slang.TokenSTRUCT, slang.TokenUSE, slang.TokenVAR)
+		cur, slang.TokenCONST, slang.TokenFUNC, slang.TokenSTRUCT, slang.TokenUSE, slang.TokenVAR)
 
 	return nil
 }

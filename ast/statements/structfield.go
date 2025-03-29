@@ -14,7 +14,7 @@ type StructField struct {
 
 func NewStructField(names []string, valueType slang.Type) *StructField {
 	return &StructField{
-		Base:      NewBase(slang.StatementCLASSFIELD),
+		Base:      NewBase(slang.StatementSTRUCTFIELD),
 		Names:     names,
 		ValueType: valueType,
 	}

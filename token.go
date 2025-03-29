@@ -54,7 +54,6 @@ const (
 	TokenASSIGN
 	TokenBANG
 	TokenBREAK
-	TokenCLASS
 	TokenCOLON
 	TokenCOMMA
 	TokenCOMMENT
@@ -66,7 +65,6 @@ const (
 	TokenEOF
 	TokenEQUAL
 	TokenFALSE
-	TokenFIELD
 	TokenFLOAT
 	TokenFOREACH
 	TokenFUNC
@@ -82,7 +80,6 @@ const (
 	TokenLESSEQUAL
 	TokenLESSLESS
 	TokenLPAREN
-	TokenMETHOD
 	TokenMINUS
 	TokenMINUSEQUAL
 	TokenMINUSMINUS
@@ -123,8 +120,6 @@ func (tt TokenType) String() string {
 		str = "BANG"
 	case TokenBREAK:
 		str = "BREAK"
-	case TokenCLASS:
-		str = "CLASS"
 	case TokenCOLON:
 		str = "COLON"
 	case TokenCOMMA:
@@ -145,8 +140,6 @@ func (tt TokenType) String() string {
 		str = "EQUAL"
 	case TokenFALSE:
 		str = "FALSE"
-	case TokenFIELD:
-		str = "FIELD"
 	case TokenFLOAT:
 		str = "FLOAT"
 	case TokenFOREACH:
@@ -179,8 +172,6 @@ func (tt TokenType) String() string {
 		str = "LPAREN"
 	case TokenMODULE:
 		str = "MODULE"
-	case TokenMETHOD:
-		str = "METHOD"
 	case TokenMINUS:
 		str = "MINUS"
 	case TokenMINUSEQUAL:

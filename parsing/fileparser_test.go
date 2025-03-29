@@ -84,24 +84,24 @@ func TestFileParserGlobalConst(t *testing.T) {
 	testFileParserSuccess(t, "global const", file, expected, 0)
 }
 
-func TestFileParserClassWithTest(t *testing.T) {
+func TestFileParserStructWithTest(t *testing.T) {
 	file := strings.NewReader(`
 		use "test"
 
-		class Accumulator {
-			field total float
+		struct Accumulator {
+			total float
+		}
 
-			method Add(x float) {
-				this.total = this.total + x
-			}
+		func Add(a Accumulator, x float) {
+			a.total = a.total + x
+		}
 
-			method Mul(x float) {
-				this.total = this.total * x
-			}
+		func Mul(a Accumulator, x float) {
+			a.total = a.total * x
+		}
 
-			method Total() float {
-				return this.total
-			}
+		func Total(a Accumulator) float {
+			return a.total
 		}
 
 		func TestAccumulator(t test.Test) {
@@ -120,49 +120,55 @@ func TestFileParserClassWithTest(t *testing.T) {
 	`)
 	expected := []slang.Statement{
 		statements.NewUse("test"),
-		statements.NewClass("Accumulator", "",
-			statements.NewClassField("total", ast.NewBasicType("float")),
-			statements.NewMethod(
-				"Add",
-				ast.NewFunction(
-					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
-					[]slang.Type{},
-					statements.NewAssign(
+		statements.NewStruct("Accumulator",
+			statements.NewStructField([]string{"total"}, ast.NewBasicType("float"))),
+		statements.NewFunc("Add",
+			ast.NewFunction(
+				[]slang.Param{
+					ast.NewParam("a", ast.NewBasicType("Accumulator")),
+					ast.NewParam("x", ast.NewBasicType("float")),
+				},
+				[]slang.Type{},
+				statements.NewAssign(
+					expressions.NewAccessMember(
+						expressions.NewIdentifier("a"), "total"),
+					expressions.NewAdd(
 						expressions.NewAccessMember(
-							expressions.NewIdentifier("this"), "total"),
-						expressions.NewAdd(
-							expressions.NewAccessMember(
-								expressions.NewIdentifier("this"), "total"),
-							expressions.NewIdentifier("x"),
-						),
+							expressions.NewIdentifier("a"), "total"),
+						expressions.NewIdentifier("x"),
 					),
 				),
 			),
-			statements.NewMethod(
-				"Mul",
-				ast.NewFunction(
-					[]slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
-					[]slang.Type{},
-					statements.NewAssign(
+		),
+		statements.NewFunc(
+			"Mul",
+			ast.NewFunction(
+				[]slang.Param{
+					ast.NewParam("a", ast.NewBasicType("Accumulator")),
+					ast.NewParam("x", ast.NewBasicType("float")),
+				},
+				[]slang.Type{},
+				statements.NewAssign(
+					expressions.NewAccessMember(
+						expressions.NewIdentifier("a"), "total"),
+					expressions.NewMultiply(
 						expressions.NewAccessMember(
-							expressions.NewIdentifier("this"), "total"),
-						expressions.NewMultiply(
-							expressions.NewAccessMember(
-								expressions.NewIdentifier("this"), "total"),
-							expressions.NewIdentifier("x"),
-						),
+							expressions.NewIdentifier("a"), "total"),
+						expressions.NewIdentifier("x"),
 					),
 				),
 			),
-			statements.NewMethod(
-				"Total",
-				ast.NewFunction(
-					[]slang.Param{},
-					[]slang.Type{ast.NewBasicType("float")},
-					statements.NewReturnVal(
-						expressions.NewAccessMember(
-							expressions.NewIdentifier("this"), "total"),
-					),
+		),
+		statements.NewFunc(
+			"Total",
+			ast.NewFunction(
+				[]slang.Param{
+					ast.NewParam("a", ast.NewBasicType("Accumulator")),
+				},
+				[]slang.Type{ast.NewBasicType("float")},
+				statements.NewReturnVal(
+					expressions.NewAccessMember(
+						expressions.NewIdentifier("a"), "total"),
 				),
 			),
 		),
@@ -219,7 +225,7 @@ func TestFileParserClassWithTest(t *testing.T) {
 			),
 		)),
 	}
-	testFileParserSuccess(t, "class with test", file, expected, 0)
+	testFileParserSuccess(t, "struct with test", file, expected, 0)
 }
 
 func TestFileParserStruct(t *testing.T) {
@@ -230,7 +236,7 @@ func TestFileParserStruct(t *testing.T) {
 		}
 	`)
 	expected := []slang.Statement{
-		statements.NewStruct("X", "X has stuff",
+		statements.NewStruct("X",
 			statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
 			statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
 		),
@@ -261,7 +267,7 @@ func TestFileParserWithComments(t *testing.T) {
 	expected := []slang.Statement{
 		statements.NewComment("this is a leading", "standalone comment"),
 		statements.WithComment(
-			statements.NewStruct("X", "X has stuff",
+			statements.NewStruct("X",
 				statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
 				statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
 			),

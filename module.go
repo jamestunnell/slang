@@ -1,8 +1,8 @@
 package slang
 
 type Module interface {
-	GetClassNames() []string
-	GetClass(name string) (Class, bool)
+	GetStructNames() []string
+	GetStruct(name string) (Struct, bool)
 
 	GetFunctionNames() []string
 	GetFunction(name string) (Function, bool)
