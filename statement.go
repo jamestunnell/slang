@@ -5,6 +5,9 @@ import "encoding/json"
 type StatementType int
 
 type Statement interface {
+	GetComment() []string
+	SetComment(lines []string)
+
 	Type() StatementType
 	Equal(Statement) bool
 	// Eval(env *objecsts.Environment) (objects.Object, error)
@@ -15,6 +18,7 @@ const (
 	StatementBLOCK
 	StatementBREAK
 	StatementCLASS
+	StatementCOMMENT
 	StatementCONST
 	StatementCONTINUE
 	StatementEXPRESSION
@@ -34,6 +38,7 @@ const (
 	StrASSIGN      = "ASSIGN"
 	StrCLASS       = "CLASS"
 	StrCLASSFIELD  = "CLASSFIELD"
+	StrCOMMENT     = "COMMENT"
 	StrCONST       = "CONST"
 	StrEXPRESSION  = "EXPRESSION"
 	StrIF          = "IF"
@@ -76,6 +81,10 @@ func (st StatementType) String() string {
 		str = StrCLASS
 	case StatementCLASSFIELD:
 		str = StrCLASSFIELD
+	case StatementCOMMENT:
+		str = StrCOMMENT
+	case StatementCONST:
+		str = StrCONST
 	case StatementEXPRESSION:
 		str = StrEXPRESSION
 	case StatementIF:

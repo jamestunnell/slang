@@ -142,10 +142,10 @@ func TestLexer_AssignNestedStringInterp(t *testing.T) {
 
 func TestLexer_WholeLineComment(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.COMMENT("# not gonna lie..."), 1, 3),
+		tok(tokens.COMMENT("not gonna lie..."), 1, 3),
 	}
 
-	testLexer(t, `  # not gonna lie...`, expected...)
+	testLexer(t, `  // not gonna lie... `, expected...)
 }
 
 func TestLexer_InlineComment(t *testing.T) {

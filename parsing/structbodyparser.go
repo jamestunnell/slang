@@ -11,11 +11,13 @@ type StructBodyParser struct {
 func NewStructBodyParser() *StructBodyParser {
 	p := &StructBodyParser{}
 
-	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
+	p.BodyParserBase = NewBodyParserBase(p.makeStatementParser)
 
 	return p
 }
 
-func (p *StructBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
-	return p.ParseStatement(toks, NewStructFieldParser())
+func (p *StructBodyParser) makeStatementParser(
+	cur *slang.Token,
+) StatementParser {
+	return NewStructFieldParser()
 }

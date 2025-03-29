@@ -11,28 +11,26 @@ type FuncBodyParser struct {
 func NewFuncBodyParser() *FuncBodyParser {
 	p := &FuncBodyParser{}
 
-	p.BodyParserBase = NewBodyParserBase(p.parseStatement)
+	p.BodyParserBase = NewBodyParserBase(p.makeStatementParser)
 
 	return p
 }
 
-func (p *FuncBodyParser) parseStatement(toks slang.TokenSeq) slang.Statement {
-	var sp StatementParser
-
-	switch toks.Current().Type() {
+func (p *FuncBodyParser) makeStatementParser(
+	cur *slang.Token,
+) StatementParser {
+	switch cur.Type() {
 	case slang.TokenCONST:
-		sp = NewConstStatementParser()
+		return NewConstStatementParser()
 	case slang.TokenIF:
-		sp = NewIfStatementParser()
+		return NewIfStatementParser()
 	case slang.TokenFOREACH:
-		sp = NewForEachStmtParser()
+		return NewForEachStmtParser()
 	case slang.TokenRETURN:
-		sp = NewReturnStatementParser()
+		return NewReturnStatementParser()
 	case slang.TokenVAR:
-		sp = NewVarStatementParser()
-	default:
-		sp = NewExprOrAssignStatementParser()
+		return NewVarStatementParser()
 	}
 
-	return p.ParseStatement(toks, sp)
+	return NewExprOrAssignStatementParser()
 }

@@ -238,6 +238,46 @@ func TestFileParserStruct(t *testing.T) {
 	testFileParserSuccess(t, "struct", file, expected, 0)
 }
 
+func TestFileParserWithComments(t *testing.T) {
+	file := strings.NewReader(`
+		// this is a leading
+		// standalone comment
+		
+		// my struct comment
+		struct X {
+			a, b int
+			c string
+		}
+
+		// this is a
+		// standalone comment
+
+		// also not empty
+		const y = 10
+
+		// this is a trailing
+		// standalone comment
+	`)
+	expected := []slang.Statement{
+		statements.NewComment("this is a leading", "standalone comment"),
+		statements.WithComment(
+			statements.NewStruct("X", "X has stuff",
+				statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
+				statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
+			),
+			"my struct comment",
+		),
+		statements.NewComment("this is a", "standalone comment"),
+		statements.WithComment(
+			statements.NewConst("y", expressions.NewInteger(10)),
+			"also not empty",
+		),
+		statements.NewComment("this is a trailing", "standalone comment"),
+	}
+
+	testFileParserSuccess(t, "with comments", file, expected, 0)
+}
+
 func testFileParserSuccess(
 	t *testing.T,
 	name string,

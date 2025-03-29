@@ -5,11 +5,20 @@ import (
 )
 
 type Base struct {
-	StmtType slang.StatementType `json:"type"`
+	CommentLines []string
+	StmtType     slang.StatementType `json:"type"`
 }
 
 func NewBase(typ slang.StatementType) *Base {
 	return &Base{StmtType: typ}
+}
+
+func (b *Base) SetComment(lines []string) {
+	b.CommentLines = lines
+}
+
+func (b *Base) GetComment() []string {
+	return b.CommentLines
 }
 
 func (b *Base) Type() slang.StatementType {

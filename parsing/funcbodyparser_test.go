@@ -23,13 +23,45 @@ func TestFuncBodyParser(t *testing.T) {
 				var a int
 				const b = "hello"
 				var c float
-				const d = 12 
+				const d = 12
 			}`,
 			Statements: []slang.Statement{
 				statements.NewVar("a", ast.NewBasicType("int")),
 				statements.NewConst("b", expressions.NewString("hello")),
 				statements.NewVar("c", ast.NewBasicType("float")),
 				statements.NewConst("d", expressions.NewInteger(12)),
+			},
+		},
+		{
+			TestName: "with comments",
+			Input: `{
+			    // this is a leading
+				// standalone comment
+
+			    // not empty
+				const x = "hello"
+
+				// this is a
+				// standalone comment
+
+				// also not empty
+				const y = 10
+
+				// this is a trailing
+				// standalone comment
+			}`,
+			Statements: []slang.Statement{
+				statements.NewComment("this is a leading", "standalone comment"),
+				statements.WithComment(
+					statements.NewConst("x", expressions.NewString("hello")),
+					"not empty",
+				),
+				statements.NewComment("this is a", "standalone comment"),
+				statements.WithComment(
+					statements.NewConst("y", expressions.NewInteger(10)),
+					"also not empty",
+				),
+				statements.NewComment("this is a trailing", "standalone comment"),
 			},
 		},
 		{

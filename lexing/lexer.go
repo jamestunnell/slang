@@ -50,7 +50,10 @@ func (l *Lexer) NextToken() *slang.Token {
 	loc := l.curLoc()
 
 	switch {
-	case l.cur == '#':
+	case l.cur == '/' && l.next == '/':
+		l.advance()
+		l.advance()
+
 		l.readComment(loc)
 	case l.cur == '\n':
 		l.readNewline(loc)
@@ -114,10 +117,6 @@ func isSymbol(r rune) bool {
 func (l *Lexer) readComment(loc slang.SourceLocation) {
 	var b strings.Builder
 
-	b.WriteRune('#')
-
-	l.advance()
-
 	for l.cur != eof && l.cur != '\n' {
 		b.WriteRune(l.cur)
 
@@ -126,7 +125,9 @@ func (l *Lexer) readComment(loc slang.SourceLocation) {
 
 	l.advance()
 
-	l.emit(tokens.COMMENT(b.String()), loc)
+	val := b.String()
+
+	l.emit(tokens.COMMENT(strings.TrimSpace(val)), loc)
 }
 
 func (l *Lexer) advanceLine() {
