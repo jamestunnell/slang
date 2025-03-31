@@ -2,21 +2,21 @@ package ast
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/statements"
 )
 
 type Module struct {
-	Comment   string           `json:"comment"`
-	Errors    []error          `json:"errors"`
-	Structs   []slang.Struct   `json:"structs"`
-	Functions []slang.Function `json:"functions"`
+	Statements []slang.Statement `json:"statements"`
+	// // Errors    []error          `json:"errors"`
+	// Structures []slang.Structure `json:"structures"`
+	// Functions  []slang.Function  `json:"functions"`
 }
 
 func NewModule() *Module {
 	return &Module{
-		Comment:   "",
-		Structs:   []slang.Struct{},
-		Functions: []slang.Function{},
-		Errors:    []error{},
+		// Structures: []slang.Structure{},
+		// Functions:  []slang.Function{},
+		// // Errors:    []error{},
 	}
 }
 
@@ -81,23 +81,24 @@ func NewModule() *Module {
 // 	return m, nil
 // }
 
-func (m *Module) GetComment() string {
-	return m.Comment
-}
-
 func (m *Module) GetStructNames() []string {
-	names := make([]string, len(m.Structs))
-	for i, s := range m.Structs {
-		names[i] = s.GetName()
+	names := []string{}
+
+	for _, s := range m.Statements {
+		if str, ok := s.(*statements.Struct); ok {
+			names = append(names, str.Name)
+		}
 	}
 
 	return names
 }
 
-func (m *Module) GetStruct(name string) (slang.Struct, bool) {
-	for _, s := range m.Structs {
-		if s.GetName() == name {
-			return s, true
+func (m *Module) GetStruct(name string) (slang.Structure, bool) {
+	for _, s := range m.Statements {
+		if str, ok := s.(*statements.Struct); ok {
+			if str.Name == name {
+				return str, true
+			}
 		}
 	}
 
@@ -105,18 +106,23 @@ func (m *Module) GetStruct(name string) (slang.Struct, bool) {
 }
 
 func (m *Module) GetFunctionNames() []string {
-	names := make([]string, len(m.Functions))
-	for i, s := range m.Functions {
-		names[i] = s.GetName()
+	names := []string{}
+
+	for _, s := range m.Statements {
+		if fn, ok := s.(*statements.Func); ok {
+			names = append(names, fn.Name)
+		}
 	}
 
 	return names
 }
 
 func (m *Module) GetFunction(name string) (slang.Function, bool) {
-	for _, f := range m.Functions {
-		if f.GetName() == name {
-			return f, true
+	for _, s := range m.Statements {
+		if f, ok := s.(*statements.Func); ok {
+			if f.Name == name {
+				return f, true
+			}
 		}
 	}
 

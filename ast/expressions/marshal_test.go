@@ -25,7 +25,9 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, expressions.NewEqual(a, b))
 	testMarshalJSON(t, expressions.NewFloat(0.0))
 	testMarshalJSON(t, expressions.NewFunc(
-		ast.NewFunction([]slang.Param{}, []slang.Type{ast.NewBasicType("bool")})))
+		[]slang.Param{},
+		[]slang.Type{ast.NewBasicType("bool")},
+	))
 	testMarshalJSON(t, expressions.NewCall(a))
 	testMarshalJSON(t, expressions.NewGreater(a, b))
 	testMarshalJSON(t, expressions.NewGreaterEqual(a, b))

@@ -9,7 +9,7 @@ type StructField struct {
 	*Base
 
 	Names     []string   `json:"names"`
-	ValueType slang.Type `json:"valueType"`
+	ValueType slang.Type `json:"fieldType"`
 }
 
 func NewStructField(names []string, valueType slang.Type) *StructField {

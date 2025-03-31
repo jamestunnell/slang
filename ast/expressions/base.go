@@ -5,7 +5,7 @@ import (
 )
 
 type Base struct {
-	ExprType slang.ExprType `json:"type"`
+	ExprType slang.ExprType `json:"expressionType"`
 }
 
 func NewBase(typ slang.ExprType) *Base {

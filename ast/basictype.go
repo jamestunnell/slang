@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"encoding/json"
 	"strings"
 
 	"golang.org/x/exp/slices"
@@ -22,6 +23,10 @@ func (typ *BasicType) String() string {
 	return strings.Join(typ.NameParts, ".")
 }
 
+func (typ *BasicType) Parse(s string) {
+	typ.NameParts = strings.Split(s, ".")
+}
+
 func (typ *BasicType) IsEqual(other slang.Type) bool {
 	typ2, ok := other.(*BasicType)
 	if !ok {
@@ -37,4 +42,20 @@ func (typ *BasicType) IsArray() bool {
 
 func (typ *BasicType) IsMap() bool {
 	return false
+}
+
+func (typ *BasicType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(typ.String())
+}
+
+func (typ *BasicType) UnmarshalJSON(d []byte) error {
+	var s string
+
+	if err := json.Unmarshal(d, &s); err != nil {
+		return err
+	}
+
+	typ.Parse(s)
+
+	return nil
 }

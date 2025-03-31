@@ -28,10 +28,6 @@ func (p *FileParser) Run(toks slang.TokenSeq) bool {
 			return false
 		}
 
-		// if !p.ExpectToken(toks.Current(), slang.TokenNEWLINE, slang.TokenEOF) {
-		// 	return false
-		// }
-
 		_ = toks.Skip(slang.TokenNEWLINE)
 	}
 

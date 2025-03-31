@@ -76,10 +76,6 @@ func (p *BodyParserBase) Run(toks slang.TokenSeq) bool {
 			return false
 		}
 
-		// if !p.ExpectToken(toks.Current(), slang.TokenNEWLINE, slang.TokenRBRACE) {
-		// 	return false
-		// }
-
 		_ = toks.Skip(slang.TokenNEWLINE)
 	}
 

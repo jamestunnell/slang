@@ -7,15 +7,15 @@ import (
 type AccessMember struct {
 	*Base
 
-	Object slang.Expression `json:"object"`
-	Member string           `json:"member"`
+	Receiver slang.Expression `json:"receiver"`
+	Member   string           `json:"member"`
 }
 
 func NewAccessMember(object slang.Expression, member string) slang.Expression {
 	return &AccessMember{
-		Base:   NewBase(slang.ExprACCESSMEMBER),
-		Object: object,
-		Member: member,
+		Base:     NewBase(slang.ExprACCESSMEMBER),
+		Receiver: object,
+		Member:   member,
 	}
 }
 
@@ -25,7 +25,7 @@ func (c *AccessMember) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return c2.Object.Equal(c.Object) && c2.Member == c.Member
+	return c2.Receiver.Equal(c.Receiver) && c2.Member == c.Member
 }
 
 // func (c *Member) Eval(env *slang.Environment) (slang.Object, error) {

@@ -38,7 +38,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewUse("rand"),
 		statements.NewVar("x", ast.NewBasicType("int")),
 		statements.NewVar("y", ast.NewBasicType("int")),
-		statements.NewFunc("init", ast.NewFunction(
+		statements.NewFunc("init",
 			[]slang.Param{},
 			[]slang.Type{},
 			statements.NewAssign(
@@ -53,21 +53,21 @@ func TestFileParserGlobalVars(t *testing.T) {
 					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
 				),
 			),
-		)),
-		statements.NewFunc("GetX", ast.NewFunction(
+		),
+		statements.NewFunc("GetX",
 			[]slang.Param{},
 			[]slang.Type{ast.NewBasicType("int")},
 			statements.NewReturnVal(
 				expressions.NewIdentifier("x"),
 			),
-		)),
-		statements.NewFunc("GetY", ast.NewFunction(
+		),
+		statements.NewFunc("GetY",
 			[]slang.Param{},
 			[]slang.Type{ast.NewBasicType("int")},
 			statements.NewReturnVal(
 				expressions.NewIdentifier("y"),
 			),
-		)),
+		),
 	}
 	testFileParserSuccess(t, "global vars and funcs", file, expected, 0)
 }
@@ -123,56 +123,50 @@ func TestFileParserStructWithTest(t *testing.T) {
 		statements.NewStruct("Accumulator",
 			statements.NewStructField([]string{"total"}, ast.NewBasicType("float"))),
 		statements.NewFunc("Add",
-			ast.NewFunction(
-				[]slang.Param{
-					ast.NewParam("a", ast.NewBasicType("Accumulator")),
-					ast.NewParam("x", ast.NewBasicType("float")),
-				},
-				[]slang.Type{},
-				statements.NewAssign(
+			[]slang.Param{
+				ast.NewParam("a", ast.NewBasicType("Accumulator")),
+				ast.NewParam("x", ast.NewBasicType("float")),
+			},
+			[]slang.Type{},
+			statements.NewAssign(
+				expressions.NewAccessMember(
+					expressions.NewIdentifier("a"), "total"),
+				expressions.NewAdd(
 					expressions.NewAccessMember(
 						expressions.NewIdentifier("a"), "total"),
-					expressions.NewAdd(
-						expressions.NewAccessMember(
-							expressions.NewIdentifier("a"), "total"),
-						expressions.NewIdentifier("x"),
-					),
+					expressions.NewIdentifier("x"),
 				),
 			),
 		),
 		statements.NewFunc(
 			"Mul",
-			ast.NewFunction(
-				[]slang.Param{
-					ast.NewParam("a", ast.NewBasicType("Accumulator")),
-					ast.NewParam("x", ast.NewBasicType("float")),
-				},
-				[]slang.Type{},
-				statements.NewAssign(
+			[]slang.Param{
+				ast.NewParam("a", ast.NewBasicType("Accumulator")),
+				ast.NewParam("x", ast.NewBasicType("float")),
+			},
+			[]slang.Type{},
+			statements.NewAssign(
+				expressions.NewAccessMember(
+					expressions.NewIdentifier("a"), "total"),
+				expressions.NewMultiply(
 					expressions.NewAccessMember(
 						expressions.NewIdentifier("a"), "total"),
-					expressions.NewMultiply(
-						expressions.NewAccessMember(
-							expressions.NewIdentifier("a"), "total"),
-						expressions.NewIdentifier("x"),
-					),
+					expressions.NewIdentifier("x"),
 				),
 			),
 		),
 		statements.NewFunc(
 			"Total",
-			ast.NewFunction(
-				[]slang.Param{
-					ast.NewParam("a", ast.NewBasicType("Accumulator")),
-				},
-				[]slang.Type{ast.NewBasicType("float")},
-				statements.NewReturnVal(
-					expressions.NewAccessMember(
-						expressions.NewIdentifier("a"), "total"),
-				),
+			[]slang.Param{
+				ast.NewParam("a", ast.NewBasicType("Accumulator")),
+			},
+			[]slang.Type{ast.NewBasicType("float")},
+			statements.NewReturnVal(
+				expressions.NewAccessMember(
+					expressions.NewIdentifier("a"), "total"),
 			),
 		),
-		statements.NewFunc("TestAccumulator", ast.NewFunction(
+		statements.NewFunc("TestAccumulator",
 			[]slang.Param{ast.NewParam("t", ast.NewBasicType("test", "Test"))},
 			[]slang.Type{},
 			statements.NewAssign(
@@ -223,7 +217,7 @@ func TestFileParserStructWithTest(t *testing.T) {
 					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
 				),
 			),
-		)),
+		),
 	}
 	testFileParserSuccess(t, "struct with test", file, expected, 0)
 }

@@ -2,7 +2,6 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/statements"
 )
 
@@ -47,10 +46,8 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	fn := ast.NewFunction(
-		sigParser.Params, sigParser.ReturnTypes, bodyParser.GetStatements()...)
-
-	p.FuncStmt = statements.NewFunc(name, fn)
+	p.FuncStmt = statements.NewFunc(
+		name, sigParser.Params, sigParser.ReturnTypes, bodyParser.GetStatements()...)
 
 	return true
 }

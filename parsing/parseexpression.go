@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/customerrs"
 )
@@ -175,10 +174,8 @@ func (p *ExprParser) parseFuncLiteral(toks slang.TokenSeq) slang.Expression {
 		return nil
 	}
 
-	fn := ast.NewFunction(
+	return expressions.NewFunc(
 		sigParser.Params, sigParser.ReturnTypes, bodyParser.Statements...)
-
-	return expressions.NewFunc(fn)
 }
 
 func (p *ExprParser) parseIdentifier(toks slang.TokenSeq) slang.Expression {

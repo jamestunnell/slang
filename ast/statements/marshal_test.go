@@ -20,7 +20,7 @@ func TestMarshalJSON(t *testing.T) {
 		statements.NewStructField([]string{"y", "z"}, ast.NewBasicType("string")),
 	))
 	testMarshalJSON(t, statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("string")))
-	testMarshalJSON(t, statements.NewFunc("myfunc", ast.NewFunction([]slang.Param{}, []slang.Type{})))
+	testMarshalJSON(t, statements.NewFunc("myfunc", []slang.Param{}, []slang.Type{}))
 	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInteger(7)))
 	testMarshalJSON(t, statements.NewUse("my/path"))
 }

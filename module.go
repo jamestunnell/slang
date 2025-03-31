@@ -2,7 +2,7 @@ package slang
 
 type Module interface {
 	GetStructNames() []string
-	GetStruct(name string) (Struct, bool)
+	GetStruct(name string) (Structure, bool)
 
 	GetFunctionNames() []string
 	GetFunction(name string) (Function, bool)

@@ -2,18 +2,26 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 )
 
 type Func struct {
 	*Base
-	*ast.Function
+
+	Params      []slang.Param     `json:"params"`
+	ReturnTypes []slang.Type      `json:"returnTypes"`
+	Statements  []slang.Statement `json:"statements"`
 }
 
-func NewFunc(fn *ast.Function) *Func {
+func NewFunc(
+	params []slang.Param,
+	returnTypes []slang.Type,
+	statements ...slang.Statement,
+) *Func {
 	return &Func{
-		Base:     NewBase(slang.ExprFUNC),
-		Function: fn,
+		Base:        NewBase(slang.ExprFUNC),
+		Params:      params,
+		ReturnTypes: returnTypes,
+		Statements:  statements,
 	}
 }
 
@@ -23,11 +31,39 @@ func (f *Func) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	return f.Function.Equal(f2.Function)
+	if len(f.Params) != len(f2.Params) {
+		return false
+	}
+
+	for i, param := range f.Params {
+		if param.GetName() != f2.Params[i].GetName() {
+			return false
+		}
+
+		if !param.GetType().IsEqual(f2.Params[i].GetType()) {
+			return false
+		}
+	}
+
+	if len(f.ReturnTypes) != len(f2.ReturnTypes) {
+		return false
+	}
+
+	for i, retType := range f.ReturnTypes {
+		if !retType.IsEqual(f2.ReturnTypes[i]) {
+			return false
+		}
+	}
+
+	if len(f.Statements) != len(f2.Statements) {
+		return false
+	}
+
+	for i, stmt := range f.Statements {
+		if !stmt.Equal(f2.Statements[i]) {
+			return false
+		}
+	}
+
+	return true
 }
-
-// func (expr *Func) Eval(env *slang.Environment) (slang.Object, error) {
-// 	f := objects.NewFunction(expr.Params, expr.Body, env)
-
-// 	return f, nil
-// }

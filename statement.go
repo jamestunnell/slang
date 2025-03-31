@@ -5,7 +5,6 @@ import "encoding/json"
 type StatementType int
 
 type Statement interface {
-	GetComment() []string
 	SetComment(lines []string)
 
 	Type() StatementType

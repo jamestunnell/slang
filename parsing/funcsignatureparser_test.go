@@ -8,6 +8,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 )
@@ -92,10 +93,10 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 			t.FailNow()
 		}
 
-		fnActual := ast.NewFunction(p.Params, p.ReturnTypes)
-		fnExpected := ast.NewFunction(test.Params, test.ReturnTypes)
+		actual := expressions.NewFunc(p.Params, p.ReturnTypes)
+		expected := expressions.NewFunc(test.Params, test.ReturnTypes)
 
-		verifyFunc(t, fnExpected, fnActual)
+		assert.True(t, actual.Equal(expected))
 	})
 }
 
@@ -109,22 +110,4 @@ func testFuncSignatureParserFail(t *testing.T, testName, input string) {
 
 		assert.NotEmpty(t, p.GetErrors)
 	})
-}
-
-func verifyFunc(t *testing.T, expected, actual slang.Function) {
-	paramNames := actual.GetParamNames()
-	if assert.ElementsMatch(t, expected.GetParamNames(), paramNames) {
-		for _, name := range paramNames {
-			expectedType, ok1 := expected.GetParamType(name)
-			actualType, ok2 := actual.GetParamType(name)
-
-			if !assert.True(t, ok1 && ok2) {
-				assert.Equal(t, actualType, expectedType)
-			}
-		}
-	}
-
-	assert.ElementsMatch(t, expected.GetReturnTypes(), actual.GetReturnTypes())
-
-	// TODO verify body
 }

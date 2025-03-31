@@ -1,6 +1,6 @@
 package slang
 
-type Struct interface {
+type Structure interface {
 	GetName() string
 	GetComment() string
 
