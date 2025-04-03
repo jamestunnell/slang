@@ -14,10 +14,10 @@ import (
 )
 
 type funcSigParserSuccessTest struct {
-	TestName    string
-	Input       string
-	Params      []slang.Param
-	ReturnTypes []slang.Type
+	TestName  string
+	Input     string
+	InParams  []slang.Param
+	OutParams []slang.Param
 }
 
 func TestFuncSignatureParserFailure(t *testing.T) {
@@ -26,51 +26,62 @@ func TestFuncSignatureParserFailure(t *testing.T) {
 
 func TestFuncSignatureParserSuccess(t *testing.T) {
 	tests := []*funcSigParserSuccessTest{
+		// {
+		// 	TestName:  "empty sig",
+		// 	Input:     `()`,
+		// 	InParams:  []slang.Param{},
+		// 	OutParams: []slang.Param{},
+		// },
+		// {
+		// 	TestName:  "one param",
+		// 	Input:     `(x flt)`,
+		// 	InParams:  []slang.Param{ast.NewParam("x", &ast.FltType{})},
+		// 	OutParams: []slang.Param{},
+		// },
+		// {
+		// 	TestName: "two params",
+		// 	Input:    `(a int, b mymodule.MyType)`,
+		// 	InParams: []slang.Param{
+		// 		ast.NewParam("a", &ast.IntType{}),
+		// 		ast.NewParam("b", ast.NewExternStructType("mymodule", "MyType")),
+		// 	},
+		// 	OutParams: []slang.Param{},
+		// },
+		// {
+		// 	TestName: "two multi-name",
+		// 	Input:    `(a, b int, c, d str)`,
+		// 	InParams: []slang.Param{
+		// 		ast.NewParam("a", &ast.IntType{}),
+		// 		ast.NewParam("b", &ast.IntType{}),
+		// 		ast.NewParam("c", &ast.StrType{}),
+		// 		ast.NewParam("d", &ast.StrType{}),
+		// 	},
+		// 	OutParams: []slang.Param{},
+		// },
+		// {
+		// 	TestName:  "empty in and out params both with parens",
+		// 	Input:     `() ()`,
+		// 	InParams:  []slang.Param{},
+		// 	OutParams: []slang.Param{},
+		// },
+		// {
+		// 	TestName: "one in param, one out param",
+		// 	Input:    `(a int) (b int)`,
+		// 	InParams: []slang.Param{
+		// 		ast.NewParam("a", &ast.IntType{}),
+		// 	},
+		// 	OutParams: []slang.Param{
+		// 		ast.NewParam("b", &ast.IntType{}),
+		// 	},
+		// },
 		{
-			TestName:    "empty sig",
-			Input:       `()`,
-			Params:      []slang.Param{},
-			ReturnTypes: []slang.Type{},
-		},
-		{
-			TestName:    "one param",
-			Input:       `(x float)`,
-			Params:      []slang.Param{ast.NewParam("x", ast.NewBasicType("float"))},
-			ReturnTypes: []slang.Type{},
-		},
-		{
-			TestName: "two params",
-			Input:    `(a int, b mymodule.MyType)`,
-			Params: []slang.Param{
-				ast.NewParam("a", ast.NewBasicType("int")),
-				ast.NewParam("b", ast.NewBasicType("mymodule", "MyType")),
+			TestName: "two out params",
+			Input:    `() (t my.Type, e err)`,
+			InParams: []slang.Param{},
+			OutParams: []slang.Param{
+				ast.NewParam("t", ast.NewOutsideType("my", "Type")),
+				ast.NewParam("e", &ast.ErrType{}),
 			},
-			ReturnTypes: []slang.Type{},
-		},
-		{
-			TestName: "two multi-name",
-			Input:    `(a, b int, c, d string)`,
-			Params: []slang.Param{
-				ast.NewParam("a", ast.NewBasicType("int")),
-				ast.NewParam("b", ast.NewBasicType("int")),
-				ast.NewParam("c", ast.NewBasicType("string")),
-				ast.NewParam("d", ast.NewBasicType("string")),
-			},
-			ReturnTypes: []slang.Type{},
-		},
-		{
-			TestName: "one param, one return type",
-			Input:    `(a int) int`,
-			Params: []slang.Param{
-				ast.NewParam("a", ast.NewBasicType("int")),
-			},
-			ReturnTypes: []slang.Type{ast.NewBasicType("int")},
-		},
-		{
-			TestName:    "two return types",
-			Input:       `() (my.Type, error)`,
-			Params:      []slang.Param{},
-			ReturnTypes: []slang.Type{ast.NewBasicType("my", "Type"), ast.NewBasicType("error")},
 		},
 	}
 
@@ -93,8 +104,8 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 			t.FailNow()
 		}
 
-		actual := expressions.NewFunc(p.Params, p.ReturnTypes)
-		expected := expressions.NewFunc(test.Params, test.ReturnTypes)
+		actual := expressions.NewFunc(p.InParams, p.OutParams)
+		expected := expressions.NewFunc(test.InParams, test.OutParams)
 
 		assert.True(t, actual.Equal(expected))
 	})

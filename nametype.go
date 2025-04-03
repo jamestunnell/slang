@@ -1,18 +1,16 @@
 package slang
 
-type NameType struct {
-	Name string `json:"name"`
-	Type Type   `json:"type"`
+import "fmt"
+
+type NameType interface {
+	GetName() string
+	GetType() Type
 }
 
-func (nt *NameType) GetName() string {
-	return nt.Name
+func NameTypeString(nt NameType) string {
+	return fmt.Sprintf("%s %s", nt.GetName(), nt.GetType())
 }
 
-func (nt *NameType) GetType() Type {
-	return nt.Type
-}
-
-func (nt *NameType) Equal(other *NameType) bool {
-	return nt.Name == other.Name && nt.Type == other.Type
+func NameTypesEqual(nt1, nt2 NameType) bool {
+	return (nt1.GetName() == nt2.GetName()) && TypesEqual(nt1.GetType(), nt2.GetType())
 }

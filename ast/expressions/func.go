@@ -2,26 +2,26 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"golang.org/x/exp/slices"
 )
 
 type Func struct {
 	*Base
 
-	Params      []slang.Param     `json:"params"`
-	ReturnTypes []slang.Type      `json:"returnTypes"`
-	Statements  []slang.Statement `json:"statements"`
+	InParams   []slang.Param     `json:"inputParams"`
+	OutParams  []slang.Param     `json:"outputParams"`
+	Statements []slang.Statement `json:"statements"`
 }
 
 func NewFunc(
-	params []slang.Param,
-	returnTypes []slang.Type,
+	inParams, outParams []slang.Param,
 	statements ...slang.Statement,
 ) *Func {
 	return &Func{
-		Base:        NewBase(slang.ExprFUNC),
-		Params:      params,
-		ReturnTypes: returnTypes,
-		Statements:  statements,
+		Base:       NewBase(slang.ExprFUNC),
+		InParams:   inParams,
+		OutParams:  outParams,
+		Statements: statements,
 	}
 }
 
@@ -31,38 +31,16 @@ func (f *Func) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if len(f.Params) != len(f2.Params) {
+	if !slices.EqualFunc(f.InParams, f2.InParams, slang.NameTypesEqual) {
 		return false
 	}
 
-	for i, param := range f.Params {
-		if param.GetName() != f2.Params[i].GetName() {
-			return false
-		}
-
-		if !param.GetType().IsEqual(f2.Params[i].GetType()) {
-			return false
-		}
-	}
-
-	if len(f.ReturnTypes) != len(f2.ReturnTypes) {
+	if !slices.EqualFunc(f.OutParams, f2.OutParams, slang.NameTypesEqual) {
 		return false
 	}
 
-	for i, retType := range f.ReturnTypes {
-		if !retType.IsEqual(f2.ReturnTypes[i]) {
-			return false
-		}
-	}
-
-	if len(f.Statements) != len(f2.Statements) {
+	if !slices.EqualFunc(f.Statements, f2.Statements, slang.StatementsEqual) {
 		return false
-	}
-
-	for i, stmt := range f.Statements {
-		if !stmt.Equal(f2.Statements[i]) {
-			return false
-		}
 	}
 
 	return true

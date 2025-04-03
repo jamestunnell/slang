@@ -1,8 +1,6 @@
 // Keeps a running total.
 // Updates the total after each operation.
-struct Calculator {
-    total float
-}
+struct Calculator(total float)
 
 func Add(c Calculator, x float) {
     c.total = c.total + x
@@ -24,6 +22,6 @@ func Clear(c Calculator) {
     c.total = 0.0
 }
 
-func Total(c Calculator) float {
-    return c.total
+func Total(c Calculator) (result float) {
+    result = c.total
 }

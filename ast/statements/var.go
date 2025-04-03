@@ -8,7 +8,7 @@ type Var struct {
 	*Base
 
 	Name      string     `json:"name"`
-	ValueType slang.Type `json:"valueType"`
+	ValueType slang.Type `json:"type"`
 }
 
 func NewVar(name string, valueType slang.Type) *Var {
@@ -25,7 +25,7 @@ func (f *Var) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if !f.ValueType.IsEqual(f2.ValueType) {
+	if !slang.TypesEqual(f.ValueType, f2.ValueType) {
 		return false
 	}
 

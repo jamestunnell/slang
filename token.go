@@ -51,8 +51,11 @@ func (loc SourceLocation) String() string {
 
 const (
 	TokenAND TokenType = iota
-	TokenASSIGN
+	TokenARY
+	TokenEQUAL
 	TokenBANG
+	TokenBOOL
+	TokenBOOLVAL
 	TokenBREAK
 	TokenCOLON
 	TokenCOMMA
@@ -62,10 +65,11 @@ const (
 	TokenDOLLARLBRACE
 	TokenDOT
 	TokenELSE
+	TokenERR
 	TokenEOF
-	TokenEQUAL
-	TokenFALSE
-	TokenFLOAT
+	TokenEQUALEQUAL
+	TokenFLT
+	TokenFLTVAL
 	TokenFOREACH
 	TokenFUNC
 	TokenGREATER
@@ -74,12 +78,15 @@ const (
 	TokenILLEGAL
 	TokenIN
 	TokenINT
+	TokenINTVAL
 	TokenLBRACE
 	TokenLBRACKET
 	TokenLESS
 	TokenLESSEQUAL
 	TokenLESSLESS
+	TokenLAMBDAOP
 	TokenLPAREN
+	TokenMAP
 	TokenMINUS
 	TokenMINUSEQUAL
 	TokenMINUSMINUS
@@ -99,10 +106,10 @@ const (
 	TokenSLASHEQUAL
 	TokenSTAR
 	TokenSTAREQUAL
-	TokenSTRING
+	TokenSTR
+	TokenSTRVAL
 	TokenSTRUCT
 	TokenSYMBOL
-	TokenTRUE
 	TokenVAR
 	TokenVERBATIMSTRING
 	TokenUSE
@@ -114,10 +121,16 @@ func (tt TokenType) String() string {
 	switch tt {
 	case TokenAND:
 		str = "AND"
-	case TokenASSIGN:
+	case TokenARY:
+		str = "ARY"
+	case TokenEQUAL:
 		str = "ASSIGN"
 	case TokenBANG:
 		str = "BANG"
+	case TokenBOOL:
+		str = "BOOl"
+	case TokenBOOLVAL:
+		str = "BOOLVAL"
 	case TokenBREAK:
 		str = "BREAK"
 	case TokenCOLON:
@@ -134,14 +147,16 @@ func (tt TokenType) String() string {
 		str = "DOT"
 	case TokenELSE:
 		str = "ELSE"
+	case TokenERR:
+		str = "ERR"
 	case TokenEOF:
 		str = "EOF"
-	case TokenEQUAL:
-		str = "EQUAL"
-	case TokenFALSE:
-		str = "FALSE"
-	case TokenFLOAT:
+	case TokenEQUALEQUAL:
+		str = "EQUALEQUAL"
+	case TokenFLT:
 		str = "FLOAT"
+	case TokenFLTVAL:
+		str = "FLOATVAL"
 	case TokenFOREACH:
 		str = "FOREACH"
 	case TokenFUNC:
@@ -158,6 +173,10 @@ func (tt TokenType) String() string {
 		str = "IN"
 	case TokenINT:
 		str = "INT"
+	case TokenINTVAL:
+		str = "INTVAL"
+	case TokenLAMBDAOP:
+		str = "LAMBDAOP"
 	case TokenLBRACE:
 		str = "LBRACE"
 	case TokenLBRACKET:
@@ -170,6 +189,8 @@ func (tt TokenType) String() string {
 		str = "LESSLESS"
 	case TokenLPAREN:
 		str = "LPAREN"
+	case TokenMAP:
+		str = "MAP"
 	case TokenMODULE:
 		str = "MODULE"
 	case TokenMINUS:
@@ -208,14 +229,14 @@ func (tt TokenType) String() string {
 		str = "STAR"
 	case TokenSTAREQUAL:
 		str = "STAREQUAL"
-	case TokenSTRING:
-		str = "STRING"
+	case TokenSTR:
+		str = "STR"
+	case TokenSTRVAL:
+		str = "STRVAL"
 	case TokenSTRUCT:
 		str = "STRUCT"
 	case TokenSYMBOL:
 		str = "SYMBOL"
-	case TokenTRUE:
-		str = "TRUE"
 	case TokenVERBATIMSTRING:
 		str = "VERBATIMSTRING"
 	case TokenUSE:

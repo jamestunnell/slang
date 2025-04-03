@@ -53,86 +53,115 @@ func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
 
 func (p *ParserBase) ParseType(toks slang.TokenSeq) (slang.Type, bool) {
 	switch toks.Current().Type() {
+	case slang.TokenBOOL:
+		toks.Advance()
+
+		return &ast.BoolType{}, true
+	case slang.TokenERR:
+		toks.Advance()
+
+		return &ast.ErrType{}, true
+	case slang.TokenINT:
+		toks.Advance()
+
+		return &ast.IntType{}, true
+	case slang.TokenSTR:
+		toks.Advance()
+
+		return &ast.StrType{}, true
+	case slang.TokenFLT:
+		toks.Advance()
+
+		return &ast.FltType{}, true
 	case slang.TokenSYMBOL:
-		return p.ParseBasicType(toks)
-	case slang.TokenLBRACKET:
-		if toks.Next().Is(slang.TokenRBRACKET) {
-			return p.ParseArrayType(toks)
+		nameFirst := toks.Current().Value()
+
+		if !toks.Next().Is(slang.TokenDOT) {
+			toks.Advance()
+
+			return ast.NewInsideType(nameFirst), true
 		}
 
-		return p.ParseMapType(toks)
-	}
+		toks.Advance()
+		toks.Advance()
 
-	p.TokenErr(toks.Current(), slang.TokenSYMBOL, slang.TokenLBRACKET)
+		if p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+			nameSecond := toks.Current().Value()
+
+			toks.Advance()
+
+			return ast.NewOutsideType(nameFirst, nameSecond), true
+		}
+	}
 
 	return nil, false
 }
 
-func (p *ParserBase) ParseBasicType(toks slang.TokenSeq) (slang.Type, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
-		return nil, false
-	}
+// func (p *ParserBase) ParseBasicType(toks slang.TokenSeq) (slang.Type, bool) {
+// 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+// 		return nil, false
+// 	}
 
-	parts := []string{toks.Current().Value()}
+// 	parts := []string{toks.Current().Value()}
 
-	toks.Advance()
+// 	toks.Advance()
 
-	for toks.Current().Is(slang.TokenDOT) {
-		if !p.ExpectToken(toks.Next(), slang.TokenSYMBOL) {
-			return nil, false
-		}
+// 	for toks.Current().Is(slang.TokenDOT) {
+// 		if !p.ExpectToken(toks.Next(), slang.TokenSYMBOL) {
+// 			return nil, false
+// 		}
 
-		parts = append(parts, toks.Next().Value())
+// 		parts = append(parts, toks.Next().Value())
 
-		toks.Advance()
-		toks.Advance()
-	}
+// 		toks.Advance()
+// 		toks.Advance()
+// 	}
 
-	return ast.NewBasicType(parts...), true
-}
+// 	return ast.NewBasicType(parts...), true
+// }
 
-func (p *ParserBase) ParseArrayType(toks slang.TokenSeq) (*ast.ArrayType, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) ||
-		!p.ExpectToken(toks.Next(), slang.TokenRBRACKET) {
-		return nil, false
-	}
+// func (p *ParserBase) ParseArrayType(toks slang.TokenSeq) (*ast.ArrayType, bool) {
+// 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) ||
+// 		!p.ExpectToken(toks.Next(), slang.TokenRBRACKET) {
+// 		return nil, false
+// 	}
 
-	toks.Advance()
-	toks.Advance()
+// 	toks.Advance()
+// 	toks.Advance()
 
-	valType, ok := p.ParseType(toks)
-	if !ok {
-		return nil, false
-	}
+// 	valType, ok := p.ParseType(toks)
+// 	if !ok {
+// 		return nil, false
+// 	}
 
-	return ast.NewArrayType(valType), true
-}
+// 	return ast.NewArrayType(valType), true
+// }
 
-func (p *ParserBase) ParseMapType(toks slang.TokenSeq) (*ast.MapType, bool) {
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) {
-		return nil, false
-	}
+// func (p *ParserBase) ParseMapType(toks slang.TokenSeq) (*ast.MapType, bool) {
+// 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) {
+// 		return nil, false
+// 	}
 
-	toks.Advance()
+// 	toks.Advance()
 
-	keyType, ok := p.ParseType(toks)
-	if !ok {
-		return nil, false
-	}
+// 	keyType, ok := p.ParseType(toks)
+// 	if !ok {
+// 		return nil, false
+// 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
-		return nil, false
-	}
+// 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
+// 		return nil, false
+// 	}
 
-	toks.Advance()
+// 	toks.Advance()
 
-	valType, ok := p.ParseType(toks)
-	if !ok {
-		return nil, false
-	}
+// 	valType, ok := p.ParseType(toks)
+// 	if !ok {
+// 		return nil, false
+// 	}
 
-	return ast.NewMapType(keyType, valType), true
-}
+// 	return ast.NewMapType(keyType, valType), true
+// }
 
 func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, slang.Type, bool) {
 	if !toks.Current().Is(slang.TokenSYMBOL) {

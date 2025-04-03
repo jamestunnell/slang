@@ -34,7 +34,7 @@ func (p *ConstStatementParser) Run(toks slang.TokenSeq) bool {
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), slang.TokenASSIGN) {
+	if !p.ExpectToken(toks.Current(), slang.TokenEQUAL) {
 		return false
 	}
 

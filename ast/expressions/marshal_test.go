@@ -6,46 +6,51 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
-	"github.com/jamestunnell/slang/ast/expressions"
+	e "github.com/jamestunnell/slang/ast/expressions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
 
 func TestMarshalJSON(t *testing.T) {
-	a := expressions.NewIdentifier("a")
-	b := expressions.NewIdentifier("b")
+	a := e.NewIdentifier("a")
+	b := e.NewIdentifier("b")
 
-	testMarshalJSON(t, expressions.NewAccessElem(a, b))
-	testMarshalJSON(t, expressions.NewAccessMember(a, "myMember"))
-	testMarshalJSON(t, expressions.NewAdd(a, b))
-	testMarshalJSON(t, expressions.NewArray(ast.NewBasicType("int"), a, b))
-	testMarshalJSON(t, expressions.NewBool(true))
-	testMarshalJSON(t, expressions.NewDivide(a, b))
-	testMarshalJSON(t, expressions.NewEqual(a, b))
-	testMarshalJSON(t, expressions.NewFloat(0.0))
-	testMarshalJSON(t, expressions.NewFunc(
-		[]slang.Param{},
-		[]slang.Type{ast.NewBasicType("bool")},
+	testMarshalJSON(t, e.NewAccessElem(a, b))
+	testMarshalJSON(t, e.NewAccessMember(a, "myMember"))
+	testMarshalJSON(t, e.NewAdd(a, b))
+	// testMarshalJSON(t, e.NewArray(&ast.IntType{}, a, b))
+	testMarshalJSON(t, e.NewBool(true))
+	testMarshalJSON(t, e.NewDivide(a, b))
+	testMarshalJSON(t, e.NewEqual(a, b))
+	testMarshalJSON(t, e.NewFloat(0.0))
+	testMarshalJSON(t, e.NewFunc(
+		[]slang.Param{ast.NewParam("x", &ast.IntType{})},
+		[]slang.Param{ast.NewParam("result", &ast.BoolType{})},
 	))
-	testMarshalJSON(t, expressions.NewCall(a))
-	testMarshalJSON(t, expressions.NewGreater(a, b))
-	testMarshalJSON(t, expressions.NewGreaterEqual(a, b))
-	testMarshalJSON(t, expressions.NewIdentifier("x"))
-	testMarshalJSON(t, expressions.NewInteger(0))
-	testMarshalJSON(t, expressions.NewLess(a, b))
-	testMarshalJSON(t, expressions.NewLessEqual(a, b))
+	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgPos(e.NewInt(10))))
+	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgKW("b", e.NewInt(10))))
+	testMarshalJSON(t, e.NewGreater(a, b))
+	testMarshalJSON(t, e.NewGreaterEqual(a, b))
+	testMarshalJSON(t, e.NewIdentifier("x"))
+	testMarshalJSON(t, e.NewInt(0))
+	testMarshalJSON(t, e.NewLess(a, b))
+	testMarshalJSON(t, e.NewLessEqual(a, b))
 
-	testMarshalJSON(t, expressions.NewMultiply(a, b))
-	testMarshalJSON(t, expressions.NewNegative(a))
-	testMarshalJSON(t, expressions.NewNot(a))
-	testMarshalJSON(t, expressions.NewNotEqual(a, b))
-	testMarshalJSON(t, expressions.NewString("hello"))
-	testMarshalJSON(t, expressions.NewSubtract(a, b))
+	testMarshalJSON(t, e.NewMultiply(a, b))
+	testMarshalJSON(t, e.NewNegative(a))
+	testMarshalJSON(t, e.NewNot(a))
+	testMarshalJSON(t, e.NewNotEqual(a, b))
+	testMarshalJSON(t, e.NewStr("hello"))
+	testMarshalJSON(t, e.NewStruct(
+		ast.NewParam("x", &ast.IntType{}),
+		ast.NewParam("y", &ast.StrType{}),
+	))
+	testMarshalJSON(t, e.NewSubtract(a, b))
 }
 
 func testMarshalJSON(t *testing.T, expr slang.Expression) {
-	t.Run(expr.Type().String(), func(t *testing.T) {
+	t.Run(expr.GetType().String(), func(t *testing.T) {
 		d, err := json.Marshal(expr)
 
 		require.NoError(t, err)
@@ -55,6 +60,6 @@ func testMarshalJSON(t *testing.T, expr slang.Expression) {
 		require.True(t, result.Exists())
 		require.Equal(t, gjson.String, result.Type)
 
-		assert.Equal(t, expr.Type().String(), result.String())
+		assert.Equal(t, expr.GetType().String(), result.String())
 	})
 }

@@ -1,6 +1,9 @@
 package statements
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"golang.org/x/exp/slices"
+)
 
 type Block struct {
 	*Base
@@ -21,5 +24,5 @@ func (b *Block) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return slang.StatementsEqual(b.Statements, b2.Statements)
+	return slices.EqualFunc(b.Statements, b2.Statements, slang.StatementsEqual)
 }

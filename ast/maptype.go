@@ -1,36 +1,30 @@
 package ast
 
-import (
-	"fmt"
+// type MapType struct {
+// 	KeyType, ValueType slang.Type
+// }
 
-	"github.com/jamestunnell/slang"
-)
+// func NewMapType(keyType, valType slang.Type) *MapType {
+// 	return &MapType{KeyType: keyType, ValueType: valType}
+// }
 
-type MapType struct {
-	KeyType, ValueType slang.Type
-}
+// func (typ *MapType) String() string {
+// 	return fmt.Sprintf("[%s]%s", typ.KeyType, typ.ValueType)
+// }
 
-func NewMapType(keyType, valType slang.Type) *MapType {
-	return &MapType{KeyType: keyType, ValueType: valType}
-}
+// func (typ *MapType) IsEqual(other slang.Type) bool {
+// 	typ2, ok := other.(*MapType)
+// 	if !ok {
+// 		return false
+// 	}
 
-func (typ *MapType) String() string {
-	return fmt.Sprintf("[%s]%s", typ.KeyType, typ.ValueType)
-}
+// 	return typ.KeyType.IsEqual(typ2.KeyType) && typ.ValueType.IsEqual(typ2.ValueType)
+// }
 
-func (typ *MapType) IsEqual(other slang.Type) bool {
-	typ2, ok := other.(*MapType)
-	if !ok {
-		return false
-	}
+// func (typ *MapType) IsArray() bool {
+// 	return false
+// }
 
-	return typ.KeyType.IsEqual(typ2.KeyType) && typ.ValueType.IsEqual(typ2.ValueType)
-}
-
-func (typ *MapType) IsArray() bool {
-	return false
-}
-
-func (typ *MapType) IsMap() bool {
-	return true
-}
+// func (typ *MapType) IsMap() bool {
+// 	return true
+// }

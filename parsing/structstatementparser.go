@@ -24,7 +24,7 @@ func (p *StructStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	toks.Advance()
+	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
 		return false
@@ -32,14 +32,14 @@ func (p *StructStatementParser) Run(toks slang.TokenSeq) bool {
 
 	name := toks.Current().Value()
 
-	toks.Advance()
+	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	structParser := NewStructBodyParser()
-	if !p.RunSubParser(toks, structParser) {
+	sigParser := NewDataSignatureParser()
+	if !p.RunSubParser(toks, sigParser) {
 		return false
 	}
 
-	p.StructStmt = statements.NewStruct(name, structParser.Statements...)
+	p.StructStmt = statements.NewStruct(name, sigParser.NameTypes...)
 
 	return true
 }

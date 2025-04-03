@@ -250,13 +250,18 @@ func (l *Lexer) readGreater() slang.TokenInfo {
 }
 
 func (l *Lexer) readEqual() slang.TokenInfo {
-	if l.next == '=' {
+	switch l.next {
+	case '=':
 		l.advance()
 
-		return tokens.EQUAL()
+		return tokens.EQUALEQUAL()
+	case '>':
+		l.advance()
+
+		return tokens.LAMBDAOP()
 	}
 
-	return tokens.ASSIGN()
+	return tokens.EQUAL()
 }
 
 func (l *Lexer) readPlus() slang.TokenInfo {
@@ -321,7 +326,7 @@ func (l *Lexer) readString(loc slang.SourceLocation) {
 
 	for l.cur != '\n' && l.cur != eof && l.cur != '"' {
 		if l.cur == '$' && l.next == '{' {
-			l.emit(tokens.STRING(b.String()), loc)
+			l.emit(tokens.STRVAL(b.String()), loc)
 			l.emit(tokens.DOLLARLBRACE(), l.curLoc())
 
 			l.advance()
@@ -343,7 +348,7 @@ func (l *Lexer) readString(loc slang.SourceLocation) {
 
 	l.advance()
 
-	l.emit(tokens.STRING(b.String()), loc)
+	l.emit(tokens.STRVAL(b.String()), loc)
 }
 
 func (l *Lexer) readVerbatimString(loc slang.SourceLocation) {
@@ -391,6 +396,10 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 	switch str {
 	case tokens.StrAND:
 		l.emit(tokens.AND(), loc)
+	case tokens.StrARY:
+		l.emit(tokens.ARY(), loc)
+	case tokens.StrBOOL:
+		l.emit(tokens.BOOL(), loc)
 	case tokens.StrBREAK:
 		l.emit(tokens.BREAK(), loc)
 	case tokens.StrCONST:
@@ -399,8 +408,12 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.CONTINUE(), loc)
 	case tokens.StrELSE:
 		l.emit(tokens.ELSE(), loc)
+	case tokens.StrERR:
+		l.emit(tokens.ERR(), loc)
 	case tokens.StrFALSE:
-		l.emit(tokens.FALSE(), loc)
+		l.emit(tokens.BOOLVAL(false), loc)
+	case tokens.StrFLT:
+		l.emit(tokens.FLT(), loc)
 	case tokens.StrFOREACH:
 		l.emit(tokens.FOREACH(), loc)
 	case tokens.StrFUNC:
@@ -409,14 +422,20 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.IF(), loc)
 	case tokens.StrIN:
 		l.emit(tokens.IN(), loc)
+	case tokens.StrINT:
+		l.emit(tokens.INT(), loc)
+	case tokens.StrMAP:
+		l.emit(tokens.MAP(), loc)
 	case tokens.StrOR:
 		l.emit(tokens.OR(), loc)
 	case tokens.StrRETURN:
 		l.emit(tokens.RETURN(), loc)
+	case tokens.StrSTR:
+		l.emit(tokens.STR(), loc)
 	case tokens.StrSTRUCT:
 		l.emit(tokens.STRUCT(), loc)
 	case tokens.StrTRUE:
-		l.emit(tokens.TRUE(), loc)
+		l.emit(tokens.BOOLVAL(true), loc)
 	case tokens.StrUSE:
 		l.emit(tokens.USE(), loc)
 	case tokens.StrVAR:
@@ -453,16 +472,16 @@ func (l *Lexer) readNumber(loc slang.SourceLocation) {
 				l.advance()
 			}
 
-			l.emit(tokens.FLOAT(b.String()), loc)
+			l.emit(tokens.FLTVAL(b.String()), loc)
 
 		} else {
-			l.emit(tokens.INT(b.String()), loc)
+			l.emit(tokens.INTVAL(b.String()), loc)
 			l.emit(tokens.DOT(), l.curLoc())
 
 			l.advance()
 		}
 	} else {
-		l.emit(tokens.INT(b.String()), loc)
+		l.emit(tokens.INTVAL(b.String()), loc)
 	}
 }
 

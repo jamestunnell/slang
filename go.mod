@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/akrennmair/slice v0.0.0-20220105203817-49445747ab81
+	github.com/alexflint/go-arg v1.5.1
 	github.com/oleiade/lane/v2 v2.0.0
 	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.8.1
@@ -12,6 +13,7 @@ require (
 )
 
 require (
+	github.com/alexflint/go-scalar v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

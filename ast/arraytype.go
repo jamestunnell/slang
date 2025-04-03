@@ -1,36 +1,30 @@
 package ast
 
-import (
-	"fmt"
+// type ArrayType struct {
+// 	ValueType slang.Type
+// }
 
-	"github.com/jamestunnell/slang"
-)
+// func NewArrayType(valType slang.Type) *ArrayType {
+// 	return &ArrayType{ValueType: valType}
+// }
 
-type ArrayType struct {
-	ValueType slang.Type
-}
+// func (typ *ArrayType) String() string {
+// 	return fmt.Sprintf("[]%s", typ.ValueType)
+// }
 
-func NewArrayType(valType slang.Type) *ArrayType {
-	return &ArrayType{ValueType: valType}
-}
+// func (typ *ArrayType) IsEqual(other slang.Type) bool {
+// 	typ2, ok := other.(*ArrayType)
+// 	if !ok {
+// 		return false
+// 	}
 
-func (typ *ArrayType) String() string {
-	return fmt.Sprintf("[]%s", typ.ValueType)
-}
+// 	return typ.ValueType.IsEqual(typ2.ValueType)
+// }
 
-func (typ *ArrayType) IsEqual(other slang.Type) bool {
-	typ2, ok := other.(*ArrayType)
-	if !ok {
-		return false
-	}
+// func (typ *ArrayType) IsArray() bool {
+// 	return true
+// }
 
-	return typ.ValueType.IsEqual(typ2.ValueType)
-}
-
-func (typ *ArrayType) IsArray() bool {
-	return true
-}
-
-func (typ *ArrayType) IsMap() bool {
-	return false
-}
+// func (typ *ArrayType) IsMap() bool {
+// 	return false
+// }

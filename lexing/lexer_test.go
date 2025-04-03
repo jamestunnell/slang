@@ -13,7 +13,7 @@ import (
 
 func TestLexer_Example1(t *testing.T) {
 	input := `Person struct {
-		names []string
+		names []str
 		birthdate date
 	}`
 	expected := []*slang.Token{
@@ -25,8 +25,8 @@ func TestLexer_Example1(t *testing.T) {
 		tok(tokens.SYMBOL("names"), 2, 3),
 		tok(tokens.LBRACKET(), 2, 9),
 		tok(tokens.RBRACKET(), 2, 10),
-		tok(tokens.SYMBOL("string"), 2, 11),
-		tok(tokens.NEWLINE(), 2, 17),
+		tok(tokens.STR(), 2, 11),
+		tok(tokens.NEWLINE(), 2, 14),
 
 		tok(tokens.SYMBOL("birthdate"), 3, 3),
 		tok(tokens.SYMBOL("date"), 3, 13),
@@ -69,6 +69,31 @@ func TestLexer_Example2(t *testing.T) {
 	testLexer(t, input, expected...)
 }
 
+func TestLexer_FuncDefinition(t *testing.T) {
+	input := `func mul5(x flt) (y flt) {y = 5.0*x}`
+	expected := []*slang.Token{
+		tok(tokens.FUNC(), 1, 1),
+		tok(tokens.SYMBOL("mul5"), 1, 6),
+		tok(tokens.LPAREN(), 1, 10),
+		tok(tokens.SYMBOL("x"), 1, 11),
+		tok(tokens.FLT(), 1, 13),
+		tok(tokens.RPAREN(), 1, 16),
+		tok(tokens.LPAREN(), 1, 18),
+		tok(tokens.SYMBOL("y"), 1, 19),
+		tok(tokens.FLT(), 1, 21),
+		tok(tokens.RPAREN(), 1, 24),
+		tok(tokens.LBRACE(), 1, 26),
+		tok(tokens.SYMBOL("y"), 1, 27),
+		tok(tokens.EQUAL(), 1, 29),
+		tok(tokens.FLTVAL("5.0"), 1, 31),
+		tok(tokens.STAR(), 1, 34),
+		tok(tokens.SYMBOL("x"), 1, 35),
+		tok(tokens.RBRACE(), 1, 36),
+	}
+
+	testLexer(t, input, expected...)
+}
+
 func TestLexer_IndentWithDigits(t *testing.T) {
 	testLexer(t, "var_1", tok(tokens.SYMBOL("var_1"), 1, 1))
 }
@@ -79,15 +104,15 @@ func tok(info slang.TokenInfo, line, col int) *slang.Token {
 
 func TestLexer_StringPlusString(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.STRING("abc"), 1, 1),
+		tok(tokens.STRVAL("abc"), 1, 1),
 		tok(tokens.PLUS(), 1, 7),
-		tok(tokens.STRING("xyz"), 1, 9),
+		tok(tokens.STRVAL("xyz"), 1, 9),
 	}
 
 	testLexer(t, `"abc" + "xyz"`, expected...)
 
 	expected = []*slang.Token{
-		tok(tokens.STRING("foo bar"), 1, 1),
+		tok(tokens.STRVAL("foo bar"), 1, 1),
 	}
 
 	testLexer(t, `"foo bar"`, expected...)
@@ -97,7 +122,7 @@ func TestLexer_AssignVerbatimString(t *testing.T) {
 	input := "myvar = `this \nis verbatim`"
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("myvar"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 7),
+		tok(tokens.EQUAL(), 1, 7),
 		tok(tokens.VERBATIMSTRING("this \nis verbatim"), 1, 9),
 	}
 
@@ -106,11 +131,11 @@ func TestLexer_AssignVerbatimString(t *testing.T) {
 
 func TestLexer_SimpleStringInterp(t *testing.T) {
 	expected := []*slang.Token{
-		tok(tokens.STRING("this string has a "), 1, 1),
+		tok(tokens.STRVAL("this string has a "), 1, 1),
 		tok(tokens.DOLLARLBRACE(), 1, 20),
-		tok(tokens.INT("5"), 1, 22),
+		tok(tokens.INTVAL("5"), 1, 22),
 		tok(tokens.RBRACE(), 1, 23),
-		tok(tokens.STRING(" in it"), 1, 24),
+		tok(tokens.STRVAL(" in it"), 1, 24),
 	}
 
 	testLexer(t, `"this string has a ${5} in it"`, expected...)
@@ -119,22 +144,22 @@ func TestLexer_SimpleStringInterp(t *testing.T) {
 func TestLexer_AssignNestedStringInterp(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("myVar"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 7),
-		tok(tokens.STRING("a "), 1, 9),
+		tok(tokens.EQUAL(), 1, 7),
+		tok(tokens.STRVAL("a "), 1, 9),
 		tok(tokens.DOLLARLBRACE(), 1, 12),
 		tok(tokens.IF(), 1, 14),
 		tok(tokens.SYMBOL("x"), 1, 17),
 		tok(tokens.GREATER(), 1, 19),
-		tok(tokens.INT("3"), 1, 21),
+		tok(tokens.INTVAL("3"), 1, 21),
 		tok(tokens.LBRACE(), 1, 23),
-		tok(tokens.STRING("small"), 1, 24),
+		tok(tokens.STRVAL("small"), 1, 24),
 		tok(tokens.RBRACE(), 1, 31),
 		tok(tokens.ELSE(), 1, 33),
 		tok(tokens.LBRACE(), 1, 38),
-		tok(tokens.STRING("med"), 1, 39),
+		tok(tokens.STRVAL("med"), 1, 39),
 		tok(tokens.RBRACE(), 1, 44),
 		tok(tokens.RBRACE(), 1, 45),
-		tok(tokens.STRING(" word"), 1, 46),
+		tok(tokens.STRVAL(" word"), 1, 46),
 	}
 
 	testLexer(t, `myVar = "a ${if x > 3 {"small"} else {"med"}} word"`, expected...)
@@ -151,8 +176,8 @@ func TestLexer_WholeLineComment(t *testing.T) {
 func TestLexer_InlineComment(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("x"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 3),
-		tok(tokens.INT("10"), 1, 5),
+		tok(tokens.EQUAL(), 1, 3),
+		tok(tokens.INTVAL("10"), 1, 5),
 		tok(tokens.COMMENT("this is why"), 1, 8),
 	}
 
@@ -162,8 +187,8 @@ func TestLexer_InlineComment(t *testing.T) {
 func TestLexer_AssignInt(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("x"), 1, 4),
-		tok(tokens.ASSIGN(), 1, 5),
-		tok(tokens.INT("5"), 1, 6),
+		tok(tokens.EQUAL(), 1, 5),
+		tok(tokens.INTVAL("5"), 1, 6),
 	}
 
 	testLexer(t, "   x=5", expected...)
@@ -174,12 +199,12 @@ func TestLexer_StatementsWithNewline(t *testing.T) {
 
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("x"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 3),
-		tok(tokens.INT("5"), 1, 5),
+		tok(tokens.EQUAL(), 1, 3),
+		tok(tokens.INTVAL("5"), 1, 5),
 		tok(tokens.NEWLINE(), 1, 6),
 		tok(tokens.SYMBOL("y"), 2, 1),
-		tok(tokens.ASSIGN(), 2, 3),
-		tok(tokens.INT("10"), 2, 5),
+		tok(tokens.EQUAL(), 2, 3),
+		tok(tokens.INTVAL("10"), 2, 5),
 	}
 
 	testLexer(t, str, expected...)
@@ -190,7 +215,7 @@ func TestLexer_Use(t *testing.T) {
 
 	expected := []*slang.Token{
 		tok(tokens.USE(), 1, 1),
-		tok(tokens.STRING("lib/console"), 1, 5),
+		tok(tokens.STRVAL("lib/console"), 1, 5),
 	}
 
 	testLexer(t, str, expected...)
@@ -222,8 +247,8 @@ func TestLexer_AssignClassField(t *testing.T) {
 		tok(tokens.SYMBOL("this"), 1, 1),
 		tok(tokens.DOT(), 1, 5),
 		tok(tokens.SYMBOL("MyField"), 1, 6),
-		tok(tokens.ASSIGN(), 1, 14),
-		tok(tokens.INT("7"), 1, 16),
+		tok(tokens.EQUAL(), 1, 14),
+		tok(tokens.INTVAL("7"), 1, 16),
 	}
 
 	testLexer(t, str, expected...)
@@ -244,11 +269,11 @@ func TestLexer_IntMethodCall(t *testing.T) {
 	const str = "25.add(12)"
 
 	expected := []*slang.Token{
-		tok(tokens.INT("25"), 1, 1),
+		tok(tokens.INTVAL("25"), 1, 1),
 		tok(tokens.DOT(), 1, 3),
 		tok(tokens.SYMBOL("add"), 1, 4),
 		tok(tokens.LPAREN(), 1, 7),
-		tok(tokens.INT("12"), 1, 8),
+		tok(tokens.INTVAL("12"), 1, 8),
 		tok(tokens.RPAREN(), 1, 10),
 	}
 
@@ -259,11 +284,11 @@ func TestLexer_FloatMethodCall(t *testing.T) {
 	const str = "25.5.add(12)"
 
 	expected := []*slang.Token{
-		tok(tokens.FLOAT("25.5"), 1, 1),
+		tok(tokens.FLTVAL("25.5"), 1, 1),
 		tok(tokens.DOT(), 1, 5),
 		tok(tokens.SYMBOL("add"), 1, 6),
 		tok(tokens.LPAREN(), 1, 9),
-		tok(tokens.INT("12"), 1, 10),
+		tok(tokens.INTVAL("12"), 1, 10),
 		tok(tokens.RPAREN(), 1, 12),
 	}
 
@@ -297,17 +322,17 @@ func TestLexer_OrExprCall(t *testing.T) {
 func TestLexer_FloatMath(t *testing.T) {
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("my_num"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 8),
+		tok(tokens.EQUAL(), 1, 8),
 		tok(tokens.LPAREN(), 1, 10),
-		tok(tokens.FLOAT("2.5"), 1, 11),
+		tok(tokens.FLTVAL("2.5"), 1, 11),
 		tok(tokens.PLUS(), 1, 15),
-		tok(tokens.FLOAT("7.7"), 1, 17),
+		tok(tokens.FLTVAL("7.7"), 1, 17),
 		tok(tokens.RPAREN(), 1, 20),
 		tok(tokens.STAR(), 1, 22),
 		tok(tokens.LPAREN(), 1, 24),
 		tok(tokens.SYMBOL("otherNum"), 1, 25),
 		tok(tokens.SLASH(), 1, 34),
-		tok(tokens.FLOAT("33.5"), 1, 36),
+		tok(tokens.FLTVAL("33.5"), 1, 36),
 		tok(tokens.RPAREN(), 1, 40),
 	}
 
@@ -318,7 +343,7 @@ func TestLexer_AssignFunc(t *testing.T) {
 	input := "y = func(myName: uint) {\n\treturn 7\n}"
 	expected := []*slang.Token{
 		tok(tokens.SYMBOL("y"), 1, 1),
-		tok(tokens.ASSIGN(), 1, 3),
+		tok(tokens.EQUAL(), 1, 3),
 		tok(tokens.FUNC(), 1, 5),
 		tok(tokens.LPAREN(), 1, 9),
 		tok(tokens.SYMBOL("myName"), 1, 10),
@@ -328,7 +353,7 @@ func TestLexer_AssignFunc(t *testing.T) {
 		tok(tokens.LBRACE(), 1, 24),
 		tok(tokens.NEWLINE(), 1, 25),
 		tok(tokens.RETURN(), 2, 2),
-		tok(tokens.INT("7"), 2, 9),
+		tok(tokens.INTVAL("7"), 2, 9),
 		tok(tokens.NEWLINE(), 2, 10),
 		tok(tokens.RBRACE(), 3, 1),
 	}

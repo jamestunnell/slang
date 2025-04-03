@@ -58,16 +58,16 @@ func TestForStatementParser(t *testing.T) {
 					statements.NewIf(
 						expressions.NewGreater(
 							expressions.NewIdentifier("x"),
-							expressions.NewInteger(2),
+							expressions.NewInt(2),
 						),
 						statements.NewBlock(
 							statements.NewContinue(),
 						),
 					),
 					statements.NewExpression(
-						expressions.NewCall(
+						expressions.NewInvoke(
 							expressions.NewAccessMember(expressions.NewIdentifier("fmt"), "Print"),
-							expressions.NewPositionalArg(expressions.NewString("ok")),
+							expressions.NewInvokeArgPos(expressions.NewStr("ok")),
 						),
 					),
 				),
@@ -89,9 +89,9 @@ func TestForStatementParser(t *testing.T) {
 						expressions.NewIdentifier("y"),
 						statements.NewBlock(
 							statements.NewExpression(
-								expressions.NewCall(
+								expressions.NewInvoke(
 									expressions.NewIdentifier("printNums"),
-									expressions.NewPositionalArg(
+									expressions.NewInvokeArgPos(
 										expressions.NewAdd(
 											expressions.NewIdentifier("a"),
 											expressions.NewIdentifier("x"),

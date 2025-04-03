@@ -5,7 +5,7 @@ import "encoding/json"
 type ExprType int
 
 type Expression interface {
-	Type() ExprType
+	GetType() ExprType
 	Equal(Expression) bool
 	// Eval(env *objects.Environment) (objects.Object, error)
 }
@@ -16,28 +16,32 @@ const (
 	ExprADD
 	ExprAND
 	ExprARRAY
+	ExprARRAYAUTO
 	ExprBOOL
-	ExprCALL
 	ExprCONCAT
 	ExprDIVIDE
 	ExprEQUAL
 	ExprFLOAT
 	ExprFUNC
+	ExprINVOKE
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
-	ExprINTEGER
+	ExprINT
 	ExprKEY
 	ExprLESS
 	ExprLESSEQUAL
 	ExprMAP
+	ExprMAPAUTO
 	ExprMULTIPLY
 	ExprNEGATIVE
 	ExprNOT
 	ExprNOTEQUAL
 	ExprOR
 	ExprSUBTRACT
-	ExprSTRING
+	ExprSTR
+	ExprSTRUCT
+	ExprSTRUCTVAL
 )
 
 func ExpressionsEqual(a, b []Expression) bool {
@@ -74,8 +78,6 @@ func (et ExprType) String() string {
 		str = "ARRAY"
 	case ExprBOOL:
 		str = "BOOL"
-	case ExprCALL:
-		str = "CALL"
 	case ExprCONCAT:
 		str = "CONCAT"
 	case ExprDIVIDE:
@@ -92,8 +94,10 @@ func (et ExprType) String() string {
 		str = "GREATEREQUAL"
 	case ExprIDENTIFIER:
 		str = "IDENTIFIER"
-	case ExprINTEGER:
-		str = "INTEGER"
+	case ExprINT:
+		str = "INT"
+	case ExprINVOKE:
+		str = "INVOKE"
 	case ExprKEY:
 		str = "KEY"
 	case ExprLESS:
@@ -114,8 +118,10 @@ func (et ExprType) String() string {
 		str = "OR"
 	case ExprSUBTRACT:
 		str = "SUBTRACT"
-	case ExprSTRING:
-		str = "STRING"
+	case ExprSTR:
+		str = "STR"
+	case ExprSTRUCT:
+		str = "STRUCT"
 	}
 
 	return str

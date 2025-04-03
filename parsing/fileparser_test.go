@@ -26,45 +26,51 @@ func TestFileParserGlobalVars(t *testing.T) {
 			y = rand.Int()
 		}
 
-		func GetX() int {
-			return x
+		func GetX() (result int) {
+			result = x
 		}
 
-		func GetY() int {
-			return y
+		func GetY() (result int) {
+			result = y
 		}
 	`)
 	expected := []slang.Statement{
 		statements.NewUse("rand"),
-		statements.NewVar("x", ast.NewBasicType("int")),
-		statements.NewVar("y", ast.NewBasicType("int")),
+		statements.NewVar("x", &ast.IntType{}),
+		statements.NewVar("y", &ast.IntType{}),
 		statements.NewFunc("init",
 			[]slang.Param{},
-			[]slang.Type{},
+			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewIdentifier("x"),
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
 				),
 			),
 			statements.NewAssign(
 				expressions.NewIdentifier("y"),
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("rand"), "Int"),
 				),
 			),
 		),
 		statements.NewFunc("GetX",
 			[]slang.Param{},
-			[]slang.Type{ast.NewBasicType("int")},
-			statements.NewReturnVal(
+			[]slang.Param{
+				ast.NewParam("result", &ast.IntType{}),
+			},
+			statements.NewAssign(
+				expressions.NewIdentifier("result"),
 				expressions.NewIdentifier("x"),
 			),
 		),
 		statements.NewFunc("GetY",
 			[]slang.Param{},
-			[]slang.Type{ast.NewBasicType("int")},
-			statements.NewReturnVal(
+			[]slang.Param{
+				ast.NewParam("result", &ast.IntType{}),
+			},
+			statements.NewAssign(
+				expressions.NewIdentifier("result"),
 				expressions.NewIdentifier("y"),
 			),
 		),
@@ -79,7 +85,7 @@ func TestFileParserGlobalConst(t *testing.T) {
 	`)
 	expected := []slang.Statement{
 		statements.NewConst("myConst", expressions.NewFloat(25.7)),
-		statements.NewVar("x", ast.NewBasicType("int")),
+		statements.NewVar("x", &ast.IntType{}),
 	}
 	testFileParserSuccess(t, "global const", file, expected, 0)
 }
@@ -88,24 +94,22 @@ func TestFileParserStructWithTest(t *testing.T) {
 	file := strings.NewReader(`
 		use "test"
 
-		struct Accumulator {
-			total float
-		}
+		struct Accumulator(total flt)
 
-		func Add(a Accumulator, x float) {
+		func Add(a Accumulator, x flt) {
 			a.total = a.total + x
 		}
 
-		func Mul(a Accumulator, x float) {
+		func Mul(a Accumulator, x flt) {
 			a.total = a.total * x
 		}
 
-		func Total(a Accumulator) float {
-			return a.total
+		func Total(a Accumulator) (result flt) {
+			result = a.total
 		}
 
 		func TestAccumulator(t test.Test) {
-			accum = Accumulator()
+			accum = Accumulator(0.0)
 			
 			accum.Add(2.0)
 			accum.Mul(2.0)
@@ -121,13 +125,13 @@ func TestFileParserStructWithTest(t *testing.T) {
 	expected := []slang.Statement{
 		statements.NewUse("test"),
 		statements.NewStruct("Accumulator",
-			statements.NewStructField([]string{"total"}, ast.NewBasicType("float"))),
+			ast.NewField("total", &ast.FltType{})),
 		statements.NewFunc("Add",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewBasicType("Accumulator")),
-				ast.NewParam("x", ast.NewBasicType("float")),
+				ast.NewParam("a", ast.NewInsideType("Accumulator")),
+				ast.NewParam("x", &ast.FltType{}),
 			},
-			[]slang.Type{},
+			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewAccessMember(
 					expressions.NewIdentifier("a"), "total"),
@@ -141,10 +145,10 @@ func TestFileParserStructWithTest(t *testing.T) {
 		statements.NewFunc(
 			"Mul",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewBasicType("Accumulator")),
-				ast.NewParam("x", ast.NewBasicType("float")),
+				ast.NewParam("a", ast.NewInsideType("Accumulator")),
+				ast.NewParam("x", &ast.FltType{}),
 			},
-			[]slang.Type{},
+			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewAccessMember(
 					expressions.NewIdentifier("a"), "total"),
@@ -158,63 +162,67 @@ func TestFileParserStructWithTest(t *testing.T) {
 		statements.NewFunc(
 			"Total",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewBasicType("Accumulator")),
+				ast.NewParam("a", ast.NewInsideType("Accumulator")),
 			},
-			[]slang.Type{ast.NewBasicType("float")},
-			statements.NewReturnVal(
+			[]slang.Param{
+				ast.NewParam("result", &ast.FltType{}),
+			},
+			statements.NewAssign(
+				expressions.NewIdentifier("result"),
 				expressions.NewAccessMember(
 					expressions.NewIdentifier("a"), "total"),
 			),
 		),
 		statements.NewFunc("TestAccumulator",
-			[]slang.Param{ast.NewParam("t", ast.NewBasicType("test", "Test"))},
-			[]slang.Type{},
+			[]slang.Param{ast.NewParam("t", ast.NewOutsideType("test", "Test"))},
+			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewIdentifier("accum"),
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewIdentifier("Accumulator"),
+					expressions.NewInvokeArgPos(expressions.NewFloat(0.0)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
-					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(2.0)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
-					expressions.NewPositionalArg(expressions.NewFloat(2.0)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(2.0)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
-					expressions.NewPositionalArg(expressions.NewCall(
+					expressions.NewInvokeArgPos(expressions.NewInvoke(
 						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
 					)),
-					expressions.NewPositionalArg(expressions.NewFloat(4.0)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(4.0)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Add"),
-					expressions.NewPositionalArg(expressions.NewFloat(1.0)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(1.0)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Mul"),
-					expressions.NewPositionalArg(expressions.NewFloat(0.5)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(0.5)),
 				),
 			),
 			statements.NewExpression(
-				expressions.NewCall(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(expressions.NewIdentifier("t"), "AssertAlmostEq"),
-					expressions.NewPositionalArg(expressions.NewCall(
+					expressions.NewInvokeArgPos(expressions.NewInvoke(
 						expressions.NewAccessMember(expressions.NewIdentifier("accum"), "Total"),
 					)),
-					expressions.NewPositionalArg(expressions.NewFloat(2.5)),
+					expressions.NewInvokeArgPos(expressions.NewFloat(2.5)),
 				),
 			),
 		),
@@ -222,20 +230,33 @@ func TestFileParserStructWithTest(t *testing.T) {
 	testFileParserSuccess(t, "struct with test", file, expected, 0)
 }
 
-func TestFileParserStruct(t *testing.T) {
+func TestFileParserStructOneline(t *testing.T) {
+	file := strings.NewReader(`struct X (a, b int, c str)`)
+	expected := []slang.Statement{
+		statements.NewStruct("X",
+			ast.NewField("a", &ast.IntType{}),
+			ast.NewField("b", &ast.IntType{}),
+			ast.NewField("c", &ast.StrType{}),
+		),
+	}
+	testFileParserSuccess(t, "struct multiline", file, expected, 0)
+}
+
+func TestFileParserStructMultiline(t *testing.T) {
 	file := strings.NewReader(`
-		struct X {
+		struct X (
 		  a, b int
-		  c string
-		}
+		  c str
+		)
 	`)
 	expected := []slang.Statement{
 		statements.NewStruct("X",
-			statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
-			statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
+			ast.NewField("a", &ast.IntType{}),
+			ast.NewField("b", &ast.IntType{}),
+			ast.NewField("c", &ast.StrType{}),
 		),
 	}
-	testFileParserSuccess(t, "struct", file, expected, 0)
+	testFileParserSuccess(t, "struct multiline", file, expected, 0)
 }
 
 func TestFileParserWithComments(t *testing.T) {
@@ -244,10 +265,10 @@ func TestFileParserWithComments(t *testing.T) {
 		// standalone comment
 		
 		// my struct comment
-		struct X {
+		struct X (
 			a, b int
 			c string
-		}
+		)
 
 		// this is a
 		// standalone comment
@@ -262,14 +283,15 @@ func TestFileParserWithComments(t *testing.T) {
 		statements.NewComment("this is a leading", "standalone comment"),
 		statements.WithComment(
 			statements.NewStruct("X",
-				statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("int")),
-				statements.NewStructField([]string{"c"}, ast.NewBasicType("string")),
+				ast.NewField("a", &ast.IntType{}),
+				ast.NewField("b", &ast.IntType{}),
+				ast.NewField("c", &ast.StrType{}),
 			),
 			"my struct comment",
 		),
 		statements.NewComment("this is a", "standalone comment"),
 		statements.WithComment(
-			statements.NewConst("y", expressions.NewInteger(10)),
+			statements.NewConst("y", expressions.NewInt(10)),
 			"also not empty",
 		),
 		statements.NewComment("this is a trailing", "standalone comment"),

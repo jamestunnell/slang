@@ -25,7 +25,7 @@ func (p *AssignStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenASSIGN) {
+	if !p.ExpectToken(toks.Current(), slang.TokenEQUAL) {
 		return false
 	}
 

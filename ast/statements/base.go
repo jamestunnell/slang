@@ -8,7 +8,7 @@ import (
 
 type Base struct {
 	CommentLines []string            `json:"commentLines,omitempty"`
-	StmtType     slang.StatementType `json:"statementType"`
+	StmtType     slang.StatementType `json:"type"`
 }
 
 func NewBase(typ slang.StatementType) *Base {

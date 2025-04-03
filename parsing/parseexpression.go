@@ -1,6 +1,7 @@
 package parsing
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/customerrs"
 )
+
+var errNonIdentInTypeChain = errors.New("not a valid type chain, non-identifier found")
 
 func (p *ExprParser) parseExpression(toks slang.TokenSeq, prec Precedence) slang.Expression {
 	prefixParse, foundPrefix := p.findPrefixParseFn(toks.Current().Type())
@@ -47,122 +50,118 @@ func (p *ExprParser) parseGroupedExpression(toks slang.TokenSeq) slang.Expressio
 	return expr
 }
 
-func (p *ExprParser) parseArrayOrMap(toks slang.TokenSeq) slang.Expression {
-	if toks.Next().Is(slang.TokenRBRACKET) {
-		return p.parseArray(toks)
-	}
+// func (p *ExprParser) parseArrayAuto(toks slang.TokenSeq) slang.Expression {
+// 	toks.Advance() // past [
 
-	return p.parseMap(toks)
-}
+// 	// // type includes brackets
+// 	// typ, ok := p.ParseArrayType(toks)
+// 	// if !ok {
+// 	// 	return nil
+// 	// }
 
-func (p *ExprParser) parseArray(toks slang.TokenSeq) slang.Expression {
-	// type includes brackets
-	typ, ok := p.ParseArrayType(toks)
-	if !ok {
-		return nil
-	}
+// 	// if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
+// 	// 	return nil
+// 	// }
 
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-		return nil
-	}
+// 	// toks.Advance()
 
-	toks.Advance()
+// 	vals := []slang.Expression{}
 
-	vals := []slang.Expression{}
+// 	// check for empty array
+// 	if toks.Current().Is(slang.TokenRBRACKET) {
+// 		return expressions.NewArrayAuto()
+// 	}
 
-	// check for empty array
-	if toks.Current().Is(slang.TokenRBRACE) {
-		return expressions.NewArray(typ.ValueType)
-	}
+// 	// first value
+// 	v := p.parseExpression(toks, PrecedenceLOWEST)
 
-	// first value
-	v := p.parseExpression(toks, PrecedenceLOWEST)
+// 	vals = append(vals, v)
 
-	vals = append(vals, v)
+// 	// more values
+// 	for toks.Current().Is(slang.TokenCOMMA) {
+// 		toks.Advance()
 
-	// more values
-	for toks.Current().Is(slang.TokenCOMMA) {
-		toks.Advance()
+// 		v := p.parseExpression(toks, PrecedenceLOWEST)
 
-		v := p.parseExpression(toks, PrecedenceLOWEST)
+// 		vals = append(vals, v)
+// 	}
 
-		vals = append(vals, v)
-	}
+// 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
+// 		return nil
+// 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
-		return nil
-	}
+// 	toks.Advance()
 
-	toks.Advance()
+// 	return expressions.NewArrayAuto(vals...)
+// }
 
-	return expressions.NewArray(typ.ValueType, vals...)
-}
+// func (p *ExprParser) parseMapAuto(toks slang.TokenSeq) slang.Expression {
+// 	toks.Advance() // past <
 
-func (p *ExprParser) parseMap(toks slang.TokenSeq) slang.Expression {
-	typ, ok := p.ParseMapType(toks)
-	if !ok {
-		return nil
-	}
+// 	// typ, ok := p.ParseMapType(toks)
+// 	// if !ok {
+// 	// 	return nil
+// 	// }
 
-	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-		return nil
-	}
+// 	// if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
+// 	// 	return nil
+// 	// }
 
-	toks.Advance()
+// 	keys := []slang.Expression{}
+// 	vals := []slang.Expression{}
 
-	keys := []slang.Expression{}
-	vals := []slang.Expression{}
+// 	// check for empty map
+// 	if toks.Current().Is(slang.TokenGREATER) {
+// 		return expressions.NewMapAuto(keys, vals)
+// 	}
 
-	// check for empty map
-	if toks.Current().Is(slang.TokenRBRACKET) {
-		return expressions.NewMap(typ.KeyType, keys, typ.ValueType, vals)
-	}
+// 	// first KV pair
+// 	k, v, ok := p.parseMapKVPair(toks)
+// 	if !ok {
+// 		return nil
+// 	}
 
-	// first KV pair
-	k, v, ok := p.parseMapKVPair(toks)
-	if !ok {
-		return nil
-	}
+// 	keys = append(keys, k)
+// 	vals = append(vals, v)
 
-	keys = append(keys, k)
-	vals = append(vals, v)
+// 	// more KV pairs
+// 	for toks.Current().Is(slang.TokenCOMMA) {
+// 		toks.Advance()
 
-	// more KV pairs
-	for toks.Current().Is(slang.TokenCOMMA) {
-		toks.Advance()
+// 		k, v, ok := p.parseMapKVPair(toks)
+// 		if !ok {
+// 			return nil
+// 		}
 
-		k, v, ok := p.parseMapKVPair(toks)
-		if !ok {
-			return nil
-		}
+// 		keys = append(keys, k)
+// 		vals = append(vals, v)
+// 	}
 
-		keys = append(keys, k)
-		vals = append(vals, v)
-	}
+// 	if !p.ExpectToken(toks.Current(), slang.TokenGREATER) {
+// 		return nil
+// 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACE) {
-		return nil
-	}
+// 	return expressions.NewMapAuto(keys, vals)
+// }
 
-	return expressions.NewMap(typ.KeyType, keys, typ.ValueType, vals)
-}
+// func (p *ExprParser) parseMapKVPair(toks slang.TokenSeq) (key, val slang.Expression, ok bool) {
+// 	k := p.parseExpression(toks, PrecedenceLOWEST)
 
-func (p *ExprParser) parseMapKVPair(toks slang.TokenSeq) (key, val slang.Expression, ok bool) {
-	k := p.parseExpression(toks, PrecedenceLOWEST)
+// 	toks.Skip(slang.TokenNEWLINE)
 
-	if !p.ExpectToken(toks.Current(), slang.TokenCOLON) {
-		return nil, nil, false
-	}
+// 	if !p.ExpectToken(toks.Current(), slang.TokenCOLON) {
+// 		return nil, nil, false
+// 	}
 
-	toks.Advance()
+// 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	v := p.parseExpression(toks, PrecedenceLOWEST)
+// 	v := p.parseExpression(toks, PrecedenceLOWEST)
 
-	return k, v, true
-}
+// 	return k, v, true
+// }
 
-func (p *ExprParser) parseFuncLiteral(toks slang.TokenSeq) slang.Expression {
-	toks.Advance()
+func (p *ExprParser) parseFuncAnon(toks slang.TokenSeq) slang.Expression {
+	toks.AdvanceSkip(slang.TokenNEWLINE) // past func
 
 	sigParser := NewFuncSignatureParser()
 	if !p.RunSubParser(toks, sigParser) {
@@ -175,7 +174,7 @@ func (p *ExprParser) parseFuncLiteral(toks slang.TokenSeq) slang.Expression {
 	}
 
 	return expressions.NewFunc(
-		sigParser.Params, sigParser.ReturnTypes, bodyParser.Statements...)
+		sigParser.InParams, sigParser.OutParams, bodyParser.Statements...)
 }
 
 func (p *ExprParser) parseIdentifier(toks slang.TokenSeq) slang.Expression {
@@ -184,6 +183,23 @@ func (p *ExprParser) parseIdentifier(toks slang.TokenSeq) slang.Expression {
 	toks.Advance()
 
 	return expressions.NewIdentifier(name)
+}
+
+func (p *ExprParser) parseBoolVal(toks slang.TokenSeq) slang.Expression {
+	str := toks.Current().Value()
+
+	b, err := strconv.ParseBool(str)
+	if err != nil {
+		err = fmt.Errorf("failed to parse '%s' as bool: %w", str, err)
+
+		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+
+		return nil
+	}
+
+	toks.Advance()
+
+	return expressions.NewBool(b)
 }
 
 func (p *ExprParser) parseTrue(toks slang.TokenSeq) slang.Expression {
@@ -210,7 +226,7 @@ func (p *ExprParser) parseNot(toks slang.TokenSeq) slang.Expression {
 	return expressions.NewNot(p.parseExpression(toks, PrecedencePREFIX))
 }
 
-func (p *ExprParser) parseInteger(toks slang.TokenSeq) slang.Expression {
+func (p *ExprParser) parseIntVal(toks slang.TokenSeq) slang.Expression {
 	str := toks.Current().Value()
 
 	i, err := strconv.ParseInt(str, 10, 64)
@@ -224,11 +240,11 @@ func (p *ExprParser) parseInteger(toks slang.TokenSeq) slang.Expression {
 
 	toks.Advance()
 
-	return expressions.NewInteger(i)
+	return expressions.NewInt(i)
 }
 
-func (p *ExprParser) parseString(toks slang.TokenSeq) slang.Expression {
-	strExprs := []slang.Expression{expressions.NewString(toks.Current().Value())}
+func (p *ExprParser) parseStrVal(toks slang.TokenSeq) slang.Expression {
+	strExprs := []slang.Expression{expressions.NewStr(toks.Current().Value())}
 
 	toks.Advance()
 
@@ -248,11 +264,11 @@ func (p *ExprParser) parseString(toks slang.TokenSeq) slang.Expression {
 
 		toks.Advance()
 
-		if !p.ExpectToken(toks.Current(), slang.TokenSTRING) {
+		if !p.ExpectToken(toks.Current(), slang.TokenSTRVAL) {
 			return nil
 		}
 
-		strExprs = append(strExprs, expressions.NewString(toks.Current().Value()))
+		strExprs = append(strExprs, expressions.NewStr(toks.Current().Value()))
 
 		toks.Advance()
 	}
@@ -269,10 +285,10 @@ func (p *ExprParser) parseVerbatimString(toks slang.TokenSeq) slang.Expression {
 
 	toks.Advance()
 
-	return expressions.NewString(val)
+	return expressions.NewStr(val)
 }
 
-func (p *ExprParser) parseFloat(toks slang.TokenSeq) slang.Expression {
+func (p *ExprParser) parseFloatVal(toks slang.TokenSeq) slang.Expression {
 	str := toks.Current().Value()
 
 	f, err := strconv.ParseFloat(str, 64)
@@ -303,15 +319,77 @@ func (p *ExprParser) parseAccessMember(toks slang.TokenSeq, object slang.Express
 	return expressions.NewAccessMember(object, member)
 }
 
-func (p *ExprParser) parseCall(toks slang.TokenSeq, fn slang.Expression) slang.Expression {
-	toks.Advance() // past the LPAREN
+func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject slang.Expression) slang.Expression {
+	toks.AdvanceSkip(slang.TokenNEWLINE) // past the LPAREN and any newlines
 
-	args, ok := p.parseCallArgs(toks)
-	if !ok {
+	// check for no args
+	if toks.Current().Is(slang.TokenRPAREN) {
+		toks.Advance()
+
+		return expressions.NewInvoke(subject)
+	}
+
+	args := []*expressions.InvokeArg{}
+	addArg := func() bool {
+		var nameTok *slang.Token
+
+		if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
+			nameTok = toks.Current()
+
+			toks.Advance()
+			toks.AdvanceSkip(slang.TokenNEWLINE)
+		}
+
+		val := p.parseExpression(toks, PrecedenceLOWEST)
+		if val == nil {
+			return false
+		}
+
+		toks.Skip(slang.TokenNEWLINE)
+
+		var name string
+
+		if nameTok != nil {
+			name = nameTok.Value()
+		}
+
+		args = append(args, &expressions.InvokeArg{Name: name, Value: val})
+
+		return true
+	}
+
+	if !addArg() {
 		return nil
 	}
 
-	return expressions.NewCall(fn, args...)
+	for toks.Current().Is(slang.TokenCOMMA, slang.TokenNEWLINE) {
+		toks.AdvanceSkip(slang.TokenNEWLINE)
+
+		if !addArg() {
+			return nil
+		}
+	}
+
+	toks.Skip(slang.TokenNEWLINE)
+
+	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
+		return nil
+	}
+
+	toks.Advance()
+
+	return expressions.NewInvoke(subject, args...)
+}
+
+func (p *ExprParser) parseStructAnon(toks slang.TokenSeq) slang.Expression {
+	toks.Advance() // past struct
+
+	sigParser := NewDataSignatureParser()
+	if !p.RunSubParser(toks, sigParser) {
+		return nil
+	}
+
+	return expressions.NewStruct(sigParser.NameTypes...)
 }
 
 func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
@@ -329,67 +407,6 @@ func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) 
 	toks.Advance()
 
 	return expressions.NewAccessElem(ary, keyExpr)
-}
-
-func (p *ExprParser) parseCallArgs(
-	toks slang.TokenSeq,
-) ([]*expressions.Arg, bool) {
-	if toks.Current().Is(slang.TokenRPAREN) {
-		toks.Advance()
-
-		return []*expressions.Arg{}, true
-	}
-
-	args := []*expressions.Arg{}
-
-	addArg := func() bool {
-		var nameTok *slang.Token
-
-		if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
-			nameTok = toks.Current()
-
-			toks.Advance()
-			toks.Advance()
-		}
-
-		argExpr := p.parseExpression(toks, PrecedenceLOWEST)
-
-		if argExpr == nil {
-			return false
-		}
-
-		if nameTok == nil {
-			args = append(args, expressions.NewPositionalArg(argExpr))
-
-			return true
-		}
-
-		arg := expressions.NewKeywordArg(nameTok.Value(), argExpr)
-
-		args = append(args, arg)
-
-		return true
-	}
-
-	if !addArg() {
-		return nil, false
-	}
-
-	for toks.Current().Is(slang.TokenCOMMA) {
-		toks.Advance()
-
-		if !addArg() {
-			return nil, false
-		}
-	}
-
-	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
-		return nil, false
-	}
-
-	toks.Advance()
-
-	return args, true
 }
 
 func (p *ExprParser) parseAnd(toks slang.TokenSeq, left slang.Expression) slang.Expression {

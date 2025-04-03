@@ -25,7 +25,7 @@ func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	if toks.Current().Is(slang.TokenASSIGN) {
+	if toks.Current().Is(slang.TokenEQUAL) {
 		toks.AdvanceSkip(slang.TokenNEWLINE)
 
 		valueParser := NewExprParser(PrecedenceLOWEST)

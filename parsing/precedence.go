@@ -19,7 +19,7 @@ const (
 var precedences = map[slang.TokenType]Precedence{
 	slang.TokenOR:           PrecedenceOR,
 	slang.TokenAND:          PrecedenceAND,
-	slang.TokenEQUAL:        PrecedenceEQUALITY,
+	slang.TokenEQUALEQUAL:   PrecedenceEQUALITY,
 	slang.TokenNOTEQUAL:     PrecedenceEQUALITY,
 	slang.TokenLESS:         PrecedenceRELATIONAL,
 	slang.TokenLESSEQUAL:    PrecedenceRELATIONAL,

@@ -26,7 +26,7 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	toks.Advance()
+	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
 		return false
@@ -34,7 +34,7 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 
 	name := toks.Current().Value()
 
-	toks.Advance()
+	toks.AdvanceSkip(slang.TokenNEWLINE)
 
 	sigParser := NewFuncSignatureParser()
 	if !p.RunSubParser(toks, sigParser) {
@@ -47,7 +47,11 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.FuncStmt = statements.NewFunc(
-		name, sigParser.Params, sigParser.ReturnTypes, bodyParser.GetStatements()...)
+		name,
+		sigParser.InParams,
+		sigParser.OutParams,
+		bodyParser.GetStatements()...,
+	)
 
 	return true
 }

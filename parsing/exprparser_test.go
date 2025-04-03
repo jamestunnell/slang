@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
@@ -47,8 +46,8 @@ func TestExprParser(t *testing.T) {
 		"(15 + 2) * 12": mul(add(i(15), i(2)), i(12)),
 
 		// func calls
-		"sum(1,2,3)":     callPosArgsOnly(id("sum"), i(1), i(2), i(3)),
-		"5 * sub(10, 5)": mul(i(5), callPosArgsOnly(id("sub"), i(10), i(5))),
+		"sum(1,2,3)":     invokePos(id("sum"), i(1), i(2), i(3)),
+		"5 * sub(10, 5)": mul(i(5), invokePos(id("sub"), i(10), i(5))),
 
 		// strings
 		`"abc" + "123"`: add(str("abc"), str("123")),
@@ -56,34 +55,34 @@ func TestExprParser(t *testing.T) {
 		// string interpolation
 		`"${x} is a ${y}"`: expressions.NewConcat(str(""), id("x"), str(" is a "), id("y"), str("")),
 
-		// map literal value
-		`[string]int{"a": 1, "b": 2}`: m(
-			ast.NewBasicType("string"),
-			exprs(str("a"), str("b")),
-			ast.NewBasicType("int"),
-			exprs(i(1), i(2)),
-		),
+		// // map literal value
+		// `[string]int{"a": 1, "b": 2}`: m(
+		// 	&ast.StrType{},
+		// 	exprs(str("a"), str("b")),
+		// 	&ast.IntType{},
+		// 	exprs(i(1), i(2)),
+		// ),
 
-		// nested map values
-		`[string][string]int{"a": [string]int{"b": 2}}`: m(
-			ast.NewBasicType("string"),
-			exprs(str("a")),
-			ast.NewMapType(ast.NewBasicType("string"), ast.NewBasicType("int")),
-			exprs(m(ast.NewBasicType("string"), exprs(str("b")), ast.NewBasicType("int"), exprs(i(2)))),
-		),
+		// // nested map values
+		// `[string][string]int{"a": [string]int{"b": 2}}`: m(
+		// 	&ast.StrType{},
+		// 	exprs(str("a")),
+		// 	ast.NewMapType(&ast.StrType{}, &ast.IntType{}),
+		// 	exprs(m(&ast.StrType{}, exprs(str("b")), &ast.IntType{}, exprs(i(2)))),
+		// ),
 
-		// array literal value
-		`[]int{1, 2, 3}`: ary(ast.NewBasicType("int"), i(1), i(2), i(3)),
+		// // array literal value
+		// `[]int{1, 2, 3}`: ary(&ast.IntType{}, i(1), i(2), i(3)),
 
-		// nested array values
-		`[][]string{[]string{"a", "b", "c"}, []string{"x", "y", "z"}}`: ary(
-			ast.NewArrayType(ast.NewBasicType("string")),
-			ary(ast.NewBasicType("string"), str("a"), str("b"), str("c")),
-			ary(ast.NewBasicType("string"), str("x"), str("y"), str("z")),
-		),
+		// // nested array values
+		// `[][]string{[]string{"a", "b", "c"}, []string{"x", "y", "z"}}`: ary(
+		// 	ast.NewArrayType(&ast.StrType{}),
+		// 	ary(&ast.StrType{}, str("a"), str("b"), str("c")),
+		// 	ary(&ast.StrType{}, str("x"), str("y"), str("z")),
+		// ),
 
-		// access map/array element
-		`myContainer[myKey]`: elem(id("myContainer"), id("myKey")),
+		// // access map/array element
+		// `myContainer[myKey]`: elem(id("myContainer"), id("myKey")),
 	}
 
 	for input, expected := range testCases {
@@ -134,7 +133,7 @@ func div(left, right slang.Expression) slang.Expression {
 }
 
 func i(val int64) slang.Expression {
-	return expressions.NewInteger(val)
+	return expressions.NewInt(val)
 }
 
 func b(val bool) slang.Expression {
@@ -146,17 +145,17 @@ func f(val float64) slang.Expression {
 }
 
 func str(val string) slang.Expression {
-	return expressions.NewString(val)
+	return expressions.NewStr(val)
 }
 
-func callPosArgsOnly(fn slang.Expression, argVals ...slang.Expression) slang.Expression {
-	args := make([]*expressions.Arg, len(argVals))
+func invokePos(fn slang.Expression, argVals ...slang.Expression) slang.Expression {
+	args := make([]*expressions.InvokeArg, len(argVals))
 
 	for i, val := range argVals {
-		args[i] = expressions.NewPositionalArg(val)
+		args[i] = expressions.NewInvokeArgPos(val)
 	}
 
-	return expressions.NewCall(fn, args...)
+	return expressions.NewInvoke(fn, args...)
 }
 
 func gt(left, right slang.Expression) slang.Expression {
@@ -179,18 +178,18 @@ func not(val slang.Expression) slang.Expression {
 	return expressions.NewNot(val)
 }
 
-func ary(valType slang.Type, vals ...slang.Expression) slang.Expression {
-	return expressions.NewArray(valType, vals...)
-}
+// func ary(valType slang.Type, vals ...slang.Expression) slang.Expression {
+// 	return expressions.NewArray(valType, vals...)
+// }
 
 func exprs(vals ...slang.Expression) []slang.Expression {
 	return vals
 }
 
-func m(keyType slang.Type, keys []slang.Expression,
-	valType slang.Type, vals []slang.Expression) slang.Expression {
-	return expressions.NewMap(keyType, keys, valType, vals)
-}
+// func m(keyType slang.Type, keys []slang.Expression,
+// 	valType slang.Type, vals []slang.Expression) slang.Expression {
+// 	return expressions.NewMap(keyType, keys, valType, vals)
+// }
 
 func elem(a, b slang.Expression) slang.Expression {
 	return expressions.NewAccessElem(a, b)

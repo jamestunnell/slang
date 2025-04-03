@@ -14,14 +14,14 @@ import (
 )
 
 func TestMarshalJSON(t *testing.T) {
-	testMarshalJSON(t, statements.NewAssign(expressions.NewIdentifier("xyz"), expressions.NewInteger(5)))
+	testMarshalJSON(t, statements.NewAssign(expressions.NewIdentifier("xyz"), expressions.NewInt(5)))
 	testMarshalJSON(t, statements.NewStruct("myclass",
-		statements.NewStructField([]string{"x"}, ast.NewBasicType("int")),
-		statements.NewStructField([]string{"y", "z"}, ast.NewBasicType("string")),
+		ast.NewField("x", &ast.IntType{}),
+		ast.NewField("y", &ast.StrType{}),
+		ast.NewField("z", &ast.StrType{}),
 	))
-	testMarshalJSON(t, statements.NewStructField([]string{"a", "b"}, ast.NewBasicType("string")))
-	testMarshalJSON(t, statements.NewFunc("myfunc", []slang.Param{}, []slang.Type{}))
-	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInteger(7)))
+	testMarshalJSON(t, statements.NewFunc("myfunc", []slang.Param{}, []slang.Param{}))
+	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInt(7)))
 	testMarshalJSON(t, statements.NewUse("my/path"))
 }
 

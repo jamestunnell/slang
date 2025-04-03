@@ -1,14 +1,24 @@
 package parsing_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/stretchr/testify/assert"
 )
+
+type bodyParserSuccessTest struct {
+	TestName   string
+	Input      string
+	Statements []slang.Statement
+	ErrorCount int
+}
 
 func TestFuncBodyParser(t *testing.T) {
 	tests := []*bodyParserSuccessTest{
@@ -22,14 +32,14 @@ func TestFuncBodyParser(t *testing.T) {
 			Input: `{
 				var a int
 				const b = "hello"
-				var c float
+				var c flt
 				const d = 12
 			}`,
 			Statements: []slang.Statement{
-				statements.NewVar("a", ast.NewBasicType("int")),
-				statements.NewConst("b", expressions.NewString("hello")),
-				statements.NewVar("c", ast.NewBasicType("float")),
-				statements.NewConst("d", expressions.NewInteger(12)),
+				statements.NewVar("a", &ast.IntType{}),
+				statements.NewConst("b", expressions.NewStr("hello")),
+				statements.NewVar("c", &ast.FltType{}),
+				statements.NewConst("d", expressions.NewInt(12)),
 			},
 		},
 		{
@@ -53,12 +63,12 @@ func TestFuncBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewComment("this is a leading", "standalone comment"),
 				statements.WithComment(
-					statements.NewConst("x", expressions.NewString("hello")),
+					statements.NewConst("x", expressions.NewStr("hello")),
 					"not empty",
 				),
 				statements.NewComment("this is a", "standalone comment"),
 				statements.WithComment(
-					statements.NewConst("y", expressions.NewInteger(10)),
+					statements.NewConst("y", expressions.NewInt(10)),
 					"also not empty",
 				),
 				statements.NewComment("this is a trailing", "standalone comment"),
@@ -74,11 +84,11 @@ func TestFuncBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewAssign(
 					expressions.NewAccessMember(expressions.NewIdentifier("this"), "X"),
-					expressions.NewInteger(2),
+					expressions.NewInt(2),
 				),
 				statements.NewAssign(
 					expressions.NewAccessMember(expressions.NewIdentifier("person"), "Name"),
-					expressions.NewString("Jill"),
+					expressions.NewStr("Jill"),
 				),
 			},
 		},
@@ -89,7 +99,7 @@ func TestFuncBodyParser(t *testing.T) {
 			}`,
 			Statements: []slang.Statement{
 				statements.NewExpression(
-					expressions.NewCall(
+					expressions.NewInvoke(
 						expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
 				),
 			},
@@ -102,13 +112,13 @@ func TestFuncBodyParser(t *testing.T) {
 			Statements: []slang.Statement{
 				statements.NewExpression(
 					expressions.NewAccessMember(
-						expressions.NewCall(
+						expressions.NewInvoke(
 							expressions.NewAccessMember(
 								expressions.NewIdentifier("a"),
 								"b",
 							),
-							expressions.NewPositionalArg(expressions.NewIdentifier("x")),
-							expressions.NewPositionalArg(expressions.NewIdentifier("y")),
+							expressions.NewInvokeArgPos(expressions.NewIdentifier("x")),
+							expressions.NewInvokeArgPos(expressions.NewIdentifier("y")),
 						),
 						"c",
 					),
@@ -124,12 +134,12 @@ func TestFuncBodyParser(t *testing.T) {
 				statements.NewAssign(
 					expressions.NewIdentifier("myVar"),
 					expressions.NewConcat(
-						expressions.NewString(""),
+						expressions.NewStr(""),
 						expressions.NewIdentifier("word"),
-						expressions.NewString(" is a "),
-						expressions.NewCall(
+						expressions.NewStr(" is a "),
+						expressions.NewInvoke(
 							expressions.NewAccessMember(expressions.NewIdentifier("fanciness"), "String")),
-						expressions.NewString(" word"),
+						expressions.NewStr(" word"),
 					),
 				),
 			},
@@ -145,4 +155,25 @@ func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
 	newParser := func() parsing.BodyParser { return parsing.NewFuncBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
+}
+
+func testBodyParserSuccess(
+	t *testing.T,
+	test *bodyParserSuccessTest,
+	newParser func() parsing.BodyParser) {
+	t.Run(test.TestName, func(t *testing.T) {
+		p := newParser()
+		l := lexing.NewLexer(strings.NewReader(test.Input))
+		seq := parsing.NewTokenSeq(l)
+
+		assert.True(t, p.Run(seq))
+
+		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
+			logParseErrs(t, p.GetErrors())
+
+			return
+		}
+
+		verifyStatemnts(t, test.Statements, p.GetStatements())
+	})
 }

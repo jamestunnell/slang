@@ -1,6 +1,8 @@
 package slang
 
 type Module interface {
+	GetPath() string
+
 	GetStructNames() []string
 	GetStruct(name string) (Structure, bool)
 

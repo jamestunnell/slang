@@ -34,28 +34,32 @@ func (p *ExprParser) findPrefixParseFn(
 	switch tokType {
 	case slang.TokenSYMBOL:
 		prefixParse = p.parseIdentifier
-	case slang.TokenINT:
-		prefixParse = p.parseInteger
-	case slang.TokenFLOAT:
-		prefixParse = p.parseFloat
-	case slang.TokenSTRING:
-		prefixParse = p.parseString
+	case slang.TokenINTVAL:
+		prefixParse = p.parseIntVal
+	case slang.TokenFLTVAL:
+		prefixParse = p.parseFloatVal
+	case slang.TokenSTRVAL:
+		prefixParse = p.parseStrVal
 	case slang.TokenVERBATIMSTRING:
 		prefixParse = p.parseVerbatimString
-	case slang.TokenTRUE:
-		prefixParse = p.parseTrue
-	case slang.TokenFALSE:
-		prefixParse = p.parseFalse
+	case slang.TokenBOOLVAL:
+		prefixParse = p.parseBoolVal
 	case slang.TokenMINUS:
 		prefixParse = p.parseNegative
 	case slang.TokenBANG:
 		prefixParse = p.parseNot
 	case slang.TokenLPAREN:
 		prefixParse = p.parseGroupedExpression
-	case slang.TokenLBRACKET:
-		prefixParse = p.parseArrayOrMap
+	// case slang.TokenLBRACE:
+	// 	prefixParse = p.parseStructAnon
+	// case slang.TokenLBRACKET:
+	// 	prefixParse = p.parseArrayAuto
+	// case slang.TokenLESS:
+	// 	prefixParse = p.parseMapAuto
 	case slang.TokenFUNC:
-		prefixParse = p.parseFuncLiteral
+		prefixParse = p.parseFuncAnon
+	case slang.TokenSTRUCT:
+		prefixParse = p.parseStructAnon
 	}
 
 	return prefixParse, prefixParse != nil
@@ -78,7 +82,7 @@ func (p *ExprParser) findInfixParseFn(
 		infixParse = p.parseMultiply
 	case slang.TokenSLASH:
 		infixParse = p.parseDivide
-	case slang.TokenEQUAL:
+	case slang.TokenEQUALEQUAL:
 		infixParse = p.parseEqual
 	case slang.TokenNOTEQUAL:
 		infixParse = p.parseNotEqual
@@ -93,9 +97,7 @@ func (p *ExprParser) findInfixParseFn(
 	case slang.TokenDOT:
 		infixParse = p.parseAccessMember
 	case slang.TokenLPAREN:
-		infixParse = p.parseCall
-	case slang.TokenLBRACKET:
-		infixParse = p.parseAccessElem
+		infixParse = p.parseInvoke
 	}
 
 	return infixParse, infixParse != nil

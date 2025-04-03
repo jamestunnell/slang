@@ -48,18 +48,8 @@ const (
 	StrUSE         = "USE"
 )
 
-func StatementsEqual(a, b []Statement) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for idx, stmt := range a {
-		if !stmt.Equal(b[idx]) {
-			return false
-		}
-	}
-
-	return true
+func StatementsEqual(a, b Statement) bool {
+	return a.Equal(b)
 }
 
 func (st StatementType) MarshalJSON() ([]byte, error) {

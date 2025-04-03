@@ -6,14 +6,17 @@ import (
 )
 
 type Module struct {
+	Path       string            `json:"path"`
 	Statements []slang.Statement `json:"statements"`
 	// // Errors    []error          `json:"errors"`
 	// Structures []slang.Structure `json:"structures"`
 	// Functions  []slang.Function  `json:"functions"`
 }
 
-func NewModule() *Module {
+func NewModule(path string, stmts ...slang.Statement) *Module {
 	return &Module{
+		Path:       path,
+		Statements: stmts,
 		// Structures: []slang.Structure{},
 		// Functions:  []slang.Function{},
 		// // Errors:    []error{},
@@ -81,50 +84,30 @@ func NewModule() *Module {
 // 	return m, nil
 // }
 
-func (m *Module) GetStructNames() []string {
-	names := []string{}
+func (m *Module) GetPath() string {
+	return m.Path
+}
+
+func (m *Module) GetStructures() []slang.Structure {
+	structs := []slang.Structure{}
 
 	for _, s := range m.Statements {
 		if str, ok := s.(*statements.Struct); ok {
-			names = append(names, str.Name)
+			structs = append(structs, str)
 		}
 	}
 
-	return names
+	return structs
 }
 
-func (m *Module) GetStruct(name string) (slang.Structure, bool) {
-	for _, s := range m.Statements {
-		if str, ok := s.(*statements.Struct); ok {
-			if str.Name == name {
-				return str, true
-			}
-		}
-	}
-
-	return nil, false
-}
-
-func (m *Module) GetFunctionNames() []string {
-	names := []string{}
+func (m *Module) GetFunctions() []slang.Function {
+	funcs := []slang.Function{}
 
 	for _, s := range m.Statements {
 		if fn, ok := s.(*statements.Func); ok {
-			names = append(names, fn.Name)
+			funcs = append(funcs, fn)
 		}
 	}
 
-	return names
-}
-
-func (m *Module) GetFunction(name string) (slang.Function, bool) {
-	for _, s := range m.Statements {
-		if f, ok := s.(*statements.Func); ok {
-			if f.Name == name {
-				return f, true
-			}
-		}
-	}
-
-	return nil, false
+	return funcs
 }
