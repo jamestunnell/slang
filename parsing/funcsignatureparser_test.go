@@ -108,7 +108,7 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 		actual := expressions.NewFunc(p.InParams, p.OutParams)
 		expected := expressions.NewFunc(test.InParams, test.OutParams)
 
-		assert.True(t, actual.Equal(expected))
+		assert.True(t, actual.IsEqual(expected))
 	})
 }
 

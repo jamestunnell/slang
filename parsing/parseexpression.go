@@ -463,7 +463,7 @@ func (p *ExprParser) parseGreaterEqual(toks slang.TokenSeq, left slang.Expressio
 	return p.parseInfixExpr(toks, left, expressions.NewGreaterEqual)
 }
 
-type newInfixExprFn func(left, right slang.Expression) slang.Expression
+type newInfixExprFn func(left, right slang.Expression) *expressions.Expression
 
 func (p *ExprParser) parseInfixExpr(toks slang.TokenSeq, left slang.Expression, fn newInfixExprFn) slang.Expression {
 	prec := TokenPrecedence(toks.Current().Type())

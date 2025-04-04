@@ -12,7 +12,7 @@ import (
 )
 
 func TestExprParser(t *testing.T) {
-	testCases := map[string]slang.Expression{
+	testCases := map[string]*expressions.Expression{
 		// plain values
 		"x":     id("x"),
 		"5":     i(5),
@@ -92,7 +92,7 @@ func TestExprParser(t *testing.T) {
 	}
 }
 
-func testExprParser(t *testing.T, input string, expected slang.Expression) {
+func testExprParser(t *testing.T, input string, expected *expressions.Expression) {
 	t.Run(input, func(t *testing.T) {
 		l := lexing.NewLexer(strings.NewReader(input))
 		toks := parsing.NewTokenSeq(l)
@@ -106,49 +106,49 @@ func testExprParser(t *testing.T, input string, expected slang.Expression) {
 			t.FailNow()
 		}
 
-		if !assert.True(t, p.Expr.Equal(expected)) {
+		if !assert.True(t, p.Expr.IsEqual(expected)) {
 			t.Logf("%#v (actual) != %#v (expected)", p.Expr, expected)
 		}
 	})
 }
 
-func id(name string) *expressions.Identifier {
+func id(name string) *expressions.Expression {
 	return expressions.NewIdentifier(name)
 }
 
-func add(left, right slang.Expression) slang.Expression {
+func add(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewAdd(left, right)
 }
 
-func sub(left, right slang.Expression) slang.Expression {
+func sub(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewSubtract(left, right)
 }
 
-func mul(left, right slang.Expression) slang.Expression {
+func mul(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewMultiply(left, right)
 }
 
-func div(left, right slang.Expression) slang.Expression {
+func div(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewDivide(left, right)
 }
 
-func i(val int64) slang.Expression {
+func i(val int64) *expressions.Expression {
 	return expressions.NewInt(val)
 }
 
-func b(val bool) slang.Expression {
+func b(val bool) *expressions.Expression {
 	return expressions.NewBool(val)
 }
 
-func f(val float64) slang.Expression {
+func f(val float64) *expressions.Expression {
 	return expressions.NewFloat(val)
 }
 
-func str(val string) slang.Expression {
+func str(val string) *expressions.Expression {
 	return expressions.NewStr(val)
 }
 
-func invokePos(fn slang.Expression, argVals ...slang.Expression) slang.Expression {
+func invokePos(fn slang.Expression, argVals ...*expressions.Expression) *expressions.Expression {
 	args := make([]*expressions.InvokeArg, len(argVals))
 
 	for i, val := range argVals {
@@ -158,39 +158,39 @@ func invokePos(fn slang.Expression, argVals ...slang.Expression) slang.Expressio
 	return expressions.NewInvoke(fn, args...)
 }
 
-func gt(left, right slang.Expression) slang.Expression {
+func gt(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewGreater(left, right)
 }
 
-func lt(left, right slang.Expression) slang.Expression {
+func lt(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewLess(left, right)
 }
 
-func and(left, right slang.Expression) slang.Expression {
+func and(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewAnd(left, right)
 }
 
-func or(left, right slang.Expression) slang.Expression {
+func or(left, right *expressions.Expression) *expressions.Expression {
 	return expressions.NewOr(left, right)
 }
 
-func not(val slang.Expression) slang.Expression {
+func not(val *expressions.Expression) *expressions.Expression {
 	return expressions.NewNot(val)
 }
 
-// func ary(valType slang.Type, vals ...slang.Expression) slang.Expression {
+// func ary(valType slang.Type, vals ...*expressions.Expression) slang.Expression {
 // 	return expressions.NewArray(valType, vals...)
 // }
 
-func exprs(vals ...slang.Expression) []slang.Expression {
+func exprs(vals ...*expressions.Expression) []*expressions.Expression {
 	return vals
 }
 
 // func m(keyType slang.Type, keys []slang.Expression,
-// 	valType slang.Type, vals []slang.Expression) slang.Expression {
+// 	valType slang.Type, vals []*expressions.Expression) slang.Expression {
 // 	return expressions.NewMap(keyType, keys, valType, vals)
 // }
 
-// func elem(a, b slang.Expression) slang.Expression {
+// func elem(a, b *expressions.Expression) slang.Expression {
 // 	return expressions.NewAccessElem(a, b)
 // }
