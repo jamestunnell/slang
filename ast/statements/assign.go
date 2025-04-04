@@ -24,7 +24,7 @@ func (a *Assign) IsEqual(other Core) bool {
 		return false
 	}
 
-	return a.Target.Equal(a2.Target) && a2.Value.Equal(a.Value)
+	return a.Target.IsEqual(a2.Target) && a2.Value.IsEqual(a.Value)
 }
 
 // func (st *Assign) Eval(env *slang.Environment) (slang.Object, error) {

@@ -7,19 +7,14 @@ import (
 )
 
 type Struct struct {
-	*Base
-
 	Fields []slang.Field `json:"fields"`
 }
 
-func NewStruct(fields ...slang.Field) slang.Expression {
-	return &Struct{
-		Base:   NewBase(slang.ExprSTRUCT),
-		Fields: fields,
-	}
+func NewStruct(fields ...slang.Field) *Expression {
+	return NewExpression(slang.ExprSTRUCT, &Struct{Fields: fields})
 }
 
-func (s *Struct) Equal(other slang.Expression) bool {
+func (s *Struct) IsEqual(other Core) bool {
 	s2, ok := other.(*Struct)
 	if !ok {
 		return false

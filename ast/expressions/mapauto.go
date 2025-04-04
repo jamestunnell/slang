@@ -22,7 +22,7 @@ package expressions
 // 	}
 // }
 
-// func (m *MapAuto) Equal(other slang.Expression) bool {
+// func (m *MapAuto) IsEqual (other Core) bool {
 // 	m2, ok := other.(*MapAuto)
 // 	if !ok {
 // 		return false

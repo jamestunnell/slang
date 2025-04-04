@@ -7,8 +7,6 @@ import (
 )
 
 type Invoke struct {
-	*Base
-
 	Subject slang.Expression `json:"subject"`
 	Args    []*InvokeArg     `json:"args"`
 }
@@ -21,12 +19,11 @@ type InvokeArg struct {
 func NewInvoke(
 	subject slang.Expression,
 	args ...*InvokeArg,
-) slang.Expression {
-	return &Invoke{
-		Base:    NewBase(slang.ExprINVOKE),
+) *Expression {
+	return NewExpression(slang.ExprINVOKE, &Invoke{
 		Subject: subject,
 		Args:    args,
-	}
+	})
 }
 
 func NewInvokeArgKW(name string, val slang.Expression) *InvokeArg {
@@ -37,13 +34,13 @@ func NewInvokeArgPos(val slang.Expression) *InvokeArg {
 	return &InvokeArg{Name: "", Value: val}
 }
 
-func (c *Invoke) Equal(other slang.Expression) bool {
+func (c *Invoke) IsEqual(other Core) bool {
 	c2, ok := other.(*Invoke)
 	if !ok {
 		return false
 	}
 
-	if !c2.Subject.Equal(c.Subject) {
+	if !c2.Subject.IsEqual(c.Subject) {
 		return false
 	}
 
@@ -74,5 +71,5 @@ func (c *Invoke) Equal(other slang.Expression) bool {
 // }
 
 func invokeArgsEqual(a, b *InvokeArg) bool {
-	return a.Name == b.Name && a.Value.Equal(b.Value)
+	return a.Name == b.Name && a.Value.IsEqual(b.Value)
 }

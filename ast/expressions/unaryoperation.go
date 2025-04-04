@@ -5,29 +5,20 @@ import (
 )
 
 type UnaryOperation struct {
-	*Base
-
 	Value slang.Expression `json:"value"`
 }
 
-func NewUnaryOperation(typ slang.ExprType, val slang.Expression) *UnaryOperation {
-	return &UnaryOperation{
-		Base:  NewBase(typ),
-		Value: val,
-	}
+func NewUnaryOperation(typ slang.ExprType, val slang.Expression) *Expression {
+	return NewExpression(typ, &UnaryOperation{Value: val})
 }
 
-func (op *UnaryOperation) Equal(other slang.Expression) bool {
+func (op *UnaryOperation) IsEqual(other Core) bool {
 	op2, ok := other.(*UnaryOperation)
 	if !ok {
 		return false
 	}
 
-	if op.ExprType != op2.ExprType {
-		return false
-	}
-
-	return op.Value.Equal(op2.Value)
+	return op.Value.IsEqual(op2.Value)
 }
 
 // func (bo *UnaryOperation) Eval(env *slang.Environment) (slang.Object, error) {

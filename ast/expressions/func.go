@@ -6,8 +6,6 @@ import (
 )
 
 type Func struct {
-	*Base
-
 	Inputs     []slang.Param     `json:"inputs"`
 	Outputs    []slang.Param     `json:"outputs"`
 	Statements []slang.Statement `json:"statements"`
@@ -16,16 +14,15 @@ type Func struct {
 func NewFunc(
 	inParams, outParams []slang.Param,
 	statements ...slang.Statement,
-) *Func {
-	return &Func{
-		Base:       NewBase(slang.ExprFUNC),
+) *Expression {
+	return NewExpression(slang.ExprFUNC, &Func{
 		Inputs:     inParams,
 		Outputs:    outParams,
 		Statements: statements,
-	}
+	})
 }
 
-func (f *Func) Equal(other slang.Expression) bool {
+func (f *Func) IsEqual(other Core) bool {
 	f2, ok := other.(*Func)
 	if !ok {
 		return false

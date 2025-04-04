@@ -5,19 +5,16 @@ import (
 )
 
 type Identifier struct {
-	*Base
-
 	Name string `json:"name"`
 }
 
-func NewIdentifier(name string) *Identifier {
-	return &Identifier{
-		Base: NewBase(slang.ExprIDENTIFIER),
+func NewIdentifier(name string) *Expression {
+	return NewExpression(slang.ExprIDENTIFIER, &Identifier{
 		Name: name,
-	}
+	})
 }
 
-func (i *Identifier) Equal(other slang.Expression) bool {
+func (i *Identifier) IsEqual(other Core) bool {
 	i2, ok := other.(*Identifier)
 	if !ok {
 		return false

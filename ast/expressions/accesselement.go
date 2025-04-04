@@ -19,7 +19,7 @@ package expressions
 // 	}
 // }
 
-// func (c *AccessElem) Equal(other slang.Expression) bool {
+// func (c *AccessElem) IsEqual (other Core) bool {
 // 	c2, ok := other.(*AccessElem)
 // 	if !ok {
 // 		return false

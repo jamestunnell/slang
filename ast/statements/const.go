@@ -21,7 +21,7 @@ func (f *Const) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !f.Value.Equal(f2.Value) {
+	if !f.Value.IsEqual(f2.Value) {
 		return false
 	}
 

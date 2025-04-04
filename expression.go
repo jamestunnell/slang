@@ -4,7 +4,7 @@ type ExprType int
 
 type Expression interface {
 	GetType() ExprType
-	Equal(Expression) bool
+	IsEqual(Expression) bool
 	// Eval(env *objects.Environment) (objects.Object, error)
 }
 
@@ -75,7 +75,7 @@ func ExpressionsEqual(a, b []Expression) bool {
 	}
 
 	for idx, expr := range a {
-		if !expr.Equal(b[idx]) {
+		if !expr.IsEqual(b[idx]) {
 			return false
 		}
 	}

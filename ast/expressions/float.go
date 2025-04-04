@@ -4,6 +4,6 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-func NewFloat(val float64) *Const[float64] {
+func NewFloat(val float64) *Expression {
 	return NewConst(slang.ExprFLOAT, val)
 }

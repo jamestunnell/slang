@@ -5,31 +5,24 @@ import (
 )
 
 type BinaryOperation struct {
-	*Base
-
 	Left  slang.Expression `json:"left"`
 	Right slang.Expression `json:"right"`
 }
 
-func NewBinaryOperation(typ slang.ExprType, Left, Right slang.Expression) *BinaryOperation {
-	return &BinaryOperation{
-		Base:  NewBase(typ),
+func NewBinaryOperation(typ slang.ExprType, Left, Right slang.Expression) *Expression {
+	return NewExpression(typ, &BinaryOperation{
 		Left:  Left,
 		Right: Right,
-	}
+	})
 }
 
-func (binop *BinaryOperation) Equal(other slang.Expression) bool {
+func (binop *BinaryOperation) IsEqual(other Core) bool {
 	binop2, ok := other.(*BinaryOperation)
 	if !ok {
 		return false
 	}
 
-	if binop.ExprType != binop2.ExprType {
-		return false
-	}
-
-	return binop.Left.Equal(binop2.Left) && binop.Right.Equal(binop2.Right)
+	return binop.Left.IsEqual(binop2.Left) && binop.Right.IsEqual(binop2.Right)
 }
 
 // func (bo *BinaryOperation) Eval(env *slang.Environment) (slang.Object, error) {

@@ -20,7 +20,7 @@ package expressions
 // 	}
 // }
 
-// func (a *Array) Equal(other slang.Expression) bool {
+// func (a *Array) IsEqual (other Core) bool {
 // 	a2, ok := other.(*Array)
 // 	if !ok {
 // 		return false

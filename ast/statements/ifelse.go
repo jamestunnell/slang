@@ -29,7 +29,7 @@ func (i *IfElse) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !i.Condition.Equal(i2.Condition) {
+	if !i.Condition.IsEqual(i2.Condition) {
 		return false
 	}
 

@@ -20,7 +20,7 @@ func (r *ReturnVal) IsEqual(other Core) bool {
 		return false
 	}
 
-	return r2.Value.Equal(r.Value)
+	return r2.Value.IsEqual(r.Value)
 }
 
 // func (st *ReturnVal) Eval(env *slang.Environment) (slang.Object, error) {

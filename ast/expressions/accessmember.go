@@ -5,27 +5,24 @@ import (
 )
 
 type AccessMember struct {
-	*Base
-
 	Receiver slang.Expression `json:"receiver"`
 	Member   string           `json:"member"`
 }
 
-func NewAccessMember(object slang.Expression, member string) slang.Expression {
-	return &AccessMember{
-		Base:     NewBase(slang.ExprACCESSMEMBER),
+func NewAccessMember(object slang.Expression, member string) *Expression {
+	return NewExpression(slang.ExprACCESSMEMBER, &AccessMember{
 		Receiver: object,
 		Member:   member,
-	}
+	})
 }
 
-func (c *AccessMember) Equal(other slang.Expression) bool {
+func (c *AccessMember) IsEqual(other Core) bool {
 	c2, ok := other.(*AccessMember)
 	if !ok {
 		return false
 	}
 
-	return c2.Receiver.Equal(c.Receiver) && c2.Member == c.Member
+	return c2.Receiver.IsEqual(c.Receiver) && c2.Member == c.Member
 }
 
 // func (c *Member) Eval(env *slang.Environment) (slang.Object, error) {

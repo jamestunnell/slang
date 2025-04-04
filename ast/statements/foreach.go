@@ -31,7 +31,7 @@ func (f *ForEach) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !f.Expr.Equal(f2.Expr) {
+	if !f.Expr.IsEqual(f2.Expr) {
 		return false
 	}
 

@@ -26,7 +26,7 @@ package expressions
 // 	}
 // }
 
-// func (m *Map) Equal(other slang.Expression) bool {
+// func (m *Map) IsEqual (other Core) bool {
 // 	m2, ok := other.(*Map)
 // 	if !ok {
 // 		return false

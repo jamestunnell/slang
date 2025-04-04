@@ -18,7 +18,7 @@ package expressions
 // 	}
 // }
 
-// func (a *ArrayAuto) Equal(other slang.Expression) bool {
+// func (a *ArrayAuto) IsEqual (other Core) bool {
 // 	a2, ok := other.(*ArrayAuto)
 // 	if !ok {
 // 		return false
