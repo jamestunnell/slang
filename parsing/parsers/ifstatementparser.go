@@ -1,8 +1,9 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type IfStatementParser struct {
@@ -31,7 +32,7 @@ func (p *IfStatementParser) Run(
 
 	toks.Advance()
 
-	condParser := NewExprParser(PrecedenceLOWEST)
+	condParser := NewExprParser(parsing.PrecedenceLOWEST)
 	if !p.RunSubParser(toks, condParser) {
 		return false
 	}

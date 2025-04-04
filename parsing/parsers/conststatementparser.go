@@ -1,8 +1,9 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type ConstStatementParser struct {
@@ -40,7 +41,7 @@ func (p *ConstStatementParser) Run(toks slang.TokenSeq, comment string) bool {
 
 	toks.Advance()
 
-	exprParser := NewExprParser(PrecedenceLOWEST)
+	exprParser := NewExprParser(parsing.PrecedenceLOWEST)
 
 	if !p.RunSubParser(toks, exprParser) {
 		return false

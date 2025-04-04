@@ -1,4 +1,4 @@
-package parsing_test
+package parsers_test
 
 import (
 	"strings"
@@ -9,6 +9,7 @@ import (
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -145,7 +146,7 @@ func TestFuncBodyParser(t *testing.T) {
 }
 
 func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsing.BodyParser { return parsing.NewFuncBodyParser() }
+	newParser := func() parsers.BodyParser { return parsers.NewFuncBodyParser() }
 
 	testBodyParserSuccess(t, test, newParser)
 }
@@ -153,7 +154,7 @@ func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
 func testBodyParserSuccess(
 	t *testing.T,
 	test *bodyParserSuccessTest,
-	newParser func() parsing.BodyParser) {
+	newParser func() parsers.BodyParser) {
 	t.Run(test.TestName, func(t *testing.T) {
 		p := newParser()
 		l := lexing.NewLexer(strings.NewReader(test.Input))

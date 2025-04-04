@@ -1,8 +1,9 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type ReturnStatementParser struct {
@@ -37,7 +38,7 @@ func (p *ReturnStatementParser) Run(
 		return true
 	}
 
-	exprParser := NewExprParser(PrecedenceLOWEST)
+	exprParser := NewExprParser(parsing.PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
 	}

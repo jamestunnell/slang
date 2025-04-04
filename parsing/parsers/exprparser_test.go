@@ -1,4 +1,4 @@
-package parsing_test
+package parsers_test
 
 import (
 	"strings"
@@ -8,6 +8,7 @@ import (
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -96,7 +97,7 @@ func testExprParser(t *testing.T, input string, expected *expressions.Expression
 	t.Run(input, func(t *testing.T) {
 		l := lexing.NewLexer(strings.NewReader(input))
 		toks := parsing.NewTokenSeq(l)
-		p := parsing.NewExprParser(parsing.PrecedenceLOWEST)
+		p := parsers.NewExprParser(parsing.PrecedenceLOWEST)
 
 		assert.True(t, p.Run(toks))
 

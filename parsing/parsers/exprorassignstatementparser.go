@@ -1,8 +1,9 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type ExprOrAssignStatementParser struct {
@@ -23,7 +24,7 @@ func (p *ExprOrAssignStatementParser) Run(
 	toks slang.TokenSeq,
 	comment string,
 ) bool {
-	exprParser := NewExprParser(PrecedenceLOWEST)
+	exprParser := NewExprParser(parsing.PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
 	}
@@ -31,7 +32,7 @@ func (p *ExprOrAssignStatementParser) Run(
 	if toks.Current().Is(slang.TokenEQUAL) {
 		toks.AdvanceSkip(slang.TokenNEWLINE)
 
-		valueParser := NewExprParser(PrecedenceLOWEST)
+		valueParser := NewExprParser(parsing.PrecedenceLOWEST)
 		if !p.RunSubParser(toks, valueParser) {
 			return false
 		}

@@ -1,8 +1,9 @@
 package statements
 
 import (
-	"github.com/jamestunnell/slang"
 	"golang.org/x/exp/slices"
+
+	"github.com/jamestunnell/slang"
 )
 
 type ForEach struct {

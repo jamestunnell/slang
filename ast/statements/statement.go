@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/jsonutil"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/jsonutil"
 )
 
 type Statement struct {

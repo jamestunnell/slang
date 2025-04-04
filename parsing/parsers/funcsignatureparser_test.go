@@ -1,4 +1,4 @@
-package parsing_test
+package parsers_test
 
 import (
 	"strings"
@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/parsing/parsers"
 )
 
 type funcSigParserSuccessTest struct {
@@ -36,15 +36,15 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName:  "one param",
 			Input:     `(x flt)`,
-			InParams:  []slang.Param{ast.NewParam("x", types.NewFlt())},
+			InParams:  []slang.Param{types.NewNameType("x", types.NewFlt())},
 			OutParams: []slang.Param{},
 		},
 		{
 			TestName: "two params",
 			Input:    `(a int, b mymodule.MyType)`,
 			InParams: []slang.Param{
-				ast.NewParam("a", types.NewInt()),
-				ast.NewParam("b", types.NewStruct("mymodule", "MyType")),
+				types.NewNameType("a", types.NewInt()),
+				types.NewNameType("b", types.NewStruct("mymodule", "MyType")),
 			},
 			OutParams: []slang.Param{},
 		},
@@ -52,10 +52,10 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 			TestName: "two multi-name",
 			Input:    `(a, b int, c, d str)`,
 			InParams: []slang.Param{
-				ast.NewParam("a", types.NewInt()),
-				ast.NewParam("b", types.NewInt()),
-				ast.NewParam("c", types.NewStr()),
-				ast.NewParam("d", types.NewStr()),
+				types.NewNameType("a", types.NewInt()),
+				types.NewNameType("b", types.NewInt()),
+				types.NewNameType("c", types.NewStr()),
+				types.NewNameType("d", types.NewStr()),
 			},
 			OutParams: []slang.Param{},
 		},
@@ -69,10 +69,10 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 			TestName: "one in param, one out param",
 			Input:    `(a int) (b int)`,
 			InParams: []slang.Param{
-				ast.NewParam("a", types.NewInt()),
+				types.NewNameType("a", types.NewInt()),
 			},
 			OutParams: []slang.Param{
-				ast.NewParam("b", types.NewInt()),
+				types.NewNameType("b", types.NewInt()),
 			},
 		},
 		{
@@ -80,8 +80,8 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 			Input:    `() (t my.Type, e err)`,
 			InParams: []slang.Param{},
 			OutParams: []slang.Param{
-				ast.NewParam("t", types.NewStruct("my", "Type")),
-				ast.NewParam("e", types.NewErr()),
+				types.NewNameType("t", types.NewStruct("my", "Type")),
+				types.NewNameType("e", types.NewErr()),
 			},
 		},
 	}
@@ -93,7 +93,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 
 func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest) {
 	t.Run(test.TestName, func(t *testing.T) {
-		p := parsing.NewFuncSignatureParser()
+		p := parsers.NewFuncSignatureParser()
 		l := lexing.NewLexer(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
@@ -114,7 +114,7 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 
 func testFuncSignatureParserFail(t *testing.T, testName, input string) {
 	t.Run(testName, func(t *testing.T) {
-		p := parsing.NewFuncSignatureParser()
+		p := parsers.NewFuncSignatureParser()
 		l := lexing.NewLexer(strings.NewReader(input))
 		seq := parsing.NewTokenSeq(l)
 

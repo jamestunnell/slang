@@ -1,20 +1,21 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type ExprParser struct {
 	*ParserBase
 
-	prec Precedence
+	prec parsing.Precedence
 	Expr slang.Expression
 }
 
 type prefixParseFn func(slang.TokenSeq) slang.Expression
 type infixParseFn func(slang.TokenSeq, slang.Expression) slang.Expression
 
-func NewExprParser(prec Precedence) *ExprParser {
+func NewExprParser(prec parsing.Precedence) *ExprParser {
 	return &ExprParser{
 		prec:       prec,
 		ParserBase: NewParserBase(),

@@ -5,19 +5,13 @@ import (
 	"github.com/jamestunnell/slang/ast/statements"
 )
 
-type Parser interface {
-	Run(toks slang.TokenSeq) bool
-	GetErrors() []*ParseErr
-}
-
-type BodyParser interface {
+type FileParser interface {
 	Parser
 
 	GetStatements() []*statements.Statement
 }
 
-type StatementParser interface {
-	Run(toks slang.TokenSeq, comment string) bool
+type Parser interface {
+	Run(toks slang.TokenSeq) bool
 	GetErrors() []*ParseErr
-	GetStatement() *statements.Statement
 }

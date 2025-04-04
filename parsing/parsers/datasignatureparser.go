@@ -1,8 +1,8 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/types"
 )
 
 type DataSignatureParser struct {
@@ -69,7 +69,7 @@ func (p *DataSignatureParser) parseNamesType(toks slang.TokenSeq) bool {
 	}
 
 	for _, name := range names {
-		p.NameTypes = append(p.NameTypes, ast.NewNameType(name, typ))
+		p.NameTypes = append(p.NameTypes, types.NewNameType(name, typ))
 	}
 
 	return true

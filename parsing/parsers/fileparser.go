@@ -1,4 +1,4 @@
-package parsing
+package parsers
 
 import (
 	"strings"
@@ -18,6 +18,10 @@ func NewFileParser() *FileParser {
 		ParserBase: NewParserBase(),
 		Statements: []*statements.Statement{},
 	}
+}
+
+func (p *FileParser) GetStatements() []*statements.Statement {
+	return p.Statements
 }
 
 func (p *FileParser) Run(toks slang.TokenSeq) bool {

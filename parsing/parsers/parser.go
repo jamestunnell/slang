@@ -1,22 +1,27 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type ParserBase struct {
-	errors []*ParseErr
+	errors []*parsing.ParseErr
 }
 
 func NewParserBase() *ParserBase {
 	return &ParserBase{
-		errors: []*ParseErr{},
+		errors: []*parsing.ParseErr{},
 	}
 }
 
-func (p *ParserBase) GetErrors() []*ParseErr {
+func (p *ParserBase) AddError(err *parsing.ParseErr) {
+	p.errors = append(p.errors, err)
+}
+
+func (p *ParserBase) GetErrors() []*parsing.ParseErr {
 	return p.errors
 }
 
@@ -34,14 +39,14 @@ func (p *ParserBase) ExpectToken(
 
 func (p *ParserBase) TokenErr(tok *slang.Token, expectedTypes ...slang.TokenType) {
 	err := customerrs.NewErrWrongTokenType(tok, expectedTypes...)
-	parseErr := NewParseError(err, tok)
+	parseErr := parsing.NewParseError(err, tok)
 
 	p.errors = append(p.errors, parseErr)
 }
 
 func (p *ParserBase) RunSubParser(
 	toks slang.TokenSeq,
-	sub Parser,
+	sub parsing.Parser,
 ) bool {
 	sub.Run(toks)
 

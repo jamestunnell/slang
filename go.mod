@@ -10,6 +10,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.14.2
 	github.com/tidwall/sjson v1.2.5
+	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20221215174704-0915cd710c24
 )
 

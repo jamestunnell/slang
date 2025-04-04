@@ -1,9 +1,16 @@
-package parsing
+package parsers
 
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
+
+type BodyParser interface {
+	parsing.Parser
+
+	GetStatements() []*statements.Statement
+}
 
 type BodyParserBase struct {
 	*ParserBase

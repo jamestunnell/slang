@@ -1,4 +1,4 @@
-package parsing
+package parsers
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type UseStatementParser struct {
@@ -46,7 +47,7 @@ func (p *UseStatementParser) Run(
 	parts := strings.Split(path, "/")
 
 	if len(parts) == 0 {
-		parseErr := NewParseError(errEmptyUsePath, pathTok)
+		parseErr := parsing.NewParseError(errEmptyUsePath, pathTok)
 
 		p.errors = append(p.errors, parseErr)
 

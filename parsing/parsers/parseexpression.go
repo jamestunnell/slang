@@ -1,4 +1,4 @@
-package parsing
+package parsers
 
 import (
 	"errors"
@@ -8,23 +8,24 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 var errNonIdentInTypeChain = errors.New("not a valid type chain, non-identifier found")
 
-func (p *ExprParser) parseExpression(toks slang.TokenSeq, prec Precedence) slang.Expression {
+func (p *ExprParser) parseExpression(toks slang.TokenSeq, prec parsing.Precedence) slang.Expression {
 	prefixParse, foundPrefix := p.findPrefixParseFn(toks.Current().Type())
 	if !foundPrefix {
 		err := customerrs.NewErrMissingPrefixParseFn(toks.Current().Type())
 
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		p.AddError(parsing.NewParseError(err, toks.Current()))
 
 		return nil
 	}
 
 	leftExpr := prefixParse(toks)
 
-	for prec < TokenPrecedence(toks.Current().Type()) {
+	for prec < parsing.TokenPrecedence(toks.Current().Type()) {
 		infix, foundInfix := p.findInfixParseFn(toks.Current().Type())
 		if !foundInfix {
 			break
@@ -39,7 +40,7 @@ func (p *ExprParser) parseExpression(toks slang.TokenSeq, prec Precedence) slang
 func (p *ExprParser) parseGroupedExpression(toks slang.TokenSeq) slang.Expression {
 	toks.Advance()
 
-	expr := p.parseExpression(toks, PrecedenceLOWEST)
+	expr := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 
 	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
 		return nil
@@ -198,7 +199,7 @@ func (p *ExprParser) parseBoolVal(toks slang.TokenSeq) slang.Expression {
 	if err != nil {
 		err = fmt.Errorf("failed to parse '%s' as bool: %w", str, err)
 
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		p.AddError(parsing.NewParseError(err, toks.Current()))
 
 		return nil
 	}
@@ -223,13 +224,13 @@ func (p *ExprParser) parseFalse(toks slang.TokenSeq) slang.Expression {
 func (p *ExprParser) parseNegative(toks slang.TokenSeq) slang.Expression {
 	toks.Advance()
 
-	return expressions.NewNegative(p.parseExpression(toks, PrecedencePREFIX))
+	return expressions.NewNegative(p.parseExpression(toks, parsing.PrecedencePREFIX))
 }
 
 func (p *ExprParser) parseNot(toks slang.TokenSeq) slang.Expression {
 	toks.Advance()
 
-	return expressions.NewNot(p.parseExpression(toks, PrecedencePREFIX))
+	return expressions.NewNot(p.parseExpression(toks, parsing.PrecedencePREFIX))
 }
 
 func (p *ExprParser) parseIntVal(toks slang.TokenSeq) slang.Expression {
@@ -239,7 +240,7 @@ func (p *ExprParser) parseIntVal(toks slang.TokenSeq) slang.Expression {
 	if err != nil {
 		err = fmt.Errorf("failed to parse '%s' as int: %w", str, err)
 
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		p.AddError(parsing.NewParseError(err, toks.Current()))
 
 		return nil
 	}
@@ -257,7 +258,7 @@ func (p *ExprParser) parseStrVal(toks slang.TokenSeq) slang.Expression {
 	for toks.Current().Is(slang.TokenDOLLARLBRACE) {
 		toks.AdvanceSkip(slang.TokenNEWLINE)
 
-		expr := p.parseExpression(toks, PrecedenceLOWEST)
+		expr := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 		if expr == nil {
 			return nil
 		}
@@ -301,7 +302,7 @@ func (p *ExprParser) parseFloatVal(toks slang.TokenSeq) slang.Expression {
 	if err != nil {
 		err = fmt.Errorf("failed to parse '%s' as float: %w", str, err)
 
-		p.errors = append(p.errors, NewParseError(err, toks.Current()))
+		p.AddError(parsing.NewParseError(err, toks.Current()))
 
 		return nil
 	}
@@ -346,7 +347,7 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject slang.Expression) 
 			toks.AdvanceSkip(slang.TokenNEWLINE)
 		}
 
-		val := p.parseExpression(toks, PrecedenceLOWEST)
+		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 		if val == nil {
 			return false
 		}
@@ -466,7 +467,7 @@ func (p *ExprParser) parseGreaterEqual(toks slang.TokenSeq, left slang.Expressio
 type newInfixExprFn func(left, right slang.Expression) *expressions.Expression
 
 func (p *ExprParser) parseInfixExpr(toks slang.TokenSeq, left slang.Expression, fn newInfixExprFn) slang.Expression {
-	prec := TokenPrecedence(toks.Current().Type())
+	prec := parsing.TokenPrecedence(toks.Current().Type())
 
 	toks.Advance()
 

@@ -1,4 +1,4 @@
-package parsing_test
+package parsers_test
 
 import (
 	"encoding/json"
@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,7 +58,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewFunc("GetX",
 			[]slang.Param{},
 			[]slang.Param{
-				ast.NewParam("result", types.NewInt()),
+				types.NewNameType("result", types.NewInt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -68,7 +68,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewFunc("GetY",
 			[]slang.Param{},
 			[]slang.Param{
-				ast.NewParam("result", types.NewInt()),
+				types.NewNameType("result", types.NewInt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -76,7 +76,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		),
 	}
-	testFileParserSuccess(t, "global vars and funcs", file, expected, 0)
+	testFileParserSuccess(t, "global vars and funcs", file, expected)
 }
 
 func TestFileParserGlobalConst(t *testing.T) {
@@ -88,7 +88,7 @@ func TestFileParserGlobalConst(t *testing.T) {
 		statements.NewConst("myConst", expressions.NewFloat(25.7)),
 		statements.NewVar("x", types.NewInt()),
 	}
-	testFileParserSuccess(t, "global const", file, expected, 0)
+	testFileParserSuccess(t, "global const", file, expected)
 }
 
 func TestFileParserStructWithTest(t *testing.T) {
@@ -126,11 +126,11 @@ func TestFileParserStructWithTest(t *testing.T) {
 	expected := []*statements.Statement{
 		statements.NewUse("test"),
 		statements.NewStruct("Accumulator",
-			ast.NewField("total", types.NewFlt())),
+			types.NewNameType("total", types.NewFlt())),
 		statements.NewFunc("Add",
 			[]slang.Param{
-				ast.NewParam("a", types.NewStruct("", "Accumulator")),
-				ast.NewParam("x", types.NewFlt()),
+				types.NewNameType("a", types.NewStruct("", "Accumulator")),
+				types.NewNameType("x", types.NewFlt()),
 			},
 			[]slang.Param{},
 			statements.NewAssign(
@@ -145,8 +145,8 @@ func TestFileParserStructWithTest(t *testing.T) {
 		),
 		statements.NewFunc("Mul",
 			[]slang.Param{
-				ast.NewParam("a", types.NewStruct("", "Accumulator")),
-				ast.NewParam("x", types.NewFlt()),
+				types.NewNameType("a", types.NewStruct("", "Accumulator")),
+				types.NewNameType("x", types.NewFlt()),
 			},
 			[]slang.Param{},
 			statements.NewAssign(
@@ -161,10 +161,10 @@ func TestFileParserStructWithTest(t *testing.T) {
 		),
 		statements.NewFunc("Total",
 			[]slang.Param{
-				ast.NewParam("a", types.NewStruct("", "Accumulator")),
+				types.NewNameType("a", types.NewStruct("", "Accumulator")),
 			},
 			[]slang.Param{
-				ast.NewParam("result", types.NewFlt()),
+				types.NewNameType("result", types.NewFlt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -173,7 +173,7 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("TestAccumulator",
-			[]slang.Param{ast.NewParam("t", types.NewStruct("test", "Test"))},
+			[]slang.Param{types.NewNameType("t", types.NewStruct("test", "Test"))},
 			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewIdentifier("accum"),
@@ -226,19 +226,19 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 	}
-	testFileParserSuccess(t, "struct with test", file, expected, 0)
+	testFileParserSuccess(t, "struct with test", file, expected)
 }
 
 func TestFileParserStructOneline(t *testing.T) {
 	file := strings.NewReader(`struct X (a, b int, c str)`)
 	expected := []*statements.Statement{
 		statements.NewStruct("X",
-			ast.NewField("a", types.NewInt()),
-			ast.NewField("b", types.NewInt()),
-			ast.NewField("c", types.NewStr()),
+			types.NewNameType("a", types.NewInt()),
+			types.NewNameType("b", types.NewInt()),
+			types.NewNameType("c", types.NewStr()),
 		),
 	}
-	testFileParserSuccess(t, "struct multiline", file, expected, 0)
+	testFileParserSuccess(t, "struct multiline", file, expected)
 }
 
 func TestFileParserStructMultiline(t *testing.T) {
@@ -250,12 +250,12 @@ func TestFileParserStructMultiline(t *testing.T) {
 	`)
 	expected := []*statements.Statement{
 		statements.NewStruct("X",
-			ast.NewField("a", types.NewInt()),
-			ast.NewField("b", types.NewInt()),
-			ast.NewField("c", types.NewStr()),
+			types.NewNameType("a", types.NewInt()),
+			types.NewNameType("b", types.NewInt()),
+			types.NewNameType("c", types.NewStr()),
 		),
 	}
-	testFileParserSuccess(t, "struct multiline", file, expected, 0)
+	testFileParserSuccess(t, "struct multiline", file, expected)
 }
 
 func TestFileParserWithComments(t *testing.T) {
@@ -282,9 +282,9 @@ func TestFileParserWithComments(t *testing.T) {
 		withComment(statements.NewComment(), "this is a leading standalone comment"),
 		withComment(
 			statements.NewStruct("X",
-				ast.NewField("a", types.NewInt()),
-				ast.NewField("b", types.NewInt()),
-				ast.NewField("c", types.NewStr()),
+				types.NewNameType("a", types.NewInt()),
+				types.NewNameType("b", types.NewInt()),
+				types.NewNameType("c", types.NewStr()),
 			),
 			"my struct comment",
 		),
@@ -293,7 +293,7 @@ func TestFileParserWithComments(t *testing.T) {
 		withComment(statements.NewComment(), "this is a trailing standalone comment"),
 	}
 
-	testFileParserSuccess(t, "with comments", file, expected, 0)
+	testFileParserSuccess(t, "with comments", file, expected)
 }
 
 func testFileParserSuccess(
@@ -301,18 +301,15 @@ func testFileParserSuccess(
 	name string,
 	file io.Reader,
 	expectedStmts []*statements.Statement,
-	expectedErrCount int,
 ) {
 	t.Run(name, func(t *testing.T) {
-		stmts, parseErrs := parsing.ParseFile(file)
+		p := parsers.NewFileParser()
 
-		if !assert.Len(t, parseErrs, expectedErrCount) {
-			logParseErrs(t, parseErrs)
+		err := parsing.RunParser(p, file)
 
-			return
-		}
+		assert.NoError(t, err)
 
-		verifyStatemnts(t, expectedStmts, stmts)
+		verifyStatemnts(t, expectedStmts, p.Statements)
 	})
 }
 
