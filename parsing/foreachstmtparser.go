@@ -8,7 +8,7 @@ import (
 type ForEachStmtParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewForEachStmtParser() *ForEachStmtParser {
@@ -17,11 +17,14 @@ func NewForEachStmtParser() *ForEachStmtParser {
 	}
 }
 
-func (p *ForEachStmtParser) GetStatement() slang.Statement {
+func (p *ForEachStmtParser) GetStatement() *statements.Statement {
 	return p.Stmt
 }
 
-func (p *ForEachStmtParser) Run(toks slang.TokenSeq) bool {
+func (p *ForEachStmtParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFOREACH) {
 		return false
 	}
@@ -70,6 +73,8 @@ func (p *ForEachStmtParser) Run(toks slang.TokenSeq) bool {
 	block := statements.NewBlock(bodyParser.Statements...)
 
 	p.Stmt = statements.NewForEach(vars, exprParser.Expr, block)
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }

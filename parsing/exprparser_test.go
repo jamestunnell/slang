@@ -57,28 +57,28 @@ func TestExprParser(t *testing.T) {
 
 		// // map literal value
 		// `[string]int{"a": 1, "b": 2}`: m(
-		// 	&ast.StrType{},
+		// 	types.NewStr(),
 		// 	exprs(str("a"), str("b")),
-		// 	&ast.IntType{},
+		// 	types.NewInt(),
 		// 	exprs(i(1), i(2)),
 		// ),
 
 		// // nested map values
 		// `[string][string]int{"a": [string]int{"b": 2}}`: m(
-		// 	&ast.StrType{},
+		// 	types.NewStr(),
 		// 	exprs(str("a")),
-		// 	ast.NewMapType(&ast.StrType{}, &ast.IntType{}),
-		// 	exprs(m(&ast.StrType{}, exprs(str("b")), &ast.IntType{}, exprs(i(2)))),
+		// 	ast.NewMapType(types.NewStr(), types.NewInt()),
+		// 	exprs(m(types.NewStr(), exprs(str("b")), types.NewInt(), exprs(i(2)))),
 		// ),
 
 		// // array literal value
-		// `[]int{1, 2, 3}`: ary(&ast.IntType{}, i(1), i(2), i(3)),
+		// `[]int{1, 2, 3}`: ary(types.NewInt(), i(1), i(2), i(3)),
 
 		// // nested array values
 		// `[][]string{[]string{"a", "b", "c"}, []string{"x", "y", "z"}}`: ary(
-		// 	ast.NewArrayType(&ast.StrType{}),
-		// 	ary(&ast.StrType{}, str("a"), str("b"), str("c")),
-		// 	ary(&ast.StrType{}, str("x"), str("y"), str("z")),
+		// 	ast.NewArrayType(types.NewStr()),
+		// 	ary(types.NewStr(), str("a"), str("b"), str("c")),
+		// 	ary(types.NewStr(), str("x"), str("y"), str("z")),
 		// ),
 
 		// // access map/array element
@@ -191,6 +191,6 @@ func exprs(vals ...slang.Expression) []slang.Expression {
 // 	return expressions.NewMap(keyType, keys, valType, vals)
 // }
 
-func elem(a, b slang.Expression) slang.Expression {
-	return expressions.NewAccessElem(a, b)
-}
+// func elem(a, b slang.Expression) slang.Expression {
+// 	return expressions.NewAccessElem(a, b)
+// }

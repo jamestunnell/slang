@@ -10,6 +10,7 @@ import (
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,10 +35,10 @@ func TestFileParserGlobalVars(t *testing.T) {
 			result = y
 		}
 	`)
-	expected := []slang.Statement{
+	expected := []*statements.Statement{
 		statements.NewUse("rand"),
-		statements.NewVar("x", &ast.IntType{}),
-		statements.NewVar("y", &ast.IntType{}),
+		statements.NewVar("x", types.NewInt()),
+		statements.NewVar("y", types.NewInt()),
 		statements.NewFunc("init",
 			[]slang.Param{},
 			[]slang.Param{},
@@ -57,7 +58,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewFunc("GetX",
 			[]slang.Param{},
 			[]slang.Param{
-				ast.NewParam("result", &ast.IntType{}),
+				ast.NewParam("result", types.NewInt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -67,7 +68,7 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewFunc("GetY",
 			[]slang.Param{},
 			[]slang.Param{
-				ast.NewParam("result", &ast.IntType{}),
+				ast.NewParam("result", types.NewInt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -83,9 +84,9 @@ func TestFileParserGlobalConst(t *testing.T) {
 		const myConst = 25.7
 		var x int
 	`)
-	expected := []slang.Statement{
+	expected := []*statements.Statement{
 		statements.NewConst("myConst", expressions.NewFloat(25.7)),
-		statements.NewVar("x", &ast.IntType{}),
+		statements.NewVar("x", types.NewInt()),
 	}
 	testFileParserSuccess(t, "global const", file, expected, 0)
 }
@@ -122,14 +123,14 @@ func TestFileParserStructWithTest(t *testing.T) {
 			t.AssertAlmostEq(accum.Total(), 2.5)
 		}
 	`)
-	expected := []slang.Statement{
+	expected := []*statements.Statement{
 		statements.NewUse("test"),
 		statements.NewStruct("Accumulator",
-			ast.NewField("total", &ast.FltType{})),
+			ast.NewField("total", types.NewFlt())),
 		statements.NewFunc("Add",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewInsideType("Accumulator")),
-				ast.NewParam("x", &ast.FltType{}),
+				ast.NewParam("a", types.NewStruct("", "Accumulator")),
+				ast.NewParam("x", types.NewFlt()),
 			},
 			[]slang.Param{},
 			statements.NewAssign(
@@ -142,11 +143,10 @@ func TestFileParserStructWithTest(t *testing.T) {
 				),
 			),
 		),
-		statements.NewFunc(
-			"Mul",
+		statements.NewFunc("Mul",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewInsideType("Accumulator")),
-				ast.NewParam("x", &ast.FltType{}),
+				ast.NewParam("a", types.NewStruct("", "Accumulator")),
+				ast.NewParam("x", types.NewFlt()),
 			},
 			[]slang.Param{},
 			statements.NewAssign(
@@ -159,13 +159,12 @@ func TestFileParserStructWithTest(t *testing.T) {
 				),
 			),
 		),
-		statements.NewFunc(
-			"Total",
+		statements.NewFunc("Total",
 			[]slang.Param{
-				ast.NewParam("a", ast.NewInsideType("Accumulator")),
+				ast.NewParam("a", types.NewStruct("", "Accumulator")),
 			},
 			[]slang.Param{
-				ast.NewParam("result", &ast.FltType{}),
+				ast.NewParam("result", types.NewFlt()),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("result"),
@@ -174,7 +173,7 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("TestAccumulator",
-			[]slang.Param{ast.NewParam("t", ast.NewOutsideType("test", "Test"))},
+			[]slang.Param{ast.NewParam("t", types.NewStruct("test", "Test"))},
 			[]slang.Param{},
 			statements.NewAssign(
 				expressions.NewIdentifier("accum"),
@@ -232,11 +231,11 @@ func TestFileParserStructWithTest(t *testing.T) {
 
 func TestFileParserStructOneline(t *testing.T) {
 	file := strings.NewReader(`struct X (a, b int, c str)`)
-	expected := []slang.Statement{
+	expected := []*statements.Statement{
 		statements.NewStruct("X",
-			ast.NewField("a", &ast.IntType{}),
-			ast.NewField("b", &ast.IntType{}),
-			ast.NewField("c", &ast.StrType{}),
+			ast.NewField("a", types.NewInt()),
+			ast.NewField("b", types.NewInt()),
+			ast.NewField("c", types.NewStr()),
 		),
 	}
 	testFileParserSuccess(t, "struct multiline", file, expected, 0)
@@ -249,11 +248,11 @@ func TestFileParserStructMultiline(t *testing.T) {
 		  c str
 		)
 	`)
-	expected := []slang.Statement{
+	expected := []*statements.Statement{
 		statements.NewStruct("X",
-			ast.NewField("a", &ast.IntType{}),
-			ast.NewField("b", &ast.IntType{}),
-			ast.NewField("c", &ast.StrType{}),
+			ast.NewField("a", types.NewInt()),
+			ast.NewField("b", types.NewInt()),
+			ast.NewField("c", types.NewStr()),
 		),
 	}
 	testFileParserSuccess(t, "struct multiline", file, expected, 0)
@@ -267,7 +266,7 @@ func TestFileParserWithComments(t *testing.T) {
 		// my struct comment
 		struct X (
 			a, b int
-			c string
+			c str
 		)
 
 		// this is a
@@ -279,22 +278,19 @@ func TestFileParserWithComments(t *testing.T) {
 		// this is a trailing
 		// standalone comment
 	`)
-	expected := []slang.Statement{
-		statements.NewComment("this is a leading", "standalone comment"),
-		statements.WithComment(
+	expected := []*statements.Statement{
+		withComment(statements.NewComment(), "this is a leading standalone comment"),
+		withComment(
 			statements.NewStruct("X",
-				ast.NewField("a", &ast.IntType{}),
-				ast.NewField("b", &ast.IntType{}),
-				ast.NewField("c", &ast.StrType{}),
+				ast.NewField("a", types.NewInt()),
+				ast.NewField("b", types.NewInt()),
+				ast.NewField("c", types.NewStr()),
 			),
 			"my struct comment",
 		),
-		statements.NewComment("this is a", "standalone comment"),
-		statements.WithComment(
-			statements.NewConst("y", expressions.NewInt(10)),
-			"also not empty",
-		),
-		statements.NewComment("this is a trailing", "standalone comment"),
+		withComment(statements.NewComment(), "this is a standalone comment"),
+		withComment(statements.NewConst("y", expressions.NewInt(10)), "also not empty"),
+		withComment(statements.NewComment(), "this is a trailing standalone comment"),
 	}
 
 	testFileParserSuccess(t, "with comments", file, expected, 0)
@@ -304,7 +300,7 @@ func testFileParserSuccess(
 	t *testing.T,
 	name string,
 	file io.Reader,
-	expectedStmts []slang.Statement,
+	expectedStmts []*statements.Statement,
 	expectedErrCount int,
 ) {
 	t.Run(name, func(t *testing.T) {
@@ -320,13 +316,13 @@ func testFileParserSuccess(
 	})
 }
 
-func verifyStatemnts(t *testing.T, expected, actual []slang.Statement) {
+func verifyStatemnts(t *testing.T, expected, actual []*statements.Statement) {
 	if !assert.Equal(t, len(expected), len(actual)) {
 		return
 	}
 
 	for i, stmt := range expected {
-		if !assert.True(t, stmt.Equal(actual[i])) {
+		if !assert.True(t, stmt.IsEqual(actual[i])) {
 			actualD, _ := json.Marshal(actual[i])
 			expectedD, _ := json.Marshal(stmt)
 
@@ -339,4 +335,10 @@ func logParseErrs(t *testing.T, parseErrs []*parsing.ParseErr) {
 	for _, parseErr := range parseErrs {
 		t.Logf("unxpected parse err at %s: %v", parseErr.Token.Location, parseErr.Error)
 	}
+}
+
+func withComment(s *statements.Statement, comment string) *statements.Statement {
+	s.SetComment(comment)
+
+	return s
 }

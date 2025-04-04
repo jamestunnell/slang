@@ -4,10 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +15,7 @@ import (
 type bodyParserSuccessTest struct {
 	TestName   string
 	Input      string
-	Statements []slang.Statement
+	Statements []*statements.Statement
 	ErrorCount int
 }
 
@@ -25,7 +24,7 @@ func TestFuncBodyParser(t *testing.T) {
 		{
 			TestName:   "empty",
 			Input:      `{}`,
-			Statements: []slang.Statement{},
+			Statements: []*statements.Statement{},
 		},
 		{
 			TestName: "vars&consts",
@@ -35,10 +34,10 @@ func TestFuncBodyParser(t *testing.T) {
 				var c flt
 				const d = 12
 			}`,
-			Statements: []slang.Statement{
-				statements.NewVar("a", &ast.IntType{}),
+			Statements: []*statements.Statement{
+				statements.NewVar("a", types.NewInt()),
 				statements.NewConst("b", expressions.NewStr("hello")),
-				statements.NewVar("c", &ast.FltType{}),
+				statements.NewVar("c", types.NewFlt()),
 				statements.NewConst("d", expressions.NewInt(12)),
 			},
 		},
@@ -60,18 +59,12 @@ func TestFuncBodyParser(t *testing.T) {
 				// this is a trailing
 				// standalone comment
 			}`,
-			Statements: []slang.Statement{
-				statements.NewComment("this is a leading", "standalone comment"),
-				statements.WithComment(
-					statements.NewConst("x", expressions.NewStr("hello")),
-					"not empty",
-				),
-				statements.NewComment("this is a", "standalone comment"),
-				statements.WithComment(
-					statements.NewConst("y", expressions.NewInt(10)),
-					"also not empty",
-				),
-				statements.NewComment("this is a trailing", "standalone comment"),
+			Statements: []*statements.Statement{
+				withComment(statements.NewComment(), "this is a leading standalone comment"),
+				withComment(statements.NewConst("x", expressions.NewStr("hello")), "not empty"),
+				withComment(statements.NewComment(), "this is a standalone comment"),
+				withComment(statements.NewConst("y", expressions.NewInt(10)), "also not empty"),
+				withComment(statements.NewComment(), "this is a trailing standalone comment"),
 			},
 		},
 		{
@@ -81,7 +74,7 @@ func TestFuncBodyParser(t *testing.T) {
 
 				person.Name = "Jill"
 			}`,
-			Statements: []slang.Statement{
+			Statements: []*statements.Statement{
 				statements.NewAssign(
 					expressions.NewAccessMember(expressions.NewIdentifier("this"), "X"),
 					expressions.NewInt(2),
@@ -97,7 +90,7 @@ func TestFuncBodyParser(t *testing.T) {
 			Input: `{
 				this.MyMethod()
 			}`,
-			Statements: []slang.Statement{
+			Statements: []*statements.Statement{
 				statements.NewExpression(
 					expressions.NewInvoke(
 						expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
@@ -109,7 +102,7 @@ func TestFuncBodyParser(t *testing.T) {
 			Input: `{
 				a.b(x, y).c
 			}`,
-			Statements: []slang.Statement{
+			Statements: []*statements.Statement{
 				statements.NewExpression(
 					expressions.NewAccessMember(
 						expressions.NewInvoke(
@@ -130,7 +123,7 @@ func TestFuncBodyParser(t *testing.T) {
 			Input: `{
 				myVar = "${word} is a ${fanciness.String()} word"
 			}`,
-			Statements: []slang.Statement{
+			Statements: []*statements.Statement{
 				statements.NewAssign(
 					expressions.NewIdentifier("myVar"),
 					expressions.NewConcat(

@@ -2,7 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/customerrs"
 )
 
@@ -39,7 +39,10 @@ func (p *ParserBase) TokenErr(tok *slang.Token, expectedTypes ...slang.TokenType
 	p.errors = append(p.errors, parseErr)
 }
 
-func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
+func (p *ParserBase) RunSubParser(
+	toks slang.TokenSeq,
+	sub Parser,
+) bool {
 	sub.Run(toks)
 
 	if len(sub.GetErrors()) > 0 {
@@ -51,35 +54,51 @@ func (p *ParserBase) RunSubParser(toks slang.TokenSeq, sub Parser) bool {
 	return true
 }
 
-func (p *ParserBase) ParseType(toks slang.TokenSeq) (slang.Type, bool) {
+func (p *ParserBase) RunSubStmtParser(
+	toks slang.TokenSeq,
+	comment string,
+	sub StatementParser,
+) bool {
+	sub.Run(toks, comment)
+
+	if len(sub.GetErrors()) > 0 {
+		p.errors = append(p.errors, sub.GetErrors()...)
+
+		return false
+	}
+
+	return true
+}
+
+func (p *ParserBase) ParseType(toks slang.TokenSeq) (*types.Type, bool) {
 	switch toks.Current().Type() {
 	case slang.TokenBOOL:
 		toks.Advance()
 
-		return &ast.BoolType{}, true
+		return types.NewBool(), true
 	case slang.TokenERR:
 		toks.Advance()
 
-		return &ast.ErrType{}, true
+		return types.NewErr(), true
 	case slang.TokenINT:
 		toks.Advance()
 
-		return &ast.IntType{}, true
+		return types.NewInt(), true
 	case slang.TokenSTR:
 		toks.Advance()
 
-		return &ast.StrType{}, true
+		return types.NewStr(), true
 	case slang.TokenFLT:
 		toks.Advance()
 
-		return &ast.FltType{}, true
+		return types.NewFlt(), true
 	case slang.TokenSYMBOL:
 		nameFirst := toks.Current().Value()
 
 		if !toks.Next().Is(slang.TokenDOT) {
 			toks.Advance()
 
-			return ast.NewInsideType(nameFirst), true
+			return types.NewStruct("", nameFirst), true
 		}
 
 		toks.Advance()
@@ -90,7 +109,7 @@ func (p *ParserBase) ParseType(toks slang.TokenSeq) (slang.Type, bool) {
 
 			toks.Advance()
 
-			return ast.NewOutsideType(nameFirst, nameSecond), true
+			return types.NewStruct(nameFirst, nameSecond), true
 		}
 	}
 
@@ -180,7 +199,7 @@ func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, slang.Type,
 	return name, typ, true
 }
 
-func (p *ParserBase) ParseNamesType(toks slang.TokenSeq) ([]string, slang.Type, bool) {
+func (p *ParserBase) ParseNamesType(toks slang.TokenSeq) ([]string, *types.Type, bool) {
 	if !toks.Current().Is(slang.TokenSYMBOL) {
 		return []string{}, nil, false
 	}

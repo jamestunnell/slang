@@ -5,10 +5,10 @@ import "encoding/json"
 type StatementType int
 
 type Statement interface {
-	SetComment(lines []string)
-
-	Type() StatementType
-	Equal(Statement) bool
+	// SetComment(lines []string)
+	GetType() StatementType
+	GetComment() string
+	IsEqual(Statement) bool
 	// Eval(env *objecsts.Environment) (objects.Object, error)
 }
 
@@ -32,24 +32,72 @@ const (
 	StatementSTRUCTFIELD
 	StatementUSE
 
-	StrASSIGN      = "ASSIGN"
-	StrCOMMENT     = "COMMENT"
-	StrCONST       = "CONST"
-	StrEXPRESSION  = "EXPRESSION"
-	StrIF          = "IF"
-	StrIFELSE      = "IFELSE"
-	StrFUNC        = "FUNC"
-	StrVAR         = "VAR"
-	StrMETHOD      = "METHOD"
-	StrRETURN      = "RETURN"
-	StrRETURNVAL   = "RETURNVAL"
-	StrSTRUCT      = "STRUCT"
-	StrSTRUCTFIELD = "STRUCTFIELD"
-	StrUSE         = "USE"
+	StrStatementASSIGN      = "ASSIGN"
+	StrStatementBREAK       = "BREAK"
+	StrStatementCOMMENT     = "COMMENT"
+	StrStatementCONST       = "CONST"
+	StrStatementCONTINUE    = "CONTINUE"
+	StrStatementEXPRESSION  = "EXPRESSION"
+	StrStatementFOREACH     = "FOREACH"
+	StrStatementIF          = "IF"
+	StrStatementIFELSE      = "IFELSE"
+	StrStatementFUNC        = "FUNC"
+	StrStatementVAR         = "VAR"
+	StrStatementMETHOD      = "METHOD"
+	StrStatementRETURN      = "RETURN"
+	StrStatementRETURNVAL   = "RETURNVAL"
+	StrStatementSTRUCT      = "STRUCT"
+	StrStatementSTRUCTFIELD = "STRUCTFIELD"
+	StrStatementUSE         = "USE"
 )
 
 func StatementsEqual(a, b Statement) bool {
-	return a.Equal(b)
+	return a.IsEqual(b)
+}
+
+func ParseStatementTypeStr(s string) (StatementType, bool) {
+	var st StatementType
+
+	switch s {
+	case StrStatementASSIGN:
+		st = StatementASSIGN
+	case StrStatementBREAK:
+		st = StatementBREAK
+	case StrStatementCOMMENT:
+		st = StatementCOMMENT
+	case StrStatementCONST:
+		st = StatementCONST
+	case StrStatementCONTINUE:
+		st = StatementCONTINUE
+	case StrStatementEXPRESSION:
+		st = StatementEXPRESSION
+	case StrStatementFOREACH:
+		st = StatementFOREACH
+	case StrStatementIF:
+		st = StatementIF
+	case StrStatementIFELSE:
+		st = StatementIFELSE
+	case StrStatementFUNC:
+		st = StatementFUNC
+	case StrStatementMETHOD:
+		st = StatementMETHOD
+	case StrStatementRETURN:
+		st = StatementRETURN
+	case StrStatementRETURNVAL:
+		st = StatementRETURNVAL
+	case StrStatementSTRUCT:
+		st = StatementSTRUCT
+	case StrStatementSTRUCTFIELD:
+		st = StatementSTRUCTFIELD
+	case StrStatementUSE:
+		st = StatementUSE
+	case StrStatementVAR:
+		st = StatementVAR
+	default:
+		return st, false
+	}
+
+	return st, true
 }
 
 func (st StatementType) MarshalJSON() ([]byte, error) {
@@ -61,33 +109,39 @@ func (st StatementType) String() string {
 
 	switch st {
 	case StatementASSIGN:
-		str = StrASSIGN
+		str = StrStatementASSIGN
+	case StatementBREAK:
+		str = StrStatementBREAK
 	case StatementCOMMENT:
-		str = StrCOMMENT
+		str = StrStatementCOMMENT
 	case StatementCONST:
-		str = StrCONST
+		str = StrStatementCONST
+	case StatementCONTINUE:
+		str = StrStatementCONTINUE
 	case StatementEXPRESSION:
-		str = StrEXPRESSION
+		str = StrStatementEXPRESSION
+	case StatementFOREACH:
+		str = StrStatementFOREACH
 	case StatementIF:
-		str = StrIF
+		str = StrStatementIF
 	case StatementIFELSE:
-		str = StrIFELSE
+		str = StrStatementIFELSE
 	case StatementFUNC:
-		str = StrFUNC
+		str = StrStatementFUNC
 	case StatementMETHOD:
-		str = StrMETHOD
+		str = StrStatementMETHOD
 	case StatementRETURN:
-		str = StrRETURN
+		str = StrStatementRETURN
 	case StatementRETURNVAL:
-		str = StrRETURNVAL
+		str = StrStatementRETURNVAL
 	case StatementSTRUCT:
-		str = StrSTRUCT
+		str = StrStatementSTRUCT
 	case StatementSTRUCTFIELD:
-		str = StrSTRUCTFIELD
+		str = StrStatementSTRUCTFIELD
 	case StatementUSE:
-		str = StrUSE
+		str = StrStatementUSE
 	case StatementVAR:
-		str = StrVAR
+		str = StrStatementVAR
 	}
 
 	return str

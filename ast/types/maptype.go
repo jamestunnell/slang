@@ -1,4 +1,4 @@
-package ast
+package types
 
 // type MapType struct {
 // 	KeyType, ValueType slang.Type

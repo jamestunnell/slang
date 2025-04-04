@@ -9,6 +9,7 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 )
@@ -26,61 +27,61 @@ func TestFuncSignatureParserFailure(t *testing.T) {
 
 func TestFuncSignatureParserSuccess(t *testing.T) {
 	tests := []*funcSigParserSuccessTest{
-		// {
-		// 	TestName:  "empty sig",
-		// 	Input:     `()`,
-		// 	InParams:  []slang.Param{},
-		// 	OutParams: []slang.Param{},
-		// },
-		// {
-		// 	TestName:  "one param",
-		// 	Input:     `(x flt)`,
-		// 	InParams:  []slang.Param{ast.NewParam("x", &ast.FltType{})},
-		// 	OutParams: []slang.Param{},
-		// },
-		// {
-		// 	TestName: "two params",
-		// 	Input:    `(a int, b mymodule.MyType)`,
-		// 	InParams: []slang.Param{
-		// 		ast.NewParam("a", &ast.IntType{}),
-		// 		ast.NewParam("b", ast.NewExternStructType("mymodule", "MyType")),
-		// 	},
-		// 	OutParams: []slang.Param{},
-		// },
-		// {
-		// 	TestName: "two multi-name",
-		// 	Input:    `(a, b int, c, d str)`,
-		// 	InParams: []slang.Param{
-		// 		ast.NewParam("a", &ast.IntType{}),
-		// 		ast.NewParam("b", &ast.IntType{}),
-		// 		ast.NewParam("c", &ast.StrType{}),
-		// 		ast.NewParam("d", &ast.StrType{}),
-		// 	},
-		// 	OutParams: []slang.Param{},
-		// },
-		// {
-		// 	TestName:  "empty in and out params both with parens",
-		// 	Input:     `() ()`,
-		// 	InParams:  []slang.Param{},
-		// 	OutParams: []slang.Param{},
-		// },
-		// {
-		// 	TestName: "one in param, one out param",
-		// 	Input:    `(a int) (b int)`,
-		// 	InParams: []slang.Param{
-		// 		ast.NewParam("a", &ast.IntType{}),
-		// 	},
-		// 	OutParams: []slang.Param{
-		// 		ast.NewParam("b", &ast.IntType{}),
-		// 	},
-		// },
+		{
+			TestName:  "empty sig",
+			Input:     `()`,
+			InParams:  []slang.Param{},
+			OutParams: []slang.Param{},
+		},
+		{
+			TestName:  "one param",
+			Input:     `(x flt)`,
+			InParams:  []slang.Param{ast.NewParam("x", types.NewFlt())},
+			OutParams: []slang.Param{},
+		},
+		{
+			TestName: "two params",
+			Input:    `(a int, b mymodule.MyType)`,
+			InParams: []slang.Param{
+				ast.NewParam("a", types.NewInt()),
+				ast.NewParam("b", types.NewStruct("mymodule", "MyType")),
+			},
+			OutParams: []slang.Param{},
+		},
+		{
+			TestName: "two multi-name",
+			Input:    `(a, b int, c, d str)`,
+			InParams: []slang.Param{
+				ast.NewParam("a", types.NewInt()),
+				ast.NewParam("b", types.NewInt()),
+				ast.NewParam("c", types.NewStr()),
+				ast.NewParam("d", types.NewStr()),
+			},
+			OutParams: []slang.Param{},
+		},
+		{
+			TestName:  "empty in and out params both with parens",
+			Input:     `() ()`,
+			InParams:  []slang.Param{},
+			OutParams: []slang.Param{},
+		},
+		{
+			TestName: "one in param, one out param",
+			Input:    `(a int) (b int)`,
+			InParams: []slang.Param{
+				ast.NewParam("a", types.NewInt()),
+			},
+			OutParams: []slang.Param{
+				ast.NewParam("b", types.NewInt()),
+			},
+		},
 		{
 			TestName: "two out params",
 			Input:    `() (t my.Type, e err)`,
 			InParams: []slang.Param{},
 			OutParams: []slang.Param{
-				ast.NewParam("t", ast.NewOutsideType("my", "Type")),
-				ast.NewParam("e", &ast.ErrType{}),
+				ast.NewParam("t", types.NewStruct("my", "Type")),
+				ast.NewParam("e", types.NewErr()),
 			},
 		},
 	}

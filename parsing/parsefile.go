@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"io"
 
-	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexing"
 )
 
-func ParseFile(r io.Reader) ([]slang.Statement, []*ParseErr) {
+func ParseFile(r io.Reader) ([]*statements.Statement, []*ParseErr) {
 	l := lexing.NewLexer(bufio.NewReader(r))
 	toks := NewTokenSeq(l)
 	p := NewFileParser()

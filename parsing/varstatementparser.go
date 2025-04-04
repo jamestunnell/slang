@@ -8,18 +8,18 @@ import (
 type VarStatementParser struct {
 	*ParserBase
 
-	VarStmt *statements.Var
+	VarStmt *statements.Statement
 }
 
 func NewVarStatementParser() *VarStatementParser {
 	return &VarStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *VarStatementParser) GetStatement() slang.Statement {
+func (p *VarStatementParser) GetStatement() *statements.Statement {
 	return p.VarStmt
 }
 
-func (p *VarStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *VarStatementParser) Run(toks slang.TokenSeq, comment string) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenVAR) {
 		return false
 	}
@@ -32,6 +32,8 @@ func (p *VarStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.VarStmt = statements.NewVar(name, typ)
+
+	p.VarStmt.SetComment(comment)
 
 	return true
 }

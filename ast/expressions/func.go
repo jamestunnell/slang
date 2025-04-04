@@ -8,8 +8,8 @@ import (
 type Func struct {
 	*Base
 
-	InParams   []slang.Param     `json:"inputParams"`
-	OutParams  []slang.Param     `json:"outputParams"`
+	Inputs     []slang.Param     `json:"inputs"`
+	Outputs    []slang.Param     `json:"outputs"`
 	Statements []slang.Statement `json:"statements"`
 }
 
@@ -19,8 +19,8 @@ func NewFunc(
 ) *Func {
 	return &Func{
 		Base:       NewBase(slang.ExprFUNC),
-		InParams:   inParams,
-		OutParams:  outParams,
+		Inputs:     inParams,
+		Outputs:    outParams,
 		Statements: statements,
 	}
 }
@@ -31,11 +31,11 @@ func (f *Func) Equal(other slang.Expression) bool {
 		return false
 	}
 
-	if !slices.EqualFunc(f.InParams, f2.InParams, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Inputs, f2.Inputs, slang.NameTypesEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.OutParams, f2.OutParams, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Outputs, f2.Outputs, slang.NameTypesEqual) {
 		return false
 	}
 

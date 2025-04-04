@@ -5,23 +5,25 @@ import (
 )
 
 type IfElse struct {
-	*Base
-
 	Condition slang.Expression `json:"condition"`
 	IfBlock   slang.Statement  `json:"ifBlock"`
 	ElseBlock slang.Statement  `json:"elseBlock"`
 }
 
-func NewIfElse(cond slang.Expression, ifBlock, elseBlock slang.Statement) *IfElse {
-	return &IfElse{
-		Base:      NewBase(slang.StatementIFELSE),
+func NewIfElse(
+	cond slang.Expression,
+	ifBlock, elseBlock slang.Statement,
+) *Statement {
+	core := &IfElse{
 		Condition: cond,
 		IfBlock:   ifBlock,
 		ElseBlock: elseBlock,
 	}
+
+	return NewStatement(slang.StatementIFELSE, core)
 }
 
-func (i *IfElse) Equal(other slang.Statement) bool {
+func (i *IfElse) IsEqual(other Core) bool {
 	i2, ok := other.(*IfElse)
 	if !ok {
 		return false
@@ -31,11 +33,11 @@ func (i *IfElse) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if !i.IfBlock.Equal(i2.IfBlock) {
+	if !i.IfBlock.IsEqual(i2.IfBlock) {
 		return false
 	}
 
-	return i.ElseBlock.Equal(i2.ElseBlock)
+	return i.ElseBlock.IsEqual(i2.ElseBlock)
 }
 
 // func (expr *IfElse) Eval(env *slang.Environment) (slang.Object, error) {

@@ -8,7 +8,7 @@ import (
 type FuncStatementParser struct {
 	*ParserBase
 
-	FuncStmt *statements.Func
+	FuncStmt *statements.Statement
 }
 
 func NewFuncStatementParser() *FuncStatementParser {
@@ -17,11 +17,14 @@ func NewFuncStatementParser() *FuncStatementParser {
 	}
 }
 
-func (p *FuncStatementParser) GetStatement() slang.Statement {
+func (p *FuncStatementParser) GetStatement() *statements.Statement {
 	return p.FuncStmt
 }
 
-func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *FuncStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFUNC) {
 		return false
 	}
@@ -52,6 +55,8 @@ func (p *FuncStatementParser) Run(toks slang.TokenSeq) bool {
 		sigParser.OutParams,
 		bodyParser.GetStatements()...,
 	)
+
+	p.FuncStmt.SetComment(comment)
 
 	return true
 }

@@ -5,21 +5,17 @@ import (
 )
 
 type Var struct {
-	*Base
-
 	Name      string     `json:"name"`
 	ValueType slang.Type `json:"type"`
 }
 
-func NewVar(name string, valueType slang.Type) *Var {
-	return &Var{
-		Base:      NewBase(slang.StatementVAR),
-		Name:      name,
-		ValueType: valueType,
-	}
+func NewVar(name string, valueType slang.Type) *Statement {
+	core := &Var{Name: name, ValueType: valueType}
+
+	return NewStatement(slang.StatementVAR, core)
 }
 
-func (f *Var) Equal(other slang.Statement) bool {
+func (f *Var) IsEqual(other Core) bool {
 	f2, ok := other.(*Var)
 	if !ok {
 		return false

@@ -173,8 +173,14 @@ func (p *ExprParser) parseFuncAnon(toks slang.TokenSeq) slang.Expression {
 		return nil
 	}
 
+	bodyStatements := make([]slang.Statement, len(bodyParser.Statements))
+
+	for i, stmt := range bodyParser.Statements {
+		bodyStatements[i] = stmt
+	}
+
 	return expressions.NewFunc(
-		sigParser.InParams, sigParser.OutParams, bodyParser.Statements...)
+		sigParser.InParams, sigParser.OutParams, bodyStatements...)
 }
 
 func (p *ExprParser) parseIdentifier(toks slang.TokenSeq) slang.Expression {
@@ -392,22 +398,22 @@ func (p *ExprParser) parseStructAnon(toks slang.TokenSeq) slang.Expression {
 	return expressions.NewStruct(sigParser.NameTypes...)
 }
 
-func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
-	toks.Advance()
+// func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary slang.Expression) slang.Expression {
+// 	toks.Advance()
 
-	keyExpr := p.parseExpression(toks, PrecedenceLOWEST)
-	if keyExpr == nil {
-		return nil
-	}
+// 	keyExpr := p.parseExpression(toks, PrecedenceLOWEST)
+// 	if keyExpr == nil {
+// 		return nil
+// 	}
 
-	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
-		return nil
-	}
+// 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
+// 		return nil
+// 	}
 
-	toks.Advance()
+// 	toks.Advance()
 
-	return expressions.NewAccessElem(ary, keyExpr)
-}
+// 	return expressions.NewAccessElem(ary, keyExpr)
+// }
 
 func (p *ExprParser) parseAnd(toks slang.TokenSeq, left slang.Expression) slang.Expression {
 	return p.parseInfixExpr(toks, left, expressions.NewAnd)

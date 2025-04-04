@@ -5,21 +5,20 @@ import (
 )
 
 type Assign struct {
-	*Base
-
 	Target slang.Expression `json:"target"`
 	Value  slang.Expression `json:"value"`
 }
 
-func NewAssign(Target slang.Expression, val slang.Expression) slang.Statement {
-	return &Assign{
-		Base:   NewBase(slang.StatementASSIGN),
-		Target: Target,
-		Value:  val,
-	}
+func NewAssign(
+	target slang.Expression,
+	val slang.Expression,
+) *Statement {
+	core := &Assign{Target: target, Value: val}
+
+	return NewStatement(slang.StatementASSIGN, core)
 }
 
-func (a *Assign) Equal(other slang.Statement) bool {
+func (a *Assign) IsEqual(other Core) bool {
 	a2, ok := other.(*Assign)
 	if !ok {
 		return false

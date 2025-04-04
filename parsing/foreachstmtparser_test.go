@@ -17,7 +17,7 @@ type forEachStmtParserTest struct {
 	Name       string
 	Input      string
 	ErrorCount int
-	ForEach    *statements.ForEach
+	ForEach    *statements.Statement
 }
 
 func TestForStatementParser(t *testing.T) {
@@ -37,9 +37,7 @@ func TestForStatementParser(t *testing.T) {
 			ForEach: statements.NewForEach(
 				[]string{"a", "b"},
 				expressions.NewIdentifier("x"),
-				statements.NewBlock(
-					statements.NewBreak(),
-				),
+				statements.NewBlock(statements.NewBreak()),
 			),
 		},
 		{
@@ -60,9 +58,7 @@ func TestForStatementParser(t *testing.T) {
 							expressions.NewIdentifier("x"),
 							expressions.NewInt(2),
 						),
-						statements.NewBlock(
-							statements.NewContinue(),
-						),
+						statements.NewBlock(statements.NewContinue()),
 					),
 					statements.NewExpression(
 						expressions.NewInvoke(
@@ -117,7 +113,7 @@ func testForEachStmtParser(t *testing.T, test *forEachStmtParserTest) {
 		l := lexing.NewLexer(strings.NewReader(test.Input))
 		seq := parsing.NewTokenSeq(l)
 
-		assert.True(t, p.Run(seq))
+		assert.True(t, p.Run(seq, ""))
 
 		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
 			logParseErrs(t, p.GetErrors())
@@ -125,20 +121,22 @@ func testForEachStmtParser(t *testing.T, test *forEachStmtParserTest) {
 			return
 		}
 
-		actual, ok := p.Stmt.(*statements.ForEach)
+		expected, ok := test.ForEach.Core.(*statements.ForEach)
 
 		require.True(t, ok)
 
-		verifyBlock(t, test.ForEach.Block, actual.Block)
+		actual, ok := p.Stmt.Core.(*statements.ForEach)
+
+		verifyBlock(t, expected.Block, actual.Block)
 	})
 }
 
 func verifyBlock(t *testing.T, expected, actual slang.Statement) {
-	expectedBlock, ok := expected.(*statements.Block)
+	expectedBlock, ok := expected.(*statements.Statement).Core.(*statements.Block)
 
 	require.True(t, ok)
 
-	actualBlock, ok := actual.(*statements.Block)
+	actualBlock, ok := actual.(*statements.Statement).Core.(*statements.Block)
 
 	require.True(t, ok)
 

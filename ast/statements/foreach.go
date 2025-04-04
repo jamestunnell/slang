@@ -6,23 +6,22 @@ import (
 )
 
 type ForEach struct {
-	*Base
-
 	Vars  []string         `json:"vars"`
 	Expr  slang.Expression `json:"expr"`
 	Block slang.Statement  `json:"block"`
 }
 
-func NewForEach(vars []string, expr slang.Expression, block slang.Statement) *ForEach {
-	return &ForEach{
-		Base:  NewBase(slang.StatementFOREACH),
-		Vars:  vars,
-		Expr:  expr,
-		Block: block,
-	}
+func NewForEach(
+	vars []string,
+	expr slang.Expression,
+	block slang.Statement,
+) *Statement {
+	core := &ForEach{Vars: vars, Expr: expr, Block: block}
+
+	return NewStatement(slang.StatementFOREACH, core)
 }
 
-func (f *ForEach) Equal(other slang.Statement) bool {
+func (f *ForEach) IsEqual(other Core) bool {
 	f2, ok := other.(*ForEach)
 	if !ok {
 		return false
@@ -36,7 +35,7 @@ func (f *ForEach) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return f.Block.Equal(f2.Block)
+	return f.Block.IsEqual(f2.Block)
 }
 
 // func (expr *ForEach) Eval(env *slang.Environment) (slang.Object, error) {

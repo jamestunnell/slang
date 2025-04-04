@@ -8,7 +8,7 @@ import (
 type ContinueStatementParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewContinueStatementParser() *ContinueStatementParser {
@@ -17,11 +17,14 @@ func NewContinueStatementParser() *ContinueStatementParser {
 	}
 }
 
-func (p *ContinueStatementParser) GetStatement() slang.Statement {
+func (p *ContinueStatementParser) GetStatement() *statements.Statement {
 	return p.Stmt
 }
 
-func (p *ContinueStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *ContinueStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenCONTINUE) {
 		return false
 	}
@@ -29,6 +32,8 @@ func (p *ContinueStatementParser) Run(toks slang.TokenSeq) bool {
 	toks.Advance()
 
 	p.Stmt = statements.NewContinue()
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }

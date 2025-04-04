@@ -8,18 +8,21 @@ import (
 type ExprOrAssignStatementParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewExprOrAssignStatementParser() *ExprOrAssignStatementParser {
 	return &ExprOrAssignStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *ExprOrAssignStatementParser) GetStatement() slang.Statement {
+func (p *ExprOrAssignStatementParser) GetStatement() *statements.Statement {
 	return p.Stmt
 }
 
-func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *ExprOrAssignStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
@@ -37,6 +40,8 @@ func (p *ExprOrAssignStatementParser) Run(toks slang.TokenSeq) bool {
 	} else {
 		p.Stmt = statements.NewExpression(exprParser.Expr)
 	}
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }

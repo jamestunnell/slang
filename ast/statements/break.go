@@ -1,21 +1,16 @@
 package statements
 
-import (
-	"github.com/jamestunnell/slang"
-)
+import "github.com/jamestunnell/slang"
 
-type Break struct {
-	*Base
+type Break struct{}
+
+func NewBreak() *Statement {
+	return NewStatement(slang.StatementBREAK, &Break{})
 }
 
-func NewBreak() *Break {
-	return &Break{
-		Base: NewBase(slang.StatementBREAK),
-	}
-}
-
-func (f *Break) Equal(other slang.Statement) bool {
+func (f *Break) IsEqual(other Core) bool {
 	_, ok := other.(*Break)
+
 	return ok
 }
 

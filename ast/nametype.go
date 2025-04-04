@@ -1,13 +1,16 @@
 package ast
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
+)
 
 type NameType struct {
-	Name string     `json:"name"`
-	Type slang.Type `json:"type"`
+	Name string      `json:"name"`
+	Type *types.Type `json:"type"`
 }
 
-func NewNameType(name string, typ slang.Type) *NameType {
+func NewNameType(name string, typ *types.Type) *NameType {
 	return &NameType{
 		Name: name,
 		Type: typ,

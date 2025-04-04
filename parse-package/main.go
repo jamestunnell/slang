@@ -12,6 +12,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
+	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 )
@@ -46,7 +47,7 @@ func main() {
 		pkgName = path.Base(args.PackageRoot)
 	}
 
-	moduleStmts := map[string][]slang.Statement{}
+	moduleStmts := map[string][]*statements.Statement{}
 	fileSystem := os.DirFS(args.PackageRoot)
 
 	fs.WalkDir(fileSystem, ".", func(entryPath string, entry fs.DirEntry, walkErr error) error {

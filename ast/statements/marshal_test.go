@@ -8,34 +8,35 @@ import (
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tidwall/gjson"
 )
 
 func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, statements.NewAssign(expressions.NewIdentifier("xyz"), expressions.NewInt(5)))
 	testMarshalJSON(t, statements.NewStruct("myclass",
-		ast.NewField("x", &ast.IntType{}),
-		ast.NewField("y", &ast.StrType{}),
-		ast.NewField("z", &ast.StrType{}),
+		ast.NewField("x", types.NewInt()),
+		ast.NewField("y", types.NewStr()),
+		ast.NewField("z", types.NewStr()),
 	))
 	testMarshalJSON(t, statements.NewFunc("myfunc", []slang.Param{}, []slang.Param{}))
 	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInt(7)))
-	testMarshalJSON(t, statements.NewUse("my/path"))
+	testMarshalJSON(t, statements.NewUse("my", "path"))
 }
 
 func testMarshalJSON(t *testing.T, stmt slang.Statement) {
-	t.Run(stmt.Type().String(), func(t *testing.T) {
+	t.Run(stmt.GetType().String(), func(t *testing.T) {
 		d, err := json.Marshal(stmt)
 
 		require.NoError(t, err)
 
-		result := gjson.GetBytes(d, "type")
+		var stmt2 statements.Statement
 
-		require.True(t, result.Exists())
-		require.Equal(t, gjson.String, result.Type)
+		err = json.Unmarshal(d, &stmt2)
 
-		assert.Equal(t, stmt.Type().String(), result.String())
+		if assert.NoError(t, err) {
+			assert.True(t, stmt2.IsEqual(stmt))
+		}
 	})
 }

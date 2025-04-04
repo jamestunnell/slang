@@ -7,29 +7,28 @@ import (
 )
 
 type Func struct {
-	*Base
-
-	Name       string            `json:"name"`
-	InParams   []slang.Param     `json:"inputParams"`
-	OutParams  []slang.Param     `json:"outputParams"`
-	Statements []slang.Statement `json:"statements"`
+	Name       string        `json:"name"`
+	Inputs     []slang.Param `json:"inputs"`
+	Outputs    []slang.Param `json:"outputs"`
+	Statements []*Statement  `json:"statements"`
 }
 
 func NewFunc(
 	name string,
 	inParams, outParams []slang.Param,
-	statements ...slang.Statement,
-) *Func {
-	return &Func{
-		Base:       NewBase(slang.StatementFUNC),
+	statements ...*Statement,
+) *Statement {
+	core := &Func{
 		Name:       name,
-		InParams:   inParams,
-		OutParams:  outParams,
+		Inputs:     inParams,
+		Outputs:    outParams,
 		Statements: statements,
 	}
+
+	return NewStatement(slang.StatementFUNC, core)
 }
 
-func (f *Func) Equal(other slang.Statement) bool {
+func (f *Func) IsEqual(other Core) bool {
 	f2, ok := other.(*Func)
 	if !ok {
 		return false
@@ -39,15 +38,15 @@ func (f *Func) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	if !slices.EqualFunc(f.InParams, f2.InParams, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Inputs, f2.Inputs, slang.NameTypesEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.OutParams, f2.OutParams, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Outputs, f2.Outputs, slang.NameTypesEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Statements, f2.Statements, slang.StatementsEqual) {
+	if !slices.EqualFunc(f.Statements, f2.Statements, statementsEqual) {
 		return false
 	}
 
@@ -58,10 +57,10 @@ func (f *Func) GetName() string {
 	return f.Name
 }
 
-func (f *Func) GetInputParams() []slang.Param {
-	return f.InParams
+func (f *Func) GetInputs() []slang.Param {
+	return f.Inputs
 }
 
-func (f *Func) GetOutputParams() []slang.Param {
-	return f.OutParams
+func (f *Func) GetOutputs() []slang.Param {
+	return f.Outputs
 }

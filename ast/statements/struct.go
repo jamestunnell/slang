@@ -6,21 +6,17 @@ import (
 )
 
 type Struct struct {
-	*Base
-
 	Name   string        `json:"name"`
 	Fields []slang.Field `json:"fields"`
 }
 
-func NewStruct(name string, fields ...slang.Field) *Struct {
-	return &Struct{
-		Base:   NewBase(slang.StatementSTRUCT),
-		Name:   name,
-		Fields: fields,
-	}
+func NewStruct(name string, fields ...slang.Field) *Statement {
+	core := &Struct{Name: name, Fields: fields}
+
+	return NewStatement(slang.StatementSTRUCT, core)
 }
 
-func (c *Struct) Equal(other slang.Statement) bool {
+func (c *Struct) IsEqual(other Core) bool {
 	c2, ok := other.(*Struct)
 	if !ok {
 		return false

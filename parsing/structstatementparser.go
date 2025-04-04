@@ -8,18 +8,21 @@ import (
 type StructStatementParser struct {
 	*ParserBase
 
-	StructStmt *statements.Struct
+	StructStmt *statements.Statement
 }
 
 func NewStructStatementParser() *StructStatementParser {
 	return &StructStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *StructStatementParser) GetStatement() slang.Statement {
+func (p *StructStatementParser) GetStatement() *statements.Statement {
 	return p.StructStmt
 }
 
-func (p *StructStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *StructStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenSTRUCT) {
 		return false
 	}
@@ -40,6 +43,8 @@ func (p *StructStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.StructStmt = statements.NewStruct(name, sigParser.NameTypes...)
+
+	p.StructStmt.SetComment(comment)
 
 	return true
 }

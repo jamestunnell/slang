@@ -1,4 +1,4 @@
-package ast
+package types
 
 // type ArrayType struct {
 // 	ValueType slang.Type

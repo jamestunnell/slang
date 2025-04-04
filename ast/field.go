@@ -1,7 +1,10 @@
 package ast
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
+)
 
-func NewField(name string, typ slang.Type) slang.Field {
+func NewField(name string, typ *types.Type) slang.Field {
 	return NewNameType(name, typ)
 }

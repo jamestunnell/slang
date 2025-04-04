@@ -8,7 +8,7 @@ import (
 type AssignStatementParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewAssignStatementParser() *AssignStatementParser {
@@ -19,7 +19,10 @@ func (p *AssignStatementParser) GetStatement() slang.Statement {
 	return p.Stmt
 }
 
-func (p *AssignStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *AssignStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	exprParser := NewExprParser(PrecedenceLOWEST)
 	if !p.RunSubParser(toks, exprParser) {
 		return false
@@ -37,6 +40,8 @@ func (p *AssignStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.Stmt = statements.NewAssign(exprParser.Expr, valueParser.Expr)
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }

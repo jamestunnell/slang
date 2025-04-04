@@ -6,7 +6,7 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type InvokePos struct {
+type Invoke struct {
 	*Base
 
 	Subject slang.Expression `json:"subject"`
@@ -22,7 +22,7 @@ func NewInvoke(
 	subject slang.Expression,
 	args ...*InvokeArg,
 ) slang.Expression {
-	return &InvokePos{
+	return &Invoke{
 		Base:    NewBase(slang.ExprINVOKE),
 		Subject: subject,
 		Args:    args,
@@ -37,8 +37,8 @@ func NewInvokeArgPos(val slang.Expression) *InvokeArg {
 	return &InvokeArg{Name: "", Value: val}
 }
 
-func (c *InvokePos) Equal(other slang.Expression) bool {
-	c2, ok := other.(*InvokePos)
+func (c *Invoke) Equal(other slang.Expression) bool {
+	c2, ok := other.(*Invoke)
 	if !ok {
 		return false
 	}

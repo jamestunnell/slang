@@ -11,7 +11,7 @@ import (
 type UseStatementParser struct {
 	*ParserBase
 
-	UseStmt *statements.Use
+	UseStmt *statements.Statement
 }
 
 var errEmptyUsePath = errors.New("use path is empty")
@@ -20,11 +20,14 @@ func NewUseStatementParser() *UseStatementParser {
 	return &UseStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *UseStatementParser) GetStatement() slang.Statement {
+func (p *UseStatementParser) GetStatement() *statements.Statement {
 	return p.UseStmt
 }
 
-func (p *UseStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *UseStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenUSE) {
 		return false
 	}
@@ -51,6 +54,8 @@ func (p *UseStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.UseStmt = statements.NewUse(parts...)
+
+	p.UseStmt.SetComment(comment)
 
 	return true
 }

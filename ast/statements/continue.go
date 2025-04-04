@@ -1,20 +1,15 @@
 package statements
 
-import (
-	"github.com/jamestunnell/slang"
-)
+import "github.com/jamestunnell/slang"
 
 type Continue struct {
-	*Base
 }
 
-func NewContinue() *Continue {
-	return &Continue{
-		Base: NewBase(slang.StatementCONTINUE),
-	}
+func NewContinue() *Statement {
+	return NewStatement(slang.StatementCONTINUE, &Continue{})
 }
 
-func (f *Continue) Equal(other slang.Statement) bool {
+func (f *Continue) IsEqual(other Core) bool {
 	_, ok := other.(*Continue)
 
 	return ok

@@ -1,8 +1,8 @@
 struct Car (
-    Make, Model, Color, VIN string
+    Make, Model, Color, VIN str
     Year int
-    Miles float
+    Miles flt
 )
 
-func Drive(c Car, miles float) {
+func Drive(c Car, miles flt) {
 }

@@ -1,7 +1,5 @@
 package slang
 
-import "encoding/json"
-
 type ExprType int
 
 type Expression interface {
@@ -11,8 +9,7 @@ type Expression interface {
 }
 
 const (
-	ExprACCESSELEM ExprType = iota
-	ExprACCESSMEMBER
+	ExprACCESSMEMBER ExprType = iota
 	ExprADD
 	ExprAND
 	ExprARRAY
@@ -28,7 +25,6 @@ const (
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
 	ExprINT
-	ExprKEY
 	ExprLESS
 	ExprLESSEQUAL
 	ExprMAP
@@ -42,6 +38,35 @@ const (
 	ExprSTR
 	ExprSTRUCT
 	ExprSTRUCTVAL
+
+	StrExprACCESSMEMBER = "ACCESSMEMBER"
+	StrExprADD          = "ADD"
+	StrExprAND          = "AND"
+	StrExprARRAY        = "ARRAY"
+	StrExprARRAYAUTO    = "ARRAYAUTO"
+	StrExprBOOL         = "BOOL"
+	StrExprCONCAT       = "CONCAT"
+	StrExprDIVIDE       = "DIVIDE"
+	StrExprEQUAL        = "EQUAL"
+	StrExprFLOAT        = "FLOAT"
+	StrExprFUNC         = "FUNC"
+	StrExprGREATER      = "GREATER"
+	StrExprGREATEREQUAL = "GREATEREQUAL"
+	StrExprIDENTIFIER   = "IDENTIFIER"
+	StrExprINT          = "INT"
+	StrExprINVOKE       = "INVOKE"
+	StrExprLESS         = "LESS"
+	StrExprLESSEQUAL    = "LESSEQUAL"
+	StrExprMAP          = "MAP"
+	StrExprMAPAUTO      = "MAPAUTO"
+	StrExprMULTIPLY     = "MULTIPLY"
+	StrExprNEGATIVE     = "NEGATIVE"
+	StrExprNOT          = "NOT"
+	StrExprNOTEQUAL     = "NOTEQUAL"
+	StrExprOR           = "OR"
+	StrExprSUBTRACT     = "SUBTRACT"
+	StrExprSTR          = "STR"
+	StrExprSTRUCT       = "STRUCT"
 )
 
 func ExpressionsEqual(a, b []Expression) bool {
@@ -58,70 +83,133 @@ func ExpressionsEqual(a, b []Expression) bool {
 	return true
 }
 
-func (et ExprType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(et.String())
+func ParseExprTypeStr(s string) (ExprType, bool) {
+	var et ExprType
+
+	switch s {
+	case StrExprACCESSMEMBER:
+		et = ExprACCESSMEMBER
+	case StrExprADD:
+		et = ExprADD
+	case StrExprAND:
+		et = ExprAND
+	case StrExprARRAY:
+		et = ExprARRAY
+	case StrExprARRAYAUTO:
+		et = ExprARRAYAUTO
+	case StrExprBOOL:
+		et = ExprBOOL
+	case StrExprCONCAT:
+		et = ExprCONCAT
+	case StrExprDIVIDE:
+		et = ExprDIVIDE
+	case StrExprEQUAL:
+		et = ExprEQUAL
+	case StrExprFLOAT:
+		et = ExprFLOAT
+	case StrExprFUNC:
+		et = ExprFUNC
+	case StrExprGREATER:
+		et = ExprGREATER
+	case StrExprGREATEREQUAL:
+		et = ExprGREATEREQUAL
+	case StrExprIDENTIFIER:
+		et = ExprIDENTIFIER
+	case StrExprINT:
+		et = ExprINT
+	case StrExprINVOKE:
+		et = ExprINVOKE
+	case StrExprLESS:
+		et = ExprLESS
+	case StrExprLESSEQUAL:
+		et = ExprLESSEQUAL
+	case StrExprMAP:
+		et = ExprMAP
+	case StrExprMAPAUTO:
+		et = ExprMAPAUTO
+	case StrExprMULTIPLY:
+		et = ExprMULTIPLY
+	case StrExprNEGATIVE:
+		et = ExprNEGATIVE
+	case StrExprNOT:
+		et = ExprNOT
+	case StrExprNOTEQUAL:
+		et = ExprNOTEQUAL
+	case StrExprOR:
+		et = ExprOR
+	case StrExprSUBTRACT:
+		et = ExprSUBTRACT
+	case StrExprSTR:
+		et = ExprSTR
+	case StrExprSTRUCT:
+		et = ExprSTRUCT
+	default:
+		return et, false
+	}
+
+	return et, true
 }
 
 func (et ExprType) String() string {
 	var str string
 
 	switch et {
-	case ExprACCESSELEM:
-		str = "ACCESSELEM"
 	case ExprACCESSMEMBER:
-		str = "ACCESSMEMBER"
+		str = StrExprACCESSMEMBER
 	case ExprADD:
-		str = "ADD"
+		str = StrExprADD
 	case ExprAND:
-		str = "AND"
+		str = StrExprAND
 	case ExprARRAY:
-		str = "ARRAY"
+		str = StrExprARRAY
+	case ExprARRAYAUTO:
+		str = StrExprARRAYAUTO
 	case ExprBOOL:
-		str = "BOOL"
+		str = StrExprBOOL
 	case ExprCONCAT:
-		str = "CONCAT"
+		str = StrExprCONCAT
 	case ExprDIVIDE:
-		str = "DIVIDE"
+		str = StrExprDIVIDE
 	case ExprEQUAL:
-		str = "EQUAL"
+		str = StrExprEQUAL
 	case ExprFLOAT:
-		str = "FLOAT"
+		str = StrExprFLOAT
 	case ExprFUNC:
-		str = "FUNC"
+		str = StrExprFUNC
 	case ExprGREATER:
-		str = "GREATER"
+		str = StrExprGREATER
 	case ExprGREATEREQUAL:
-		str = "GREATEREQUAL"
+		str = StrExprGREATEREQUAL
 	case ExprIDENTIFIER:
-		str = "IDENTIFIER"
+		str = StrExprIDENTIFIER
 	case ExprINT:
-		str = "INT"
+		str = StrExprINT
 	case ExprINVOKE:
-		str = "INVOKE"
-	case ExprKEY:
-		str = "KEY"
+		str = StrExprINVOKE
 	case ExprLESS:
-		str = "LESS"
+		str = StrExprLESS
 	case ExprLESSEQUAL:
-		str = "LESSEQUAL"
+		str = StrExprLESSEQUAL
 	case ExprMAP:
-		str = "MAP"
+		str = StrExprMAP
+	case ExprMAPAUTO:
+		str = StrExprMAPAUTO
 	case ExprMULTIPLY:
-		str = "MULTIPLY"
+		str = StrExprMULTIPLY
 	case ExprNEGATIVE:
-		str = "NEGATIVE"
+		str = StrExprNEGATIVE
 	case ExprNOT:
-		str = "NOT"
+		str = StrExprNOT
 	case ExprNOTEQUAL:
-		str = "NOTEQUAL"
+		str = StrExprNOTEQUAL
 	case ExprOR:
-		str = "OR"
+		str = StrExprOR
 	case ExprSUBTRACT:
-		str = "SUBTRACT"
+		str = StrExprSUBTRACT
 	case ExprSTR:
-		str = "STR"
+		str = StrExprSTR
 	case ExprSTRUCT:
-		str = "STRUCT"
+		str = StrExprSTRUCT
 	}
 
 	return str

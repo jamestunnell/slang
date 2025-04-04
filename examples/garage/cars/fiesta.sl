@@ -1,6 +1,6 @@
 use "../models"
 
-func NewFiesta(vin string, year int, color string) (car models.Car) {
+func NewFiesta(vin str, year int, color str) (car models.Car) {
     car = models.Car(
         Make: "Ford",
         Model: "Fiesta",

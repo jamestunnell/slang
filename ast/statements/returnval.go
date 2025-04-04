@@ -5,19 +5,16 @@ import (
 )
 
 type ReturnVal struct {
-	*Base
-
 	Value slang.Expression `json:"value"`
 }
 
-func NewReturnVal(value slang.Expression) *ReturnVal {
-	return &ReturnVal{
-		Base:  NewBase(slang.StatementRETURNVAL),
-		Value: value,
-	}
+func NewReturnVal(value slang.Expression) *Statement {
+	core := &ReturnVal{Value: value}
+
+	return NewStatement(slang.StatementRETURNVAL, core)
 }
 
-func (r *ReturnVal) Equal(other slang.Statement) bool {
+func (r *ReturnVal) IsEqual(other Core) bool {
 	r2, ok := other.(*ReturnVal)
 	if !ok {
 		return false

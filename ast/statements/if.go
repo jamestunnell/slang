@@ -5,21 +5,20 @@ import (
 )
 
 type If struct {
-	*Base
-
 	Condition slang.Expression `json:"condition"`
 	Block     slang.Statement  `json:"block"`
 }
 
-func NewIf(cond slang.Expression, ifBlock slang.Statement) *If {
-	return &If{
-		Base:      NewBase(slang.StatementIF),
-		Condition: cond,
-		Block:     ifBlock,
-	}
+func NewIf(
+	cond slang.Expression,
+	ifBlock slang.Statement,
+) *Statement {
+	core := &If{Condition: cond, Block: ifBlock}
+
+	return NewStatement(slang.StatementIF, core)
 }
 
-func (i *If) Equal(other slang.Statement) bool {
+func (i *If) IsEqual(other Core) bool {
 	i2, ok := other.(*If)
 	if !ok {
 		return false
@@ -29,7 +28,7 @@ func (i *If) Equal(other slang.Statement) bool {
 		return false
 	}
 
-	return i.Block.Equal(i2.Block)
+	return i.Block.IsEqual(i2.Block)
 }
 
 // func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {

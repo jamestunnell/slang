@@ -8,7 +8,7 @@ import (
 type BodyParserBase struct {
 	*ParserBase
 
-	Statements []slang.Statement
+	Statements []*statements.Statement
 
 	makeStmtParser MakeStmtParserFunc
 }
@@ -18,12 +18,12 @@ type MakeStmtParserFunc func(cur *slang.Token) StatementParser
 func NewBodyParserBase(makeStmtParser MakeStmtParserFunc) *BodyParserBase {
 	return &BodyParserBase{
 		ParserBase:     NewParserBase(),
-		Statements:     []slang.Statement{},
+		Statements:     []*statements.Statement{},
 		makeStmtParser: makeStmtParser,
 	}
 }
 
-func (p *BodyParserBase) GetStatements() []slang.Statement {
+func (p *BodyParserBase) GetStatements() []*statements.Statement {
 	return p.Statements
 }
 
@@ -36,7 +36,11 @@ func (p *BodyParserBase) parseStatement(
 		commentLines = append(commentLines, toks.Current().Value())
 
 		if toks.AdvanceSkip(slang.TokenNEWLINE) > 1 || toks.Current().Is(slang.TokenRBRACE) {
-			p.Statements = append(p.Statements, statements.NewComment(commentLines...))
+			stmt := statements.NewComment()
+
+			stmt.SetComment(makeComment(commentLines))
+
+			p.Statements = append(p.Statements, stmt)
 
 			return true
 		}
@@ -47,23 +51,17 @@ func (p *BodyParserBase) parseStatement(
 		return false
 	}
 
-	if !p.RunSubParser(toks, stmtParser) {
+	if !p.RunSubStmtParser(toks, makeComment(commentLines), stmtParser) {
 		return false
 	}
 
-	stmt := stmtParser.GetStatement()
-
-	if len(commentLines) > 0 {
-		stmt.SetComment(commentLines)
-	}
-
-	p.Statements = append(p.Statements, stmt)
+	p.Statements = append(p.Statements, stmtParser.GetStatement())
 
 	return true
 }
 
 func (p *BodyParserBase) Run(toks slang.TokenSeq) bool {
-	p.Statements = []slang.Statement{}
+	p.Statements = []*statements.Statement{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
 		return false

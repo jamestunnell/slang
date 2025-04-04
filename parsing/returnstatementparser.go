@@ -8,18 +8,21 @@ import (
 type ReturnStatementParser struct {
 	*ParserBase
 
-	ReturnStmt slang.Statement
+	ReturnStmt *statements.Statement
 }
 
 func NewReturnStatementParser() *ReturnStatementParser {
 	return &ReturnStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *ReturnStatementParser) GetStatement() slang.Statement {
+func (p *ReturnStatementParser) GetStatement() *statements.Statement {
 	return p.ReturnStmt
 }
 
-func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *ReturnStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenRETURN) {
 		return false
 	}
@@ -28,6 +31,8 @@ func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
 
 	if toks.Current().Is(slang.TokenNEWLINE, slang.TokenRBRACE) {
 		p.ReturnStmt = statements.NewReturn()
+
+		p.ReturnStmt.SetComment(comment)
 
 		return true
 	}
@@ -38,6 +43,8 @@ func (p *ReturnStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.ReturnStmt = statements.NewReturnVal(exprParser.Expr)
+
+	p.ReturnStmt.SetComment(comment)
 
 	return true
 }

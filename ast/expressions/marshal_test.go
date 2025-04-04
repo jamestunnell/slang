@@ -7,6 +7,7 @@ import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	e "github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -16,17 +17,17 @@ func TestMarshalJSON(t *testing.T) {
 	a := e.NewIdentifier("a")
 	b := e.NewIdentifier("b")
 
-	testMarshalJSON(t, e.NewAccessElem(a, b))
+	// testMarshalJSON(t, e.NewAccessElem(a, b))
 	testMarshalJSON(t, e.NewAccessMember(a, "myMember"))
 	testMarshalJSON(t, e.NewAdd(a, b))
-	// testMarshalJSON(t, e.NewArray(&ast.IntType{}, a, b))
+	// testMarshalJSON(t, e.NewArray(types.NewInt(), a, b))
 	testMarshalJSON(t, e.NewBool(true))
 	testMarshalJSON(t, e.NewDivide(a, b))
 	testMarshalJSON(t, e.NewEqual(a, b))
 	testMarshalJSON(t, e.NewFloat(0.0))
 	testMarshalJSON(t, e.NewFunc(
-		[]slang.Param{ast.NewParam("x", &ast.IntType{})},
-		[]slang.Param{ast.NewParam("result", &ast.BoolType{})},
+		[]slang.Param{ast.NewParam("x", types.NewInt())},
+		[]slang.Param{ast.NewParam("result", types.NewBool())},
 	))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgPos(e.NewInt(10))))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgKW("b", e.NewInt(10))))
@@ -43,8 +44,8 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, e.NewNotEqual(a, b))
 	testMarshalJSON(t, e.NewStr("hello"))
 	testMarshalJSON(t, e.NewStruct(
-		ast.NewParam("x", &ast.IntType{}),
-		ast.NewParam("y", &ast.StrType{}),
+		ast.NewParam("x", types.NewInt()),
+		ast.NewParam("y", types.NewStr()),
 	))
 	testMarshalJSON(t, e.NewSubtract(a, b))
 }

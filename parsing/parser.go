@@ -1,21 +1,23 @@
 package parsing
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/statements"
+)
 
 type Parser interface {
-	Run(slang.TokenSeq) bool
-
+	Run(toks slang.TokenSeq) bool
 	GetErrors() []*ParseErr
 }
 
 type BodyParser interface {
 	Parser
 
-	GetStatements() []slang.Statement
+	GetStatements() []*statements.Statement
 }
 
 type StatementParser interface {
-	Parser
-
-	GetStatement() slang.Statement
+	Run(toks slang.TokenSeq, comment string) bool
+	GetErrors() []*ParseErr
+	GetStatement() *statements.Statement
 }

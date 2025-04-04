@@ -8,18 +8,18 @@ import (
 type ConstStatementParser struct {
 	*ParserBase
 
-	ConstStmt *statements.Const
+	ConstStmt *statements.Statement
 }
 
 func NewConstStatementParser() *ConstStatementParser {
 	return &ConstStatementParser{ParserBase: NewParserBase()}
 }
 
-func (p *ConstStatementParser) GetStatement() slang.Statement {
+func (p *ConstStatementParser) GetStatement() *statements.Statement {
 	return p.ConstStmt
 }
 
-func (p *ConstStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *ConstStatementParser) Run(toks slang.TokenSeq, comment string) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenCONST) {
 		return false
 	}
@@ -47,6 +47,8 @@ func (p *ConstStatementParser) Run(toks slang.TokenSeq) bool {
 	}
 
 	p.ConstStmt = statements.NewConst(name, exprParser.Expr)
+
+	p.ConstStmt.SetComment(comment)
 
 	return true
 }

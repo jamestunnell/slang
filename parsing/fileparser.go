@@ -1,6 +1,8 @@
 package parsing
 
 import (
+	"strings"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
 )
@@ -8,18 +10,18 @@ import (
 type FileParser struct {
 	*ParserBase
 
-	Statements []slang.Statement
+	Statements []*statements.Statement
 }
 
 func NewFileParser() *FileParser {
 	return &FileParser{
 		ParserBase: NewParserBase(),
-		Statements: []slang.Statement{},
+		Statements: []*statements.Statement{},
 	}
 }
 
 func (p *FileParser) Run(toks slang.TokenSeq) bool {
-	p.Statements = []slang.Statement{}
+	p.Statements = []*statements.Statement{}
 
 	_ = toks.Skip(slang.TokenNEWLINE)
 
@@ -41,7 +43,11 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 		commentLines = append(commentLines, toks.Current().Value())
 
 		if toks.AdvanceSkip(slang.TokenNEWLINE) > 1 || toks.Current().Is(slang.TokenEOF) {
-			p.Statements = append(p.Statements, statements.NewComment(commentLines...))
+			stmt := statements.NewComment()
+
+			stmt.SetComment(makeComment(commentLines))
+
+			p.Statements = append(p.Statements, stmt)
 
 			return true
 		}
@@ -52,17 +58,11 @@ func (p *FileParser) parseStatement(toks slang.TokenSeq) bool {
 		return false
 	}
 
-	if !p.RunSubParser(toks, stmtParser) {
+	if !p.RunSubStmtParser(toks, makeComment(commentLines), stmtParser) {
 		return false
 	}
 
-	stmt := stmtParser.GetStatement()
-
-	if len(commentLines) > 0 {
-		stmt.SetComment(commentLines)
-	}
-
-	p.Statements = append(p.Statements, stmt)
+	p.Statements = append(p.Statements, stmtParser.GetStatement())
 
 	return true
 }
@@ -85,4 +85,8 @@ func (p *FileParser) makeStmtParser(cur *slang.Token) StatementParser {
 		cur, slang.TokenCONST, slang.TokenFUNC, slang.TokenSTRUCT, slang.TokenUSE, slang.TokenVAR)
 
 	return nil
+}
+
+func makeComment(lines []string) string {
+	return strings.Join(lines, " ")
 }

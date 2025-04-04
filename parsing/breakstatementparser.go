@@ -8,7 +8,7 @@ import (
 type BreakStatementParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewBreakStatementParser() *BreakStatementParser {
@@ -17,11 +17,14 @@ func NewBreakStatementParser() *BreakStatementParser {
 	}
 }
 
-func (p *BreakStatementParser) GetStatement() slang.Statement {
+func (p *BreakStatementParser) GetStatement() *statements.Statement {
 	return p.Stmt
 }
 
-func (p *BreakStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *BreakStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenBREAK) {
 		return false
 	}
@@ -29,6 +32,8 @@ func (p *BreakStatementParser) Run(toks slang.TokenSeq) bool {
 	toks.Advance()
 
 	p.Stmt = statements.NewBreak()
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }

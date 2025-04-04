@@ -1,25 +1,21 @@
 package statements
 
 import (
-	"golang.org/x/exp/slices"
-
 	"github.com/jamestunnell/slang"
+	"golang.org/x/exp/slices"
 )
 
 type Use struct {
-	*Base
-
 	PathParts []string `json:"pathParts"`
 }
 
-func NewUse(parts ...string) *Use {
-	return &Use{
-		Base:      NewBase(slang.StatementUSE),
-		PathParts: parts,
-	}
+func NewUse(parts ...string) *Statement {
+	core := &Use{PathParts: parts}
+
+	return NewStatement(slang.StatementUSE, core)
 }
 
-func (u *Use) Equal(other slang.Statement) bool {
+func (u *Use) IsEqual(other Core) bool {
 	u2, ok := other.(*Use)
 	if !ok {
 		return false

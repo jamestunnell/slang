@@ -5,21 +5,17 @@ import (
 )
 
 type Const struct {
-	*Base
-
 	Name  string           `json:"name"`
 	Value slang.Expression `json:"value"`
 }
 
-func NewConst(name string, val slang.Expression) *Const {
-	return &Const{
-		Base:  NewBase(slang.StatementCONST),
-		Name:  name,
-		Value: val,
-	}
+func NewConst(name string, val slang.Expression) *Statement {
+	core := &Const{Name: name, Value: val}
+
+	return NewStatement(slang.StatementCONST, core)
 }
 
-func (f *Const) Equal(other slang.Statement) bool {
+func (f *Const) IsEqual(other Core) bool {
 	f2, ok := other.(*Const)
 	if !ok {
 		return false

@@ -1,7 +1,10 @@
 package ast
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
+)
 
-func NewParam(name string, typ slang.Type) slang.Param {
+func NewParam(name string, typ *types.Type) slang.Param {
 	return NewNameType(name, typ)
 }

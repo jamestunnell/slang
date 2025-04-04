@@ -6,23 +6,24 @@ import (
 )
 
 type Block struct {
-	*Base
-
-	Statements []slang.Statement
+	Statements []*Statement `json:"statements"`
 }
 
-func NewBlock(stmts ...slang.Statement) *Block {
-	return &Block{
-		Base:       NewBase(slang.StatementBLOCK),
-		Statements: stmts,
-	}
+func NewBlock(stmts ...*Statement) *Statement {
+	core := &Block{Statements: stmts}
+
+	return NewStatement(slang.StatementBLOCK, core)
 }
 
-func (b *Block) Equal(other slang.Statement) bool {
+func (b *Block) IsEqual(other Core) bool {
 	b2, ok := other.(*Block)
 	if !ok {
 		return false
 	}
 
-	return slices.EqualFunc(b.Statements, b2.Statements, slang.StatementsEqual)
+	return slices.EqualFunc(b.Statements, b2.Statements, statementsEqual)
+}
+
+func statementsEqual(a, b *Statement) bool {
+	return slang.StatementsEqual(a, b)
 }

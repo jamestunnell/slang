@@ -8,7 +8,7 @@ import (
 type IfStatementParser struct {
 	*ParserBase
 
-	Stmt slang.Statement
+	Stmt *statements.Statement
 }
 
 func NewIfStatementParser() *IfStatementParser {
@@ -17,11 +17,14 @@ func NewIfStatementParser() *IfStatementParser {
 	}
 }
 
-func (p *IfStatementParser) GetStatement() slang.Statement {
+func (p *IfStatementParser) GetStatement() *statements.Statement {
 	return p.Stmt
 }
 
-func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
+func (p *IfStatementParser) Run(
+	toks slang.TokenSeq,
+	comment string,
+) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenIF) {
 		return false
 	}
@@ -43,6 +46,8 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 	if !toks.Current().Is(slang.TokenELSE) {
 		p.Stmt = statements.NewIf(condParser.Expr, ifBlock)
 
+		p.Stmt.SetComment(comment)
+
 		return true
 	}
 
@@ -56,6 +61,8 @@ func (p *IfStatementParser) Run(toks slang.TokenSeq) bool {
 	elseBlock := statements.NewBlock(elseBodyParser.Statements...)
 
 	p.Stmt = statements.NewIfElse(condParser.Expr, ifBlock, elseBlock)
+
+	p.Stmt.SetComment(comment)
 
 	return true
 }
