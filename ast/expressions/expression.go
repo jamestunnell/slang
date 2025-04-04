@@ -12,8 +12,8 @@ import (
 )
 
 type Expression struct {
-	Type slang.ExprType
-	Core Core
+	Type slang.ExprType `json:"-"`
+	Core Core           `json:"-"`
 }
 
 type Core interface {
@@ -143,6 +143,10 @@ func (s *Expression) UnmarshalJSON(d []byte) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal core: %w", err)
+	}
+
+	if core == nil {
+		return fmt.Errorf("unhandled expression type %s", result.String())
 	}
 
 	s.Core = core

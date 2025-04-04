@@ -12,8 +12,8 @@ import (
 )
 
 type Type struct {
-	Type slang.TypeType
-	Core Core
+	Type slang.TypeType `json:"-"`
+	Core Core           `json:"-"`
 }
 
 type Core interface {
@@ -104,6 +104,10 @@ func (s *Type) UnmarshalJSON(d []byte) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal core: %w", err)
+	}
+
+	if core == nil {
+		return fmt.Errorf("unhandled type type %s", result.String())
 	}
 
 	s.Core = core

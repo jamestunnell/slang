@@ -6,8 +6,6 @@ package expressions
 // )
 
 // type Array struct {
-// 	*Base
-
 // 	ValueType slang.Type         `json:"type"`
 // 	Values    []slang.Expression `json:"values"`
 // }

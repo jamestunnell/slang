@@ -4,14 +4,15 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
 )
 
 type Struct struct {
-	Name   string        `json:"name"`
-	Fields []slang.Field `json:"fields"`
+	Name   string            `json:"name"`
+	Fields []*types.NameType `json:"fields"`
 }
 
-func NewStruct(name string, fields ...slang.Field) *Statement {
+func NewStruct(name string, fields ...*types.NameType) *Statement {
 	core := &Struct{Name: name, Fields: fields}
 
 	return NewStatement(slang.StatementSTRUCT, core)
@@ -27,7 +28,7 @@ func (c *Struct) IsEqual(other Core) bool {
 		return false
 	}
 
-	return slices.EqualFunc(c.Fields, c2.Fields, slang.NameTypesEqual)
+	return slices.EqualFunc(c.Fields, c2.Fields, nameTypesEqual)
 }
 
 func (s *Struct) GetName() string {
@@ -35,5 +36,11 @@ func (s *Struct) GetName() string {
 }
 
 func (s *Struct) GetFields() []slang.Field {
-	return s.Fields
+	fields := make([]slang.Field, len(s.Fields))
+
+	for i, f := range s.Fields {
+		fields[i] = f
+	}
+
+	return fields
 }

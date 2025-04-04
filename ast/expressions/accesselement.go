@@ -5,8 +5,6 @@ package expressions
 // )
 
 // type AccessElem struct {
-// 	*Base
-
 // 	Container slang.Expression `json:"container"`
 // 	Key       slang.Expression `json:"key"`
 // }

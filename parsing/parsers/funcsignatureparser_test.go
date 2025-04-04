@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
@@ -17,8 +16,8 @@ import (
 type funcSigParserSuccessTest struct {
 	TestName  string
 	Input     string
-	InParams  []slang.Param
-	OutParams []slang.Param
+	InParams  []*types.NameType
+	OutParams []*types.NameType
 }
 
 func TestFuncSignatureParserFailure(t *testing.T) {
@@ -30,56 +29,56 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		{
 			TestName:  "empty sig",
 			Input:     `()`,
-			InParams:  []slang.Param{},
-			OutParams: []slang.Param{},
+			InParams:  []*types.NameType{},
+			OutParams: []*types.NameType{},
 		},
 		{
 			TestName:  "one param",
 			Input:     `(x flt)`,
-			InParams:  []slang.Param{types.NewNameType("x", types.NewFlt())},
-			OutParams: []slang.Param{},
+			InParams:  []*types.NameType{types.NewNameType("x", types.NewFlt())},
+			OutParams: []*types.NameType{},
 		},
 		{
 			TestName: "two params",
 			Input:    `(a int, b mymodule.MyType)`,
-			InParams: []slang.Param{
+			InParams: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewStruct("mymodule", "MyType")),
 			},
-			OutParams: []slang.Param{},
+			OutParams: []*types.NameType{},
 		},
 		{
 			TestName: "two multi-name",
 			Input:    `(a, b int, c, d str)`,
-			InParams: []slang.Param{
+			InParams: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewInt()),
 				types.NewNameType("c", types.NewStr()),
 				types.NewNameType("d", types.NewStr()),
 			},
-			OutParams: []slang.Param{},
+			OutParams: []*types.NameType{},
 		},
 		{
 			TestName:  "empty in and out params both with parens",
 			Input:     `() ()`,
-			InParams:  []slang.Param{},
-			OutParams: []slang.Param{},
+			InParams:  []*types.NameType{},
+			OutParams: []*types.NameType{},
 		},
 		{
 			TestName: "one in param, one out param",
 			Input:    `(a int) (b int)`,
-			InParams: []slang.Param{
+			InParams: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 			},
-			OutParams: []slang.Param{
+			OutParams: []*types.NameType{
 				types.NewNameType("b", types.NewInt()),
 			},
 		},
 		{
 			TestName: "two out params",
 			Input:    `() (t my.Type, e err)`,
-			InParams: []slang.Param{},
-			OutParams: []slang.Param{
+			InParams: []*types.NameType{},
+			OutParams: []*types.NameType{
 				types.NewNameType("t", types.NewStruct("my", "Type")),
 				types.NewNameType("e", types.NewErr()),
 			},

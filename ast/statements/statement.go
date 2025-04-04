@@ -13,9 +13,9 @@ import (
 )
 
 type Statement struct {
-	Type    slang.StatementType
-	Comment string
-	Core    Core
+	Type    slang.StatementType `json:"-"`
+	Comment string              `json:"-"`
+	Core    Core                `json:"-"`
 }
 
 type Core interface {
@@ -126,6 +126,8 @@ func (s *Statement) UnmarshalJSON(d []byte) error {
 		core, err = jsonutil.UnmarshalAs[Return](d)
 	case slang.StatementRETURNVAL:
 		core, err = jsonutil.UnmarshalAs[ReturnVal](d)
+	case slang.StatementSTRUCT:
+		core, err = jsonutil.UnmarshalAs[Struct](d)
 	case slang.StatementUSE:
 		core, err = jsonutil.UnmarshalAs[Use](d)
 	case slang.StatementVAR:
@@ -134,6 +136,10 @@ func (s *Statement) UnmarshalJSON(d []byte) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal core: %w", err)
+	}
+
+	if core == nil {
+		return fmt.Errorf("unhandled statement type %s", result.String())
 	}
 
 	s.Core = core

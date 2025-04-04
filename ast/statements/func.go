@@ -4,24 +4,25 @@ import (
 	"slices"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
 )
 
 type Func struct {
-	Name       string        `json:"name"`
-	Inputs     []slang.Param `json:"inputs"`
-	Outputs    []slang.Param `json:"outputs"`
-	Statements []*Statement  `json:"statements"`
+	Name       string            `json:"name"`
+	Inputs     []*types.NameType `json:"inputs"`
+	Outputs    []*types.NameType `json:"outputs"`
+	Statements []*Statement      `json:"statements"`
 }
 
 func NewFunc(
 	name string,
-	inParams, outParams []slang.Param,
+	inputs, outputs []*types.NameType,
 	statements ...*Statement,
 ) *Statement {
 	core := &Func{
 		Name:       name,
-		Inputs:     inParams,
-		Outputs:    outParams,
+		Inputs:     inputs,
+		Outputs:    outputs,
 		Statements: statements,
 	}
 
@@ -38,11 +39,11 @@ func (f *Func) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Inputs, f2.Inputs, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Inputs, f2.Inputs, nameTypesEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Outputs, f2.Outputs, slang.NameTypesEqual) {
+	if !slices.EqualFunc(f.Outputs, f2.Outputs, nameTypesEqual) {
 		return false
 	}
 
@@ -58,9 +59,25 @@ func (f *Func) GetName() string {
 }
 
 func (f *Func) GetInputs() []slang.Param {
-	return f.Inputs
+	params := make([]slang.Field, len(f.Inputs))
+
+	for i, param := range f.Inputs {
+		params[i] = param
+	}
+
+	return params
 }
 
 func (f *Func) GetOutputs() []slang.Param {
-	return f.Outputs
+	params := make([]slang.Field, len(f.Outputs))
+
+	for i, param := range f.Outputs {
+		params[i] = param
+	}
+
+	return params
+}
+
+func nameTypesEqual(a, b *types.NameType) bool {
+	return a.IsEqual(b)
 }

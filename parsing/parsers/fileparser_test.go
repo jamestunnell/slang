@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
@@ -40,8 +39,8 @@ func TestFileParserGlobalVars(t *testing.T) {
 		statements.NewVar("x", types.NewInt()),
 		statements.NewVar("y", types.NewInt()),
 		statements.NewFunc("init",
-			[]slang.Param{},
-			[]slang.Param{},
+			[]*types.NameType{},
+			[]*types.NameType{},
 			statements.NewAssign(
 				expressions.NewIdentifier("x"),
 				expressions.NewInvoke(
@@ -56,8 +55,8 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		),
 		statements.NewFunc("GetX",
-			[]slang.Param{},
-			[]slang.Param{
+			[]*types.NameType{},
+			[]*types.NameType{
 				types.NewNameType("result", types.NewInt()),
 			},
 			statements.NewAssign(
@@ -66,8 +65,8 @@ func TestFileParserGlobalVars(t *testing.T) {
 			),
 		),
 		statements.NewFunc("GetY",
-			[]slang.Param{},
-			[]slang.Param{
+			[]*types.NameType{},
+			[]*types.NameType{
 				types.NewNameType("result", types.NewInt()),
 			},
 			statements.NewAssign(
@@ -128,11 +127,11 @@ func TestFileParserStructWithTest(t *testing.T) {
 		statements.NewStruct("Accumulator",
 			types.NewNameType("total", types.NewFlt())),
 		statements.NewFunc("Add",
-			[]slang.Param{
+			[]*types.NameType{
 				types.NewNameType("a", types.NewStruct("", "Accumulator")),
 				types.NewNameType("x", types.NewFlt()),
 			},
-			[]slang.Param{},
+			[]*types.NameType{},
 			statements.NewAssign(
 				expressions.NewAccessMember(
 					expressions.NewIdentifier("a"), "total"),
@@ -144,11 +143,11 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("Mul",
-			[]slang.Param{
+			[]*types.NameType{
 				types.NewNameType("a", types.NewStruct("", "Accumulator")),
 				types.NewNameType("x", types.NewFlt()),
 			},
-			[]slang.Param{},
+			[]*types.NameType{},
 			statements.NewAssign(
 				expressions.NewAccessMember(
 					expressions.NewIdentifier("a"), "total"),
@@ -160,10 +159,10 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("Total",
-			[]slang.Param{
+			[]*types.NameType{
 				types.NewNameType("a", types.NewStruct("", "Accumulator")),
 			},
-			[]slang.Param{
+			[]*types.NameType{
 				types.NewNameType("result", types.NewFlt()),
 			},
 			statements.NewAssign(
@@ -173,8 +172,8 @@ func TestFileParserStructWithTest(t *testing.T) {
 			),
 		),
 		statements.NewFunc("TestAccumulator",
-			[]slang.Param{types.NewNameType("t", types.NewStruct("test", "Test"))},
-			[]slang.Param{},
+			[]*types.NameType{types.NewNameType("t", types.NewStruct("test", "Test"))},
+			[]*types.NameType{},
 			statements.NewAssign(
 				expressions.NewIdentifier("accum"),
 				expressions.NewInvoke(

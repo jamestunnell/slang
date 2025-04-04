@@ -6,8 +6,6 @@ package expressions
 // )
 
 // type Map struct {
-// 	*Base
-
 // 	KeyType   slang.Type         `json:"keyType"`
 // 	Keys      []slang.Expression `json:"keys"`
 // 	ValueType slang.Type         `json:"valueType"`

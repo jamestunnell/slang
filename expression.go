@@ -69,19 +69,19 @@ const (
 	StrExprSTRUCT       = "STRUCT"
 )
 
-func ExpressionsEqual(a, b []Expression) bool {
-	if len(a) != len(b) {
-		return false
-	}
+// func ExpressionsEqual(a, b []Expression) bool {
+// 	if len(a) != len(b) {
+// 		return false
+// 	}
 
-	for idx, expr := range a {
-		if !expr.IsEqual(b[idx]) {
-			return false
-		}
-	}
+// 	for idx, expr := range a {
+// 		if !expr.IsEqual(b[idx]) {
+// 			return false
+// 		}
+// 	}
 
-	return true
-}
+// 	return true
+// }
 
 func ParseExprTypeStr(s string) (ExprType, bool) {
 	var et ExprType

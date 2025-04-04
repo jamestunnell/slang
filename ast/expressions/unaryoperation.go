@@ -5,10 +5,10 @@ import (
 )
 
 type UnaryOperation struct {
-	Value slang.Expression `json:"value"`
+	Value *Expression `json:"value"`
 }
 
-func NewUnaryOperation(typ slang.ExprType, val slang.Expression) *Expression {
+func NewUnaryOperation(typ slang.ExprType, val *Expression) *Expression {
 	return NewExpression(typ, &UnaryOperation{Value: val})
 }
 

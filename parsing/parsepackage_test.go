@@ -3,10 +3,11 @@ package parsing_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/jamestunnell/slang/examples"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestParsePackag_CalculatorExample(t *testing.T) {
@@ -24,5 +25,6 @@ func TestParsePackag_GarageExample(t *testing.T) {
 	modules, err := parsing.ParsePackage(examples.Garage(), fp)
 
 	assert.NoError(t, err)
-	assert.Greater(t, len(modules), 1)
+	assert.Len(t, modules, 2)
+
 }

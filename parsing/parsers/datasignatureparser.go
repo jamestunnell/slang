@@ -8,18 +8,18 @@ import (
 type DataSignatureParser struct {
 	*ParserBase
 
-	NameTypes []slang.NameType
+	NameTypes []*types.NameType
 }
 
 func NewDataSignatureParser() *DataSignatureParser {
 	return &DataSignatureParser{
 		ParserBase: NewParserBase(),
-		NameTypes:  []slang.NameType{},
+		NameTypes:  []*types.NameType{},
 	}
 }
 
 func (p *DataSignatureParser) Run(toks slang.TokenSeq) bool {
-	p.NameTypes = []slang.NameType{}
+	p.NameTypes = []*types.NameType{}
 
 	if !p.ExpectToken(toks.Current(), slang.TokenLPAREN) {
 		return false

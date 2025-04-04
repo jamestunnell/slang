@@ -7,17 +7,17 @@ import (
 )
 
 type Invoke struct {
-	Subject slang.Expression `json:"subject"`
-	Args    []*InvokeArg     `json:"args"`
+	Subject *Expression  `json:"subject"`
+	Args    []*InvokeArg `json:"args"`
 }
 
 type InvokeArg struct {
-	Name  string           `json:"name,omitempty"`
-	Value slang.Expression `json:"value"`
+	Name  string      `json:"name,omitempty"`
+	Value *Expression `json:"value"`
 }
 
 func NewInvoke(
-	subject slang.Expression,
+	subject *Expression,
 	args ...*InvokeArg,
 ) *Expression {
 	return NewExpression(slang.ExprINVOKE, &Invoke{
@@ -26,11 +26,11 @@ func NewInvoke(
 	})
 }
 
-func NewInvokeArgKW(name string, val slang.Expression) *InvokeArg {
+func NewInvokeArgKW(name string, val *Expression) *InvokeArg {
 	return &InvokeArg{Name: name, Value: val}
 }
 
-func NewInvokeArgPos(val slang.Expression) *InvokeArg {
+func NewInvokeArgPos(val *Expression) *InvokeArg {
 	return &InvokeArg{Name: "", Value: val}
 }
 

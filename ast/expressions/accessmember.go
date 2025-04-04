@@ -5,11 +5,11 @@ import (
 )
 
 type AccessMember struct {
-	Receiver slang.Expression `json:"receiver"`
-	Member   string           `json:"member"`
+	Receiver *Expression `json:"receiver"`
+	Member   string      `json:"member"`
 }
 
-func NewAccessMember(object slang.Expression, member string) *Expression {
+func NewAccessMember(object *Expression, member string) *Expression {
 	return NewExpression(slang.ExprACCESSMEMBER, &AccessMember{
 		Receiver: object,
 		Member:   member,

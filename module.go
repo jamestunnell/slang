@@ -1,10 +1,10 @@
 package slang
 
 type Module interface {
-	GetPath() string
-	GetStructs() []Structure
+	GetPathParts() []string
+	GetStructures() []Structure
 	GetFunctions() []Function
-
+	IsEqual(Module) bool
 	// GetInterfaceNames() []string
 	// GetInterface(name string) Interface
 

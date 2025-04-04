@@ -6,8 +6,6 @@ package expressions
 // )
 
 // type ArrayAuto struct {
-// 	*Base
-
 // 	Values []slang.Expression `json:"values"`
 // }
 

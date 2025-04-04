@@ -8,7 +8,7 @@ type Not struct {
 	*UnaryOperation
 }
 
-func NewNot(val slang.Expression) *Expression {
+func NewNot(val *Expression) *Expression {
 	return NewUnaryOperation(slang.ExprNOT, val)
 }
 

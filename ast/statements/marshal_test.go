@@ -20,7 +20,7 @@ func TestMarshalJSON(t *testing.T) {
 		types.NewNameType("y", types.NewStr()),
 		types.NewNameType("z", types.NewStr()),
 	))
-	testMarshalJSON(t, statements.NewFunc("myfunc", []slang.Param{}, []slang.Param{}))
+	testMarshalJSON(t, statements.NewFunc("myfunc", []*types.NameType{}, []*types.NameType{}))
 	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInt(7)))
 	testMarshalJSON(t, statements.NewUse("my", "path"))
 }

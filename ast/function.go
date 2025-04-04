@@ -1,12 +1,15 @@
 package ast
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
+)
 
 type Function struct {
 	Name    string
 	Comment string
-	Inputs  []slang.Param
-	Outputs []slang.Param
+	Inputs  []*types.NameType
+	Outputs []*types.NameType
 }
 
 func (f *Function) GetName() string {
@@ -18,9 +21,21 @@ func (f *Function) GetComment() string {
 }
 
 func (f *Function) GetInputs() []slang.Param {
-	return f.Inputs
+	params := make([]slang.Field, len(f.Inputs))
+
+	for i, p := range f.Inputs {
+		params[i] = p
+	}
+
+	return params
 }
 
 func (f *Function) GetOutputs() []slang.Param {
-	return f.Outputs
+	params := make([]slang.Field, len(f.Outputs))
+
+	for i, p := range f.Outputs {
+		params[i] = p
+	}
+
+	return params
 }

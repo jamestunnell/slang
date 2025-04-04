@@ -2,6 +2,7 @@ package parsers
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/parsing"
 )
 
@@ -9,11 +10,11 @@ type ExprParser struct {
 	*ParserBase
 
 	prec parsing.Precedence
-	Expr slang.Expression
+	Expr *expressions.Expression
 }
 
-type prefixParseFn func(slang.TokenSeq) slang.Expression
-type infixParseFn func(slang.TokenSeq, slang.Expression) slang.Expression
+type prefixParseFn func(slang.TokenSeq) *expressions.Expression
+type infixParseFn func(slang.TokenSeq, *expressions.Expression) *expressions.Expression
 
 func NewExprParser(prec parsing.Precedence) *ExprParser {
 	return &ExprParser{

@@ -6,8 +6,6 @@ package expressions
 // )
 
 // type MapAuto struct {
-// 	*Base
-
 // 	Keys   []slang.Expression `json:"keys"`
 // 	Values []slang.Expression `json:"values"`
 // }

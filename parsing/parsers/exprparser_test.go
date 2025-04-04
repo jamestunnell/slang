@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
@@ -149,7 +148,7 @@ func str(val string) *expressions.Expression {
 	return expressions.NewStr(val)
 }
 
-func invokePos(fn slang.Expression, argVals ...*expressions.Expression) *expressions.Expression {
+func invokePos(fn *expressions.Expression, argVals ...*expressions.Expression) *expressions.Expression {
 	args := make([]*expressions.InvokeArg, len(argVals))
 
 	for i, val := range argVals {

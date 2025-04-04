@@ -25,8 +25,8 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, e.NewEqual(a, b))
 	testMarshalJSON(t, e.NewFloat(0.0))
 	testMarshalJSON(t, e.NewFunc(
-		[]slang.Param{types.NewNameType("x", types.NewInt())},
-		[]slang.Param{types.NewNameType("result", types.NewBool())},
+		[]*types.NameType{types.NewNameType("x", types.NewInt())},
+		[]*types.NameType{types.NewNameType("result", types.NewBool())},
 	))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgPos(e.NewInt(10))))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgKW("b", e.NewInt(10))))

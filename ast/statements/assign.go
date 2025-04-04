@@ -2,17 +2,15 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 )
 
 type Assign struct {
-	Target slang.Expression `json:"target"`
-	Value  slang.Expression `json:"value"`
+	Target *expressions.Expression `json:"target"`
+	Value  *expressions.Expression `json:"value"`
 }
 
-func NewAssign(
-	target slang.Expression,
-	val slang.Expression,
-) *Statement {
+func NewAssign(target, val *expressions.Expression) *Statement {
 	core := &Assign{Target: target, Value: val}
 
 	return NewStatement(slang.StatementASSIGN, core)

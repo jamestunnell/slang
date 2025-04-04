@@ -5,11 +5,11 @@ import (
 )
 
 type BinaryOperation struct {
-	Left  slang.Expression `json:"left"`
-	Right slang.Expression `json:"right"`
+	Left  *Expression `json:"left"`
+	Right *Expression `json:"right"`
 }
 
-func NewBinaryOperation(typ slang.ExprType, Left, Right slang.Expression) *Expression {
+func NewBinaryOperation(typ slang.ExprType, Left, Right *Expression) *Expression {
 	return NewExpression(typ, &BinaryOperation{
 		Left:  Left,
 		Right: Right,

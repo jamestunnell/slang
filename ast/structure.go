@@ -1,11 +1,14 @@
 package ast
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
+)
 
 type Structure struct {
 	Name    string
 	Comment string
-	Fields  []slang.Field
+	Fields  []*types.NameType
 }
 
 func (s *Structure) GetName() string {
@@ -17,5 +20,11 @@ func (s *Structure) GetComment() string {
 }
 
 func (s *Structure) GetFields() []slang.Field {
-	return s.Fields
+	fields := make([]slang.Field, len(s.Fields))
+
+	for i, f := range s.Fields {
+		fields[i] = f
+	}
+
+	return fields
 }

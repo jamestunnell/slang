@@ -8,7 +8,7 @@ type Negative struct {
 	*UnaryOperation
 }
 
-func NewNegative(val slang.Expression) *Expression {
+func NewNegative(val *Expression) *Expression {
 	return NewUnaryOperation(slang.ExprNEGATIVE, val)
 }
 

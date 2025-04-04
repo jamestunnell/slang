@@ -2,26 +2,27 @@ package parsers
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
 )
 
 type FuncSignatureParser struct {
 	*ParserBase
 
-	InParams  []slang.Param
-	OutParams []slang.Param
+	InParams  []*types.NameType
+	OutParams []*types.NameType
 }
 
 func NewFuncSignatureParser() *FuncSignatureParser {
 	return &FuncSignatureParser{
 		ParserBase: NewParserBase(),
-		InParams:   []slang.Param{},
-		OutParams:  []slang.Param{},
+		InParams:   []*types.NameType{},
+		OutParams:  []*types.NameType{},
 	}
 }
 
 func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
-	p.InParams = []slang.Param{}
-	p.OutParams = []slang.Param{}
+	p.InParams = []*types.NameType{}
+	p.OutParams = []*types.NameType{}
 
 	inputSigParser := NewDataSignatureParser()
 	if !p.RunSubParser(toks, inputSigParser) {
@@ -30,7 +31,7 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 
 	toks.Skip(slang.TokenNEWLINE)
 
-	outParams := []slang.Param{}
+	outParams := []*types.NameType{}
 
 	if toks.Current().Is(slang.TokenLPAREN) {
 		outputSigParser := NewDataSignatureParser()
@@ -52,7 +53,7 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 
 	// toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	// p.Params = []slang.Param{}
+	// p.Params = []*types.NameType{}
 	// p.ReturnTypes = []slang.Type{}
 
 	// if !toks.Current().Is(slang.TokenRPAREN) && !p.parseParam(toks) {

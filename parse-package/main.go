@@ -7,7 +7,6 @@ import (
 	"path"
 
 	arg "github.com/alexflint/go-arg"
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
@@ -46,10 +45,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	pkgInfo := &slang.PackageInfo{
-		Name: path.Base(args.PackageRoot),
-	}
-	pkg := ast.NewPackage(pkgInfo, modules...)
+	pkgName := path.Base(args.PackageRoot)
+	pkg := ast.NewPackage(pkgName, modules...)
 
 	d, err := json.MarshalIndent(pkg, "", "  ")
 	if err != nil {

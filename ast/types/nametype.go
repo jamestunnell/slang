@@ -23,3 +23,7 @@ func (p *NameType) GetName() string {
 func (p *NameType) GetType() slang.Type {
 	return p.Type
 }
+
+func (p *NameType) IsEqual(other *NameType) bool {
+	return p.Name == other.Name && p.Type.IsEqual(other.Type)
+}

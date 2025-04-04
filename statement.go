@@ -29,26 +29,24 @@ const (
 	StatementRETURN
 	StatementRETURNVAL
 	StatementSTRUCT
-	StatementSTRUCTFIELD
 	StatementUSE
 
-	StrStatementASSIGN      = "ASSIGN"
-	StrStatementBREAK       = "BREAK"
-	StrStatementCOMMENT     = "COMMENT"
-	StrStatementCONST       = "CONST"
-	StrStatementCONTINUE    = "CONTINUE"
-	StrStatementEXPRESSION  = "EXPRESSION"
-	StrStatementFOREACH     = "FOREACH"
-	StrStatementIF          = "IF"
-	StrStatementIFELSE      = "IFELSE"
-	StrStatementFUNC        = "FUNC"
-	StrStatementVAR         = "VAR"
-	StrStatementMETHOD      = "METHOD"
-	StrStatementRETURN      = "RETURN"
-	StrStatementRETURNVAL   = "RETURNVAL"
-	StrStatementSTRUCT      = "STRUCT"
-	StrStatementSTRUCTFIELD = "STRUCTFIELD"
-	StrStatementUSE         = "USE"
+	StrStatementASSIGN     = "ASSIGN"
+	StrStatementBREAK      = "BREAK"
+	StrStatementCOMMENT    = "COMMENT"
+	StrStatementCONST      = "CONST"
+	StrStatementCONTINUE   = "CONTINUE"
+	StrStatementEXPRESSION = "EXPRESSION"
+	StrStatementFOREACH    = "FOREACH"
+	StrStatementIF         = "IF"
+	StrStatementIFELSE     = "IFELSE"
+	StrStatementFUNC       = "FUNC"
+	StrStatementVAR        = "VAR"
+	StrStatementMETHOD     = "METHOD"
+	StrStatementRETURN     = "RETURN"
+	StrStatementRETURNVAL  = "RETURNVAL"
+	StrStatementSTRUCT     = "STRUCT"
+	StrStatementUSE        = "USE"
 )
 
 func StatementsEqual(a, b Statement) bool {
@@ -87,8 +85,6 @@ func ParseStatementTypeStr(s string) (StatementType, bool) {
 		st = StatementRETURNVAL
 	case StrStatementSTRUCT:
 		st = StatementSTRUCT
-	case StrStatementSTRUCTFIELD:
-		st = StatementSTRUCTFIELD
 	case StrStatementUSE:
 		st = StatementUSE
 	case StrStatementVAR:
@@ -136,8 +132,6 @@ func (st StatementType) String() string {
 		str = StrStatementRETURNVAL
 	case StatementSTRUCT:
 		str = StrStatementSTRUCT
-	case StatementSTRUCTFIELD:
-		str = StrStatementSTRUCTFIELD
 	case StatementUSE:
 		str = StrStatementUSE
 	case StatementVAR:

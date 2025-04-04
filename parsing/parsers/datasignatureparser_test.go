@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
@@ -16,7 +15,7 @@ import (
 type dataSigParserSuccessTest struct {
 	TestName  string
 	Input     string
-	NameTypes []slang.NameType
+	NameTypes []*types.NameType
 }
 
 func TestDataSignatureParserFailure(t *testing.T) {
@@ -28,17 +27,17 @@ func TestDataSignatureParser_SuccessOneline(t *testing.T) {
 		{
 			TestName:  "empty sig",
 			Input:     `()`,
-			NameTypes: []slang.NameType{},
+			NameTypes: []*types.NameType{},
 		},
 		{
 			TestName:  "one param",
 			Input:     `(x flt)`,
-			NameTypes: []slang.NameType{types.NewNameType("x", types.NewFlt())},
+			NameTypes: []*types.NameType{types.NewNameType("x", types.NewFlt())},
 		},
 		{
 			TestName: "two params",
 			Input:    `(a int, b mymodule.MyType)`,
-			NameTypes: []slang.NameType{
+			NameTypes: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewStruct("mymodule", "MyType")),
 			},
@@ -46,7 +45,7 @@ func TestDataSignatureParser_SuccessOneline(t *testing.T) {
 		{
 			TestName: "two multi-name",
 			Input:    `(a, b int, c, d str)`,
-			NameTypes: []slang.NameType{
+			NameTypes: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewInt()),
 				types.NewNameType("c", types.NewStr()),
@@ -68,14 +67,14 @@ func TestDataSignatureParser_SuccessMultiline(t *testing.T) {
 			
 			
 			)`,
-			NameTypes: []slang.NameType{},
+			NameTypes: []*types.NameType{},
 		},
 		{
 			TestName: "one param",
 			Input: `(
 				x flt
 			)`,
-			NameTypes: []slang.NameType{types.NewNameType("x", types.NewFlt())},
+			NameTypes: []*types.NameType{types.NewNameType("x", types.NewFlt())},
 		},
 		{
 			TestName: "two params",
@@ -83,7 +82,7 @@ func TestDataSignatureParser_SuccessMultiline(t *testing.T) {
 				a int
 				b mymodule.MyType
 			)`,
-			NameTypes: []slang.NameType{
+			NameTypes: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewStruct("mymodule", "MyType")),
 			},
@@ -94,7 +93,7 @@ func TestDataSignatureParser_SuccessMultiline(t *testing.T) {
 				a, b int
 				c, d str
 			)`,
-			NameTypes: []slang.NameType{
+			NameTypes: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 				types.NewNameType("b", types.NewInt()),
 				types.NewNameType("c", types.NewStr()),
@@ -107,7 +106,7 @@ func TestDataSignatureParser_SuccessMultiline(t *testing.T) {
 			    // a comment
 				a int
 			)`,
-			NameTypes: []slang.NameType{
+			NameTypes: []*types.NameType{
 				types.NewNameType("a", types.NewInt()),
 			},
 		},
@@ -132,7 +131,7 @@ func testDataSignatureParserSuccess(t *testing.T, test *dataSigParserSuccessTest
 			t.FailNow()
 		}
 
-		assert.True(t, slices.EqualFunc(p.NameTypes, test.NameTypes, slang.NameTypesEqual))
+		assert.True(t, slices.EqualFunc(p.NameTypes, test.NameTypes, nameTypesEqual))
 	})
 }
 
@@ -146,4 +145,8 @@ func testDataSignatureParserFail(t *testing.T, testName, input string) {
 
 		assert.NotEmpty(t, p.GetErrors)
 	})
+}
+
+func nameTypesEqual(a, b *types.NameType) bool {
+	return a.IsEqual(b)
 }
