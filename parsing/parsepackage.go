@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -53,7 +54,8 @@ func ParsePackage(rootFS fs.FS, fp FileParser) ([]*ast.Module, error) {
 	modules := []*ast.Module{}
 
 	for relativePath, stmts := range moduleStmts {
-		modules = append(modules, ast.NewModule(relativePath, stmts...))
+		pathParts := strings.Split(relativePath, "/")
+		modules = append(modules, ast.NewModule(pathParts, stmts...))
 	}
 
 	return modules, nil
