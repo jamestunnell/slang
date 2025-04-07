@@ -5,6 +5,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/sliceutil"
 )
 
 type Module struct {
@@ -26,44 +27,17 @@ func (m *Module) GetPathParts() []string {
 }
 
 func (m *Module) GetStructures() []slang.Structure {
-	structs := []slang.Structure{}
-
-	for _, stmt := range m.Statements {
-		if stmt.GetType() == slang.StatementSTRUCT {
-			if core, ok := stmt.Core.(*statements.Struct); ok {
-				s := &Structure{
-					Name:    core.Name,
-					Comment: stmt.Comment,
-					Fields:  core.Fields,
-				}
-
-				structs = append(structs, s)
-			}
-		}
-	}
-
-	return structs
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementSTRUCT },
+		NewStructure,
+	)
 }
 
 func (m *Module) GetFunctions() []slang.Function {
-	funcs := []slang.Function{}
-
-	for _, stmt := range m.Statements {
-		if stmt.GetType() == slang.StatementFUNC {
-			if core, ok := stmt.Core.(*statements.Func); ok {
-				f := &Function{
-					Name:    core.Name,
-					Comment: stmt.Comment,
-					Inputs:  core.Inputs,
-					Outputs: core.Outputs,
-				}
-
-				funcs = append(funcs, f)
-			}
-		}
-	}
-
-	return funcs
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementFUNC },
+		NewFunction,
+	)
 }
 
 func (m *Module) IsEqual(other slang.Module) bool {

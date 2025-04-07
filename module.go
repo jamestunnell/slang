@@ -4,10 +4,8 @@ type Module interface {
 	GetPathParts() []string
 	GetStructures() []Structure
 	GetFunctions() []Function
-	IsEqual(Module) bool
-	// GetInterfaceNames() []string
-	// GetInterface(name string) Interface
+	GetVariables() []Variable
+	GetConstants() []Constant
 
-	// GetVariableNames() []string
-	// GetVariable(name string) Variable
+	IsEqual(Module) bool
 }
