@@ -17,6 +17,7 @@ const (
 	ExprBOOL
 	ExprCONCAT
 	ExprDIVIDE
+	ExprEMPTY
 	ExprEQUAL
 	ExprFLOAT
 	ExprFUNC
@@ -47,6 +48,7 @@ const (
 	StrExprBOOL         = "BOOL"
 	StrExprCONCAT       = "CONCAT"
 	StrExprDIVIDE       = "DIVIDE"
+	StrExprEMPTY        = "EMPTY"
 	StrExprEQUAL        = "EQUAL"
 	StrExprFLOAT        = "FLOAT"
 	StrExprFUNC         = "FUNC"
@@ -103,6 +105,8 @@ func ParseExprTypeStr(s string) (ExprType, bool) {
 		et = ExprCONCAT
 	case StrExprDIVIDE:
 		et = ExprDIVIDE
+	case StrExprEMPTY:
+		et = ExprEMPTY
 	case StrExprEQUAL:
 		et = ExprEQUAL
 	case StrExprFLOAT:
@@ -170,6 +174,8 @@ func (et ExprType) String() string {
 		str = StrExprCONCAT
 	case ExprDIVIDE:
 		str = StrExprDIVIDE
+	case ExprEMPTY:
+		str = StrExprEMPTY
 	case ExprEQUAL:
 		str = StrExprEQUAL
 	case ExprFLOAT:

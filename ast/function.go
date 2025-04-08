@@ -2,25 +2,25 @@ package ast
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
-	"github.com/jamestunnell/slang/ast/types"
 )
 
 type Function struct {
 	Name    string
 	Comment string
-	Inputs  []*types.NameType
-	Outputs []*types.NameType
+	Inputs  []*field.Field
+	Outputs []*field.Field
 }
 
-func NewFunction(s *statements.Statement) slang.Function {
+func NewFunction(s *statements.Statement) *Function {
 	core, ok := s.Core.(*statements.Func)
 	if !ok {
 		return &Function{
 			Name:    "",
 			Comment: "",
-			Inputs:  []*types.NameType{},
-			Outputs: []*types.NameType{},
+			Inputs:  []*field.Field{},
+			Outputs: []*field.Field{},
 		}
 	}
 

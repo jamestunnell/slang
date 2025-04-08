@@ -7,8 +7,10 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/customerrs"
 	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/sliceutil"
 )
 
 var errNonIdentInTypeChain = errors.New("not a valid type chain, non-identifier found")
@@ -177,14 +179,10 @@ func (p *ExprParser) parseFuncAnon(toks slang.TokenSeq) *expressions.Expression 
 		return nil
 	}
 
-	bodyStatements := make([]slang.Statement, len(bodyParser.Statements))
-
-	for i, stmt := range bodyParser.Statements {
-		bodyStatements[i] = stmt
-	}
+	bodyStatements := sliceutil.Map(bodyParser.GetStatements(), func(s *statements.Statement) slang.Statement { return s })
 
 	return expressions.NewFunc(
-		sigParser.InParams, sigParser.OutParams, bodyStatements...)
+		sigParser.Inputs, sigParser.Outputs, bodyStatements...)
 }
 
 func (p *ExprParser) parseIdentifier(toks slang.TokenSeq) *expressions.Expression {
@@ -340,7 +338,16 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expre
 	}
 
 	args := []*expressions.InvokeArg{}
-	addArg := func() bool {
+
+	for {
+		toks.Skip(slang.TokenNEWLINE)
+
+		if toks.Current().Is(slang.TokenRPAREN) {
+			toks.Advance()
+
+			break
+		}
+
 		var nameTok *slang.Token
 
 		if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
@@ -352,10 +359,8 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expre
 
 		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 		if val == nil {
-			return false
+			return nil
 		}
-
-		toks.Skip(slang.TokenNEWLINE)
 
 		var name string
 
@@ -364,29 +369,7 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expre
 		}
 
 		args = append(args, &expressions.InvokeArg{Name: name, Value: val})
-
-		return true
 	}
-
-	if !addArg() {
-		return nil
-	}
-
-	for toks.Current().Is(slang.TokenCOMMA, slang.TokenNEWLINE) {
-		toks.AdvanceSkip(slang.TokenNEWLINE)
-
-		if !addArg() {
-			return nil
-		}
-	}
-
-	toks.Skip(slang.TokenNEWLINE)
-
-	if !p.ExpectToken(toks.Current(), slang.TokenRPAREN) {
-		return nil
-	}
-
-	toks.Advance()
 
 	return expressions.NewInvoke(subject, args...)
 }
@@ -394,12 +377,12 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expre
 func (p *ExprParser) parseStructAnon(toks slang.TokenSeq) *expressions.Expression {
 	toks.Advance() // past struct
 
-	sigParser := NewDataSignatureParser()
+	sigParser := NewFieldSeqParser()
 	if !p.RunSubParser(toks, sigParser) {
 		return nil
 	}
 
-	return expressions.NewStruct(sigParser.NameTypes...)
+	return expressions.NewStruct(sigParser.GetFields()...)
 }
 
 // func (p *ExprParser) parseAccessElem(toks slang.TokenSeq, ary *expressions.Expression) *expressions.Expression {

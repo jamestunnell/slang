@@ -35,6 +35,14 @@ func (p *UseStatementParser) Run(
 
 	toks.Advance()
 
+	var rename string
+
+	if toks.Current().Is(slang.TokenSYMBOL) {
+		rename = toks.Current().Value()
+
+		toks.Advance()
+	}
+
 	if !p.ExpectToken(toks.Current(), slang.TokenSTRVAL) {
 		return false
 	}
@@ -54,7 +62,7 @@ func (p *UseStatementParser) Run(
 		return false
 	}
 
-	p.UseStmt = statements.NewUse(parts...)
+	p.UseStmt = statements.NewUse(rename, parts)
 
 	p.UseStmt.SetComment(comment)
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
 )
@@ -19,24 +20,24 @@ func TestPackage_MarshalUnmarshal(t *testing.T) {
 
 	models := ast.NewModule([]string{"models"},
 		statements.NewStruct("Car",
-			types.NewNameType("Make", types.NewStr()),
-			types.NewNameType("Model", types.NewStr()),
-			types.NewNameType("Color", types.NewStr()),
-			types.NewNameType("VIN", types.NewStr()),
-			types.NewNameType("Year", types.NewInt()),
-			types.NewNameType("Miles", types.NewFlt()),
+			field.New("Make", types.NewStr()),
+			field.New("Model", types.NewStr()),
+			field.New("Color", types.NewStr()),
+			field.New("VIN", types.NewStr()),
+			field.New("Year", types.NewInt()),
+			field.New("Miles", types.NewFlt()),
 		),
 	)
 	cars := ast.NewModule([]string{"cars"},
-		statements.NewUse("..", "modules"),
+		statements.NewUse("", []string{"..", "modules"}),
 		statements.NewFunc("NewFiesta",
-			[]*types.NameType{
-				types.NewNameType("vin", types.NewStr()),
-				types.NewNameType("year", types.NewInt()),
-				types.NewNameType("color", types.NewStr()),
+			[]*field.Field{
+				field.New("vin", types.NewStr()),
+				field.New("year", types.NewInt()),
+				field.New("color", types.NewStr()),
 			},
-			[]*types.NameType{
-				types.NewNameType("car", types.NewStruct("models", "Car")),
+			[]*field.Field{
+				field.New("car", types.NewStruct("models", "Car")),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("car"),
@@ -52,13 +53,13 @@ func TestPackage_MarshalUnmarshal(t *testing.T) {
 			),
 		),
 		statements.NewFunc("NewMustang",
-			[]*types.NameType{
-				types.NewNameType("vin", types.NewStr()),
-				types.NewNameType("year", types.NewInt()),
-				types.NewNameType("color", types.NewStr()),
+			[]*field.Field{
+				field.New("vin", types.NewStr()),
+				field.New("year", types.NewInt()),
+				field.New("color", types.NewStr()),
 			},
-			[]*types.NameType{
-				types.NewNameType("car", types.NewStruct("models", "Car")),
+			[]*field.Field{
+				field.New("car", types.NewStruct("models", "Car")),
 			},
 			statements.NewAssign(
 				expressions.NewIdentifier("car"),

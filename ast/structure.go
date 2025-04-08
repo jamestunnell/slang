@@ -2,23 +2,23 @@ package ast
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
-	"github.com/jamestunnell/slang/ast/types"
 )
 
 type Structure struct {
 	Name    string
 	Comment string
-	Fields  []*types.NameType
+	Fields  []*field.Field
 }
 
-func NewStructure(s *statements.Statement) slang.Structure {
+func NewStructure(s *statements.Statement) *Structure {
 	core, ok := s.Core.(*statements.Struct)
 	if !ok {
 		return &Structure{
 			Name:    "",
 			Comment: "",
-			Fields:  []*types.NameType{},
+			Fields:  []*field.Field{},
 		}
 	}
 

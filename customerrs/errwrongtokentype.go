@@ -23,7 +23,7 @@ func NewErrWrongTokenType(
 }
 
 func (err *ErrWrongTokenType) Error() string {
-	const fmtStr = "%s token %s did not match any expected types %s"
+	const fmtStr = "%s token (value='%s') did not match any expected types %s"
 	expectedStr := slice.Map(err.expectedTypes, func(tokType slang.TokenType) string {
 		return tokType.String()
 	})

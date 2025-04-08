@@ -2,18 +2,18 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast/types"
+	"github.com/jamestunnell/slang/ast/field"
 	"golang.org/x/exp/slices"
 )
 
 type Func struct {
-	Inputs     []*types.NameType `json:"inputs"`
-	Outputs    []*types.NameType `json:"outputs"`
+	Inputs     []*field.Field    `json:"inputs"`
+	Outputs    []*field.Field    `json:"outputs"`
 	Statements []slang.Statement `json:"statements"`
 }
 
 func NewFunc(
-	inputs, outputs []*types.NameType,
+	inputs, outputs []*field.Field,
 	statements ...slang.Statement,
 ) *Expression {
 	return NewExpression(slang.ExprFUNC, &Func{
@@ -29,11 +29,11 @@ func (f *Func) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Inputs, f2.Inputs, nameTypesEqual) {
+	if !slices.EqualFunc(f.Inputs, f2.Inputs, fieldsEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Outputs, f2.Outputs, nameTypesEqual) {
+	if !slices.EqualFunc(f.Outputs, f2.Outputs, fieldsEqual) {
 		return false
 	}
 
@@ -44,6 +44,6 @@ func (f *Func) IsEqual(other Core) bool {
 	return true
 }
 
-func nameTypesEqual(a, b *types.NameType) bool {
+func fieldsEqual(a, b *field.Field) bool {
 	return a.IsEqual(b)
 }

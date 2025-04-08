@@ -2,14 +2,15 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/types"
 )
 
 type Var struct {
-	Name      string     `json:"name"`
-	ValueType slang.Type `json:"type"`
+	Name      string      `json:"name"`
+	ValueType *types.Type `json:"type"`
 }
 
-func NewVar(name string, valueType slang.Type) *Statement {
+func NewVar(name string, valueType *types.Type) *Statement {
 	core := &Var{Name: name, ValueType: valueType}
 
 	return NewStatement(slang.StatementVAR, core)
@@ -21,7 +22,7 @@ func (f *Var) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !slang.TypesEqual(f.ValueType, f2.ValueType) {
+	if !f.ValueType.IsEqual(f2.ValueType) {
 		return false
 	}
 

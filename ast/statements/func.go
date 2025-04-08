@@ -4,19 +4,19 @@ import (
 	"slices"
 
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast/types"
+	"github.com/jamestunnell/slang/ast/field"
 )
 
 type Func struct {
-	Name       string            `json:"name"`
-	Inputs     []*types.NameType `json:"inputs"`
-	Outputs    []*types.NameType `json:"outputs"`
-	Statements []*Statement      `json:"statements"`
+	Name       string         `json:"name"`
+	Inputs     []*field.Field `json:"inputs"`
+	Outputs    []*field.Field `json:"outputs"`
+	Statements []*Statement   `json:"statements"`
 }
 
 func NewFunc(
 	name string,
-	inputs, outputs []*types.NameType,
+	inputs, outputs []*field.Field,
 	statements ...*Statement,
 ) *Statement {
 	core := &Func{
@@ -39,11 +39,11 @@ func (f *Func) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Inputs, f2.Inputs, nameTypesEqual) {
+	if !slices.EqualFunc(f.Inputs, f2.Inputs, fieldsEqual) {
 		return false
 	}
 
-	if !slices.EqualFunc(f.Outputs, f2.Outputs, nameTypesEqual) {
+	if !slices.EqualFunc(f.Outputs, f2.Outputs, fieldsEqual) {
 		return false
 	}
 
@@ -78,6 +78,6 @@ func (f *Func) GetOutputs() []slang.Param {
 	return params
 }
 
-func nameTypesEqual(a, b *types.NameType) bool {
+func fieldsEqual(a, b *field.Field) bool {
 	return a.IsEqual(b)
 }

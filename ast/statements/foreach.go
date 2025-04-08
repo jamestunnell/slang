@@ -4,20 +4,21 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 )
 
 type ForEach struct {
-	Vars  []string         `json:"vars"`
-	Expr  slang.Expression `json:"expr"`
-	Block slang.Statement  `json:"block"`
+	Vars       []string                `json:"vars"`
+	Expr       *expressions.Expression `json:"expr"`
+	Statements []*Statement            `json:"statements"`
 }
 
 func NewForEach(
 	vars []string,
-	expr slang.Expression,
-	block slang.Statement,
+	expr *expressions.Expression,
+	stmts []*Statement,
 ) *Statement {
-	core := &ForEach{Vars: vars, Expr: expr, Block: block}
+	core := &ForEach{Vars: vars, Expr: expr, Statements: stmts}
 
 	return NewStatement(slang.StatementFOREACH, core)
 }
@@ -36,7 +37,7 @@ func (f *ForEach) IsEqual(other Core) bool {
 		return false
 	}
 
-	return f.Block.IsEqual(f2.Block)
+	return slices.EqualFunc(f.Statements, f2.Statements, statementsEqual)
 }
 
 // func (expr *ForEach) Eval(env *slang.Environment) (slang.Object, error) {

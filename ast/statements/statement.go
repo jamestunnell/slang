@@ -156,3 +156,7 @@ func (s *Statement) UnmarshalJSON(d []byte) error {
 
 	return nil
 }
+
+func statementsEqual(a, b *Statement) bool {
+	return a.IsEqual(b)
+}

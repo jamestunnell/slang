@@ -6,6 +6,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	e "github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,8 +26,8 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, e.NewEqual(a, b))
 	testMarshalJSON(t, e.NewFloat(0.0))
 	testMarshalJSON(t, e.NewFunc(
-		[]*types.NameType{types.NewNameType("x", types.NewInt())},
-		[]*types.NameType{types.NewNameType("result", types.NewBool())},
+		[]*field.Field{field.New("x", types.NewInt())},
+		[]*field.Field{field.New("result", types.NewBool())},
 	))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgPos(e.NewInt(10))))
 	testMarshalJSON(t, e.NewInvoke(a, e.NewInvokeArgKW("b", e.NewInt(10))))
@@ -43,8 +44,8 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, e.NewNotEqual(a, b))
 	testMarshalJSON(t, e.NewStr("hello"))
 	testMarshalJSON(t, e.NewStruct(
-		types.NewNameType("x", types.NewInt()),
-		types.NewNameType("y", types.NewStr()),
+		field.New("x", types.NewInt()),
+		field.New("y", types.NewStr()),
 	))
 	testMarshalJSON(t, e.NewSubtract(a, b))
 }

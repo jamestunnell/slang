@@ -2,18 +2,23 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
+	"golang.org/x/exp/slices"
 )
 
 type If struct {
-	Condition slang.Expression `json:"condition"`
-	Block     slang.Statement  `json:"block"`
+	Condition  *expressions.Expression `json:"condition"`
+	Statements []*Statement            `json:"statements"`
 }
 
 func NewIf(
-	cond slang.Expression,
-	ifBlock slang.Statement,
+	cond *expressions.Expression,
+	stmts []*Statement,
 ) *Statement {
-	core := &If{Condition: cond, Block: ifBlock}
+	core := &If{
+		Condition:  cond,
+		Statements: stmts,
+	}
 
 	return NewStatement(slang.StatementIF, core)
 }
@@ -28,7 +33,7 @@ func (i *If) IsEqual(other Core) bool {
 		return false
 	}
 
-	return i.Block.IsEqual(i2.Block)
+	return slices.EqualFunc(i.Statements, i2.Statements, statementsEqual)
 }
 
 // func (expr *If) Eval(env *slang.Environment) (slang.Object, error) {

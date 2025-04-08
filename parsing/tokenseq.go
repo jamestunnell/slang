@@ -67,7 +67,7 @@ func (seq *TokenSeq) AdvanceUntil(types ...slang.TokenType) int {
 func (seq *TokenSeq) AdvanceSkip(skipTypes ...slang.TokenType) int {
 	seq.Advance()
 
-	return 1 + seq.Skip(skipTypes...)
+	return seq.Skip(skipTypes...)
 }
 
 func (seq *TokenSeq) Skip(skipTypes ...slang.TokenType) int {

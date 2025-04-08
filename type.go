@@ -6,6 +6,7 @@ type TypeType int
 
 const (
 	TypeBOOLEAN TypeType = iota
+	TypeEMPTY
 	TypeERROR
 	TypeFLOAT
 	TypeINTEGER
@@ -24,6 +25,7 @@ type Type interface {
 
 const (
 	StrTypeBOOLEAN = "BOOLEAN"
+	StrTypeEMPTY   = "EMPTY"
 	StrTypeERROR   = "ERROR"
 	StrTypeFLOAT   = "FLOAT"
 	StrTypeINTEGER = "INTEGER"
@@ -41,6 +43,8 @@ func ParseTypeTypeStr(s string) (TypeType, bool) {
 	switch s {
 	case StrTypeBOOLEAN:
 		tt = TypeBOOLEAN
+	case StrTypeEMPTY:
+		tt = TypeEMPTY
 	case StrTypeERROR:
 		tt = TypeERROR
 	case StrTypeFLOAT:
@@ -68,6 +72,8 @@ func (tt TypeType) String() string {
 	switch tt {
 	case TypeBOOLEAN:
 		s = StrTypeBOOLEAN
+	case TypeEMPTY:
+		s = StrTypeEMPTY
 	case TypeERROR:
 		s = StrTypeERROR
 	case TypeFLOAT:

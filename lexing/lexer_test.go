@@ -173,15 +173,22 @@ func TestLexer_WholeLineComment(t *testing.T) {
 	testLexer(t, `  // not gonna lie... `, expected...)
 }
 
-func TestLexer_InlineComment(t *testing.T) {
+func TestLexer_CommentLines(t *testing.T) {
+	const input = `
+		// x
+		// y
+		// z`
+
 	expected := []*slang.Token{
-		tok(tokens.SYMBOL("x"), 1, 1),
-		tok(tokens.EQUAL(), 1, 3),
-		tok(tokens.INTVAL("10"), 1, 5),
-		tok(tokens.COMMENT("this is why"), 1, 8),
+		tok(tokens.NEWLINE(), 1, 1),
+		tok(tokens.COMMENT("x"), 2, 3),
+		tok(tokens.NEWLINE(), 2, 7),
+		tok(tokens.COMMENT("y"), 3, 3),
+		tok(tokens.NEWLINE(), 3, 7),
+		tok(tokens.COMMENT("z"), 4, 3),
 	}
 
-	testLexer(t, `x = 10 // this is why`, expected...)
+	testLexer(t, input, expected...)
 }
 
 func TestLexer_AssignInt(t *testing.T) {

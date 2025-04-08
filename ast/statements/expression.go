@@ -2,13 +2,14 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 )
 
 type Expression struct {
-	Value slang.Expression `json:"value"`
+	Value *expressions.Expression `json:"value"`
 }
 
-func NewExpression(val slang.Expression) *Statement {
+func NewExpression(val *expressions.Expression) *Statement {
 	core := &Expression{Value: val}
 
 	return NewStatement(slang.StatementEXPRESSION, core)

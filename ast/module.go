@@ -26,17 +26,44 @@ func (m *Module) GetPathParts() []string {
 	return m.PathParts
 }
 
-func (m *Module) GetStructures() []slang.Structure {
+func (m *Module) GetConstants() []slang.Constant {
 	return sliceutil.MapWhere(m.Statements,
-		func(s *statements.Statement) bool { return s.GetType() == slang.StatementSTRUCT },
-		NewStructure,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementCONST },
+		func(s *statements.Statement) slang.Constant { return NewConstant(s) },
 	)
 }
 
 func (m *Module) GetFunctions() []slang.Function {
 	return sliceutil.MapWhere(m.Statements,
 		func(s *statements.Statement) bool { return s.GetType() == slang.StatementFUNC },
-		NewFunction,
+		func(s *statements.Statement) slang.Function { return NewFunction(s) },
+	)
+}
+
+func (m *Module) GetImports() []slang.Import {
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementUSE },
+		func(s *statements.Statement) slang.Import { return NewImport(s) },
+	)
+}
+
+func (m *Module) GetInterfaces() []slang.Interface {
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementINTERFACE },
+		func(s *statements.Statement) slang.Interface { return NewInterface(s) },
+	)
+}
+
+func (m *Module) GetStructures() []slang.Structure {
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementSTRUCT },
+		func(s *statements.Statement) slang.Structure { return NewStructure(s) },
+	)
+}
+func (m *Module) GetVariables() []slang.Variable {
+	return sliceutil.MapWhere(m.Statements,
+		func(s *statements.Statement) bool { return s.GetType() == slang.StatementVAR },
+		func(s *statements.Statement) slang.Variable { return NewVariable(s) },
 	)
 }
 

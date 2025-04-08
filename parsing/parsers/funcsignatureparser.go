@@ -2,48 +2,48 @@ package parsers
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast/types"
+	"github.com/jamestunnell/slang/ast/field"
 )
 
 type FuncSignatureParser struct {
 	*ParserBase
 
-	InParams  []*types.NameType
-	OutParams []*types.NameType
+	Inputs  []*field.Field
+	Outputs []*field.Field
 }
 
 func NewFuncSignatureParser() *FuncSignatureParser {
 	return &FuncSignatureParser{
 		ParserBase: NewParserBase(),
-		InParams:   []*types.NameType{},
-		OutParams:  []*types.NameType{},
+		Inputs:     []*field.Field{},
+		Outputs:    []*field.Field{},
 	}
 }
 
 func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
-	p.InParams = []*types.NameType{}
-	p.OutParams = []*types.NameType{}
+	p.Inputs = []*field.Field{}
+	p.Outputs = []*field.Field{}
 
-	inputSigParser := NewDataSignatureParser()
-	if !p.RunSubParser(toks, inputSigParser) {
+	inputsParser := NewFieldSeqParser()
+	if !p.RunSubParser(toks, inputsParser) {
 		return false
 	}
 
 	toks.Skip(slang.TokenNEWLINE)
 
-	outParams := []*types.NameType{}
+	outputs := []*field.Field{}
 
 	if toks.Current().Is(slang.TokenLPAREN) {
-		outputSigParser := NewDataSignatureParser()
-		if !p.RunSubParser(toks, outputSigParser) {
+		outputsParser := NewFieldSeqParser()
+		if !p.RunSubParser(toks, outputsParser) {
 			return false
 		}
 
-		outParams = outputSigParser.NameTypes
+		outputs = outputsParser.GetFields()
 	}
 
-	p.InParams = inputSigParser.NameTypes
-	p.OutParams = outParams
+	p.Inputs = inputsParser.GetFields()
+	p.Outputs = outputs
 
 	return true
 

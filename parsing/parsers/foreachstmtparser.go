@@ -71,9 +71,7 @@ func (p *ForEachStmtParser) Run(
 		return false
 	}
 
-	block := statements.NewBlock(bodyParser.Statements...)
-
-	p.Stmt = statements.NewForEach(vars, exprParser.Expr, block)
+	p.Stmt = statements.NewForEach(vars, exprParser.Expr, bodyParser.GetStatements())
 
 	p.Stmt.SetComment(comment)
 

@@ -78,6 +78,7 @@ const (
 	TokenILLEGAL
 	TokenIN
 	TokenINT
+	TokenINTERFACE
 	TokenINTVAL
 	TokenLBRACE
 	TokenLBRACKET

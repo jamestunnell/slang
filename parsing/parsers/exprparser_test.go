@@ -45,9 +45,9 @@ func TestExprParser(t *testing.T) {
 		// grouped expression
 		"(15 + 2) * 12": mul(add(i(15), i(2)), i(12)),
 
-		// func calls
-		"sum(1,2,3)":     invokePos(id("sum"), i(1), i(2), i(3)),
-		"5 * sub(10, 5)": mul(i(5), invokePos(id("sub"), i(10), i(5))),
+		// invokation
+		"sum(1 2 3)":    invokePos(id("sum"), i(1), i(2), i(3)),
+		"5 * sub(10 5)": mul(i(5), invokePos(id("sub"), i(10), i(5))),
 
 		// strings
 		`"abc" + "123"`: add(str("abc"), str("123")),
@@ -90,6 +90,36 @@ func TestExprParser(t *testing.T) {
 			testExprParser(t, input, expected)
 		})
 	}
+}
+
+func TestExprParser_InvokeKW(t *testing.T) {
+	const multiline = `X(
+		a: f(1)
+		b: "okay"
+	)`
+	const oneline = `X(a:f(1) b:"okay")`
+
+	expected := expressions.NewInvoke(
+		id("X"),
+		expressions.NewInvokeArgKW("a", invokePos(id("f"), i(1))),
+		expressions.NewInvokeArgKW("b", str("okay")),
+	)
+
+	testExprParser(t, multiline, expected)
+	testExprParser(t, oneline, expected)
+}
+
+func TestExprParser_InvokePos(t *testing.T) {
+	const multiline = `X(
+		f(1)
+		"okay"
+	)`
+	const oneline = `X(f(1) "okay")`
+
+	expected := invokePos(id("X"), invokePos(id("f"), i(1)), str("okay"))
+
+	testExprParser(t, multiline, expected)
+	testExprParser(t, oneline, expected)
 }
 
 func testExprParser(t *testing.T, input string, expected *expressions.Expression) {

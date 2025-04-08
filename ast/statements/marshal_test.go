@@ -9,6 +9,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
 )
@@ -16,13 +17,13 @@ import (
 func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, statements.NewAssign(expressions.NewIdentifier("xyz"), expressions.NewInt(5)))
 	testMarshalJSON(t, statements.NewStruct("myclass",
-		types.NewNameType("x", types.NewInt()),
-		types.NewNameType("y", types.NewStr()),
-		types.NewNameType("z", types.NewStr()),
+		field.New("x", types.NewInt()),
+		field.New("y", types.NewStr()),
+		field.New("z", types.NewStr()),
 	))
-	testMarshalJSON(t, statements.NewFunc("myfunc", []*types.NameType{}, []*types.NameType{}))
+	testMarshalJSON(t, statements.NewFunc("myfunc", []*field.Field{}, []*field.Field{}))
 	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInt(7)))
-	testMarshalJSON(t, statements.NewUse("my", "path"))
+	testMarshalJSON(t, statements.NewUse("", []string{"my", "path"}))
 }
 
 func testMarshalJSON(t *testing.T, stmt slang.Statement) {

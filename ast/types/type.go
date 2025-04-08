@@ -90,6 +90,8 @@ func (s *Type) UnmarshalJSON(d []byte) error {
 	switch stmtType {
 	case slang.TypeBOOLEAN:
 		core = &Bool{}
+	case slang.TypeEMPTY:
+		core = &Empty{}
 	case slang.TypeERROR:
 		core = &Err{}
 	case slang.TypeFLOAT:

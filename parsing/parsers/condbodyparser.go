@@ -2,39 +2,48 @@ package parsers
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/customerrs"
 )
 
-type CondBodyParser struct {
-	*BodyParserBase
+func NewCondBodyParser() BodyParser {
+	return NewBodyParser(
+		func(toks slang.TokenSeq) error {
+			if !toks.Current().Is(slang.TokenLBRACE) {
+				return customerrs.NewErrWrongTokenType(toks.Current(), slang.TokenLBRACE)
+			}
+
+			toks.Advance()
+
+			return nil
+		},
+		slang.TokenRBRACE,
+		MakeCondBodyStmtParser,
+	)
 }
 
-func NewCondBodyParser() *CondBodyParser {
-	p := &CondBodyParser{}
-
-	p.BodyParserBase = NewBodyParserBase(p.makeStatementParser)
-
-	return p
-}
-
-func (p *CondBodyParser) makeStatementParser(
+func MakeCondBodyStmtParser(
 	cur *slang.Token,
-) StatementParser {
+) (StatementParser, error) {
+	var sp StatementParser
+
 	switch cur.Type() {
 	case slang.TokenBREAK:
-		return NewBreakStatementParser()
+		sp = NewBreakStatementParser()
 	case slang.TokenCONST:
-		return NewConstStatementParser()
+		sp = NewConstStatementParser()
 	case slang.TokenCONTINUE:
-		return NewContinueStatementParser()
+		sp = NewContinueStatementParser()
 	case slang.TokenIF:
-		return NewIfStatementParser()
+		sp = NewIfStatementParser()
 	case slang.TokenFOREACH:
-		return NewForEachStmtParser()
+		sp = NewForEachStmtParser()
 	case slang.TokenRETURN:
-		return NewReturnStatementParser()
+		sp = NewReturnStatementParser()
 	case slang.TokenVAR:
-		return NewVarStatementParser()
+		sp = NewVarStatementParser()
+	default:
+		sp = NewExprOrAssignStatementParser()
 	}
 
-	return NewExprOrAssignStatementParser()
+	return sp, nil
 }

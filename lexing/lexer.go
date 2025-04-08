@@ -123,8 +123,6 @@ func (l *Lexer) readComment(loc slang.SourceLocation) {
 		l.advance()
 	}
 
-	l.advance()
-
 	val := b.String()
 
 	l.emit(tokens.COMMENT(strings.TrimSpace(val)), loc)
@@ -418,6 +416,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.FOREACH(), loc)
 	case tokens.StrFUNC:
 		l.emit(tokens.FUNC(), loc)
+	case tokens.StrINTERFACE:
+		l.emit(tokens.INTERFACE(), loc)
 	case tokens.StrIF:
 		l.emit(tokens.IF(), loc)
 	case tokens.StrIN:

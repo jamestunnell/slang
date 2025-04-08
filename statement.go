@@ -14,13 +14,14 @@ type Statement interface {
 
 const (
 	StatementASSIGN StatementType = iota
-	StatementBLOCK
 	StatementBREAK
 	StatementCOMMENT
 	StatementCONST
 	StatementCONTINUE
 	StatementEXPRESSION
+	StatementFIELD
 	StatementFOREACH
+	StatementINTERFACE
 	StatementVAR
 	StatementFUNC
 	StatementIF
@@ -37,7 +38,9 @@ const (
 	StrStatementCONST      = "CONST"
 	StrStatementCONTINUE   = "CONTINUE"
 	StrStatementEXPRESSION = "EXPRESSION"
+	StrStatementFIELD      = "FIELD"
 	StrStatementFOREACH    = "FOREACH"
+	StrStatementINTERFACE  = "INTERFACE"
 	StrStatementIF         = "IF"
 	StrStatementIFELSE     = "IFELSE"
 	StrStatementFUNC       = "FUNC"
@@ -69,8 +72,12 @@ func ParseStatementTypeStr(s string) (StatementType, bool) {
 		st = StatementCONTINUE
 	case StrStatementEXPRESSION:
 		st = StatementEXPRESSION
+	case StrStatementFIELD:
+		st = StatementFIELD
 	case StrStatementFOREACH:
 		st = StatementFOREACH
+	case StrStatementINTERFACE:
+		st = StatementINTERFACE
 	case StrStatementIF:
 		st = StatementIF
 	case StrStatementIFELSE:
@@ -116,8 +123,12 @@ func (st StatementType) String() string {
 		str = StrStatementCONTINUE
 	case StatementEXPRESSION:
 		str = StrStatementEXPRESSION
+	case StatementFIELD:
+		str = StrStatementFIELD
 	case StatementFOREACH:
 		str = StrStatementFOREACH
+	case StatementINTERFACE:
+		str = StrStatementINTERFACE
 	case StatementIF:
 		str = StrStatementIF
 	case StatementIFELSE:

@@ -7,11 +7,12 @@ import (
 )
 
 type Use struct {
+	Rename    string   `json:"rename,omitempty"`
 	PathParts []string `json:"pathParts"`
 }
 
-func NewUse(parts ...string) *Statement {
-	core := &Use{PathParts: parts}
+func NewUse(rename string, parts []string) *Statement {
+	core := &Use{Rename: rename, PathParts: parts}
 
 	return NewStatement(slang.StatementUSE, core)
 }
@@ -19,6 +20,10 @@ func NewUse(parts ...string) *Statement {
 func (u *Use) IsEqual(other Core) bool {
 	u2, ok := other.(*Use)
 	if !ok {
+		return false
+	}
+
+	if u.Rename != u2.Rename {
 		return false
 	}
 

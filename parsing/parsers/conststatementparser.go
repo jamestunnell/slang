@@ -35,12 +35,6 @@ func (p *ConstStatementParser) Run(toks slang.TokenSeq, comment string) bool {
 
 	toks.Advance()
 
-	if !p.ExpectToken(toks.Current(), slang.TokenEQUAL) {
-		return false
-	}
-
-	toks.Advance()
-
 	exprParser := NewExprParser(parsing.PrecedenceLOWEST)
 
 	if !p.RunSubParser(toks, exprParser) {

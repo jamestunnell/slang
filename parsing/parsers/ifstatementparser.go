@@ -42,10 +42,8 @@ func (p *IfStatementParser) Run(
 		return false
 	}
 
-	ifBlock := statements.NewBlock(ifBodyParser.Statements...)
-
 	if !toks.Current().Is(slang.TokenELSE) {
-		p.Stmt = statements.NewIf(condParser.Expr, ifBlock)
+		p.Stmt = statements.NewIf(condParser.Expr, ifBodyParser.GetStatements())
 
 		p.Stmt.SetComment(comment)
 
@@ -59,9 +57,8 @@ func (p *IfStatementParser) Run(
 		return false
 	}
 
-	elseBlock := statements.NewBlock(elseBodyParser.Statements...)
-
-	p.Stmt = statements.NewIfElse(condParser.Expr, ifBlock, elseBlock)
+	p.Stmt = statements.NewIfElse(
+		condParser.Expr, ifBodyParser.GetStatements(), elseBodyParser.GetStatements())
 
 	p.Stmt.SetComment(comment)
 

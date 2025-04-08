@@ -51,8 +51,8 @@ func (p *FuncStatementParser) Run(
 
 	p.FuncStmt = statements.NewFunc(
 		name,
-		sigParser.InParams,
-		sigParser.OutParams,
+		sigParser.Inputs,
+		sigParser.Outputs,
 		bodyParser.GetStatements()...,
 	)
 

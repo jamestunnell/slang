@@ -2,14 +2,15 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 )
 
 type Const struct {
-	Name  string           `json:"name"`
-	Value slang.Expression `json:"value"`
+	Name  string                  `json:"name"`
+	Value *expressions.Expression `json:"value"`
 }
 
-func NewConst(name string, val slang.Expression) *Statement {
+func NewConst(name string, val *expressions.Expression) *Statement {
 	core := &Const{Name: name, Value: val}
 
 	return NewStatement(slang.StatementCONST, core)

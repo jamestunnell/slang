@@ -1,173 +1,133 @@
 package parsers_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
-	"github.com/jamestunnell/slang/lexing"
-	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
-	"github.com/stretchr/testify/assert"
 )
 
-type bodyParserSuccessTest struct {
-	TestName   string
-	Input      string
-	Statements []*statements.Statement
-	ErrorCount int
+func TestFuncBodyParser_EmptyBody(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{}`)
 }
 
-func TestFuncBodyParser(t *testing.T) {
-	tests := []*bodyParserSuccessTest{
-		{
-			TestName:   "empty",
-			Input:      `{}`,
-			Statements: []*statements.Statement{},
-		},
-		{
-			TestName: "vars&consts",
-			Input: `{
-				var a int
-				const b = "hello"
-				var c flt
-				const d = 12
-			}`,
-			Statements: []*statements.Statement{
-				statements.NewVar("a", types.NewInt()),
-				statements.NewConst("b", expressions.NewStr("hello")),
-				statements.NewVar("c", types.NewFlt()),
-				statements.NewConst("d", expressions.NewInt(12)),
-			},
-		},
-		{
-			TestName: "with comments",
-			Input: `{
-			    // this is a leading
-				// standalone comment
+func TestFuncBodyParser_VarsAndConsts(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			var a int
+			const b "hello"
+			var c flt
+			const d 12
+		}`,
+		statements.NewVar("a", types.NewInt()),
+		statements.NewConst("b", expressions.NewStr("hello")),
+		statements.NewVar("c", types.NewFlt()),
+		statements.NewConst("d", expressions.NewInt(12)),
+	)
+}
 
-			    // not empty
-				const x = "hello"
+func TestFuncBodyParser_WithComments(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			// this is a leading
+			// standalone comment
 
-				// this is a
-				// standalone comment
+			// not empty
+			const x "hello"
 
-				// also not empty
-				const y = 10
+			// this is a
+			// standalone comment
 
-				// this is a trailing
-				// standalone comment
-			}`,
-			Statements: []*statements.Statement{
-				withComment(statements.NewComment(), "this is a leading standalone comment"),
-				withComment(statements.NewConst("x", expressions.NewStr("hello")), "not empty"),
-				withComment(statements.NewComment(), "this is a standalone comment"),
-				withComment(statements.NewConst("y", expressions.NewInt(10)), "also not empty"),
-				withComment(statements.NewComment(), "this is a trailing standalone comment"),
-			},
-		},
-		{
-			TestName: "assign to object field",
-			Input: `{
-				this.X = 2
+			// also not empty
+			const y 10
 
-				person.Name = "Jill"
-			}`,
-			Statements: []*statements.Statement{
+			// this is a trailing
+			// standalone comment
+		}`,
+		withComment(statements.NewComment(), "this is a leading standalone comment"),
+		withComment(statements.NewConst("x", expressions.NewStr("hello")), "not empty"),
+		withComment(statements.NewComment(), "this is a standalone comment"),
+		withComment(statements.NewConst("y", expressions.NewInt(10)), "also not empty"),
+		withComment(statements.NewComment(), "this is a trailing standalone comment"),
+	)
+}
+
+func TestFuncBodyParser_IfBlock(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			if x < 10 {
+				print(x)
+
+				x = x + 1
+			}
+		}`,
+		statements.NewIf(
+			expressions.NewLess(expressions.NewIdentifier("x"), expressions.NewInt(10)),
+			[]*statements.Statement{
+				statements.NewExpression(expressions.NewInvoke(
+					expressions.NewIdentifier("print"),
+					expressions.NewInvokeArgPos(expressions.NewIdentifier("x")),
+				)),
 				statements.NewAssign(
-					expressions.NewAccessMember(expressions.NewIdentifier("this"), "X"),
-					expressions.NewInt(2),
-				),
-				statements.NewAssign(
-					expressions.NewAccessMember(expressions.NewIdentifier("person"), "Name"),
-					expressions.NewStr("Jill"),
+					expressions.NewIdentifier("x"),
+					expressions.NewAdd(expressions.NewIdentifier("x"), expressions.NewInt(1)),
 				),
 			},
-		},
-		{
-			TestName: "call member method",
-			Input: `{
-				this.MyMethod()
-			}`,
-			Statements: []*statements.Statement{
-				statements.NewExpression(
-					expressions.NewInvoke(
-						expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
-				),
-			},
-		},
-		{
-			TestName: "member access/method call",
-			Input: `{
-				a.b(x, y).c
-			}`,
-			Statements: []*statements.Statement{
-				statements.NewExpression(
+		),
+	)
+}
+
+func TestFuncBodyParser_CallMemberMethod(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			this.MyMethod()
+		}`,
+		statements.NewExpression(
+			expressions.NewInvoke(
+				expressions.NewAccessMember(expressions.NewIdentifier("this"), "MyMethod")),
+		),
+	)
+}
+
+func TestFuncBodyParser_CallMemberAccessMethodCall(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			a.b(x y).c
+		}`,
+		statements.NewExpression(
+			expressions.NewAccessMember(
+				expressions.NewInvoke(
 					expressions.NewAccessMember(
-						expressions.NewInvoke(
-							expressions.NewAccessMember(
-								expressions.NewIdentifier("a"),
-								"b",
-							),
-							expressions.NewInvokeArgPos(expressions.NewIdentifier("x")),
-							expressions.NewInvokeArgPos(expressions.NewIdentifier("y")),
-						),
-						"c",
+						expressions.NewIdentifier("a"),
+						"b",
 					),
+					expressions.NewInvokeArgPos(expressions.NewIdentifier("x")),
+					expressions.NewInvokeArgPos(expressions.NewIdentifier("y")),
 				),
-			},
-		},
-		{
-			TestName: "assign string interpolation",
-			Input: `{
-				myVar = "${word} is a ${fanciness.String()} word"
-			}`,
-			Statements: []*statements.Statement{
-				statements.NewAssign(
-					expressions.NewIdentifier("myVar"),
-					expressions.NewConcat(
-						expressions.NewStr(""),
-						expressions.NewIdentifier("word"),
-						expressions.NewStr(" is a "),
-						expressions.NewInvoke(
-							expressions.NewAccessMember(expressions.NewIdentifier("fanciness"), "String")),
-						expressions.NewStr(" word"),
-					),
-				),
-			},
-		},
-	}
-
-	for _, test := range tests {
-		testFuncBodyParserSuccess(t, test)
-	}
+				"c",
+			),
+		),
+	)
 }
 
-func testFuncBodyParserSuccess(t *testing.T, test *bodyParserSuccessTest) {
-	newParser := func() parsers.BodyParser { return parsers.NewFuncBodyParser() }
-
-	testBodyParserSuccess(t, test, newParser)
+func TestFuncBodyParser_AssignStringInterp(t *testing.T) {
+	testFuncBodyParserSuccess(t, `{
+			myVar = "${word} is a ${fanciness.String()} word"
+		}`,
+		statements.NewAssign(
+			expressions.NewIdentifier("myVar"),
+			expressions.NewConcat(
+				expressions.NewStr(""),
+				expressions.NewIdentifier("word"),
+				expressions.NewStr(" is a "),
+				expressions.NewInvoke(
+					expressions.NewAccessMember(expressions.NewIdentifier("fanciness"), "String")),
+				expressions.NewStr(" word"),
+			),
+		),
+	)
 }
 
-func testBodyParserSuccess(
+func testFuncBodyParserSuccess(
 	t *testing.T,
-	test *bodyParserSuccessTest,
-	newParser func() parsers.BodyParser) {
-	t.Run(test.TestName, func(t *testing.T) {
-		p := newParser()
-		l := lexing.NewLexer(strings.NewReader(test.Input))
-		seq := parsing.NewTokenSeq(l)
-
-		assert.True(t, p.Run(seq))
-
-		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
-			logParseErrs(t, p.GetErrors())
-
-			return
-		}
-
-		verifyStatemnts(t, test.Statements, p.GetStatements())
-	})
+	input string,
+	expected ...*statements.Statement) {
+	testBodyParserSuccess(t, parsers.NewFuncBodyParser(), input, expected...)
 }

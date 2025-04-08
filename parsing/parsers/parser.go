@@ -187,8 +187,8 @@ func (p *ParserBase) ParseType(toks slang.TokenSeq) (*types.Type, bool) {
 // 	return ast.NewMapType(keyType, valType), true
 // }
 
-func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, slang.Type, bool) {
-	if !toks.Current().Is(slang.TokenSYMBOL) {
+func (p *ParserBase) ParseNameTypePair(toks slang.TokenSeq) (string, *types.Type, bool) {
+	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
 		return "", nil, false
 	}
 

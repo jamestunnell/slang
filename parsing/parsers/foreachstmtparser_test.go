@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexing"
@@ -29,7 +28,7 @@ func TestForStatementParser(t *testing.T) {
 			ForEach: statements.NewForEach(
 				[]string{"x"},
 				expressions.NewIdentifier("y"),
-				statements.NewBlock(),
+				[]*statements.Statement{},
 			),
 		},
 		{
@@ -38,7 +37,7 @@ func TestForStatementParser(t *testing.T) {
 			ForEach: statements.NewForEach(
 				[]string{"a", "b"},
 				expressions.NewIdentifier("x"),
-				statements.NewBlock(statements.NewBreak()),
+				[]*statements.Statement{statements.NewBreak()},
 			),
 		},
 		{
@@ -53,13 +52,13 @@ func TestForStatementParser(t *testing.T) {
 			ForEach: statements.NewForEach(
 				[]string{"x"},
 				expressions.NewIdentifier("y"),
-				statements.NewBlock(
+				[]*statements.Statement{
 					statements.NewIf(
 						expressions.NewGreater(
 							expressions.NewIdentifier("x"),
 							expressions.NewInt(2),
 						),
-						statements.NewBlock(statements.NewContinue()),
+						[]*statements.Statement{statements.NewContinue()},
 					),
 					statements.NewExpression(
 						expressions.NewInvoke(
@@ -67,7 +66,7 @@ func TestForStatementParser(t *testing.T) {
 							expressions.NewInvokeArgPos(expressions.NewStr("ok")),
 						),
 					),
-				),
+				},
 			),
 		},
 		{
@@ -80,11 +79,11 @@ func TestForStatementParser(t *testing.T) {
 			ForEach: statements.NewForEach(
 				[]string{"a"},
 				expressions.NewIdentifier("b"),
-				statements.NewBlock(
+				[]*statements.Statement{
 					statements.NewForEach(
 						[]string{"x"},
 						expressions.NewIdentifier("y"),
-						statements.NewBlock(
+						[]*statements.Statement{
 							statements.NewExpression(
 								expressions.NewInvoke(
 									expressions.NewIdentifier("printNums"),
@@ -96,9 +95,9 @@ func TestForStatementParser(t *testing.T) {
 									),
 								),
 							),
-						),
+						},
 					),
-				),
+				},
 			),
 		},
 	}
@@ -128,18 +127,8 @@ func testForEachStmtParser(t *testing.T, test *forEachStmtParserTest) {
 
 		actual, ok := p.Stmt.Core.(*statements.ForEach)
 
-		verifyBlock(t, expected.Block, actual.Block)
+		require.True(t, ok)
+
+		verifyStatements(t, expected.Statements, actual.Statements)
 	})
-}
-
-func verifyBlock(t *testing.T, expected, actual slang.Statement) {
-	expectedBlock, ok := expected.(*statements.Statement).Core.(*statements.Block)
-
-	require.True(t, ok)
-
-	actualBlock, ok := actual.(*statements.Statement).Core.(*statements.Block)
-
-	require.True(t, ok)
-
-	verifyStatemnts(t, expectedBlock.Statements, actualBlock.Statements)
 }

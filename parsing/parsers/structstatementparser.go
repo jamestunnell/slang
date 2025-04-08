@@ -37,12 +37,12 @@ func (p *StructStatementParser) Run(
 
 	toks.AdvanceSkip(slang.TokenNEWLINE)
 
-	sigParser := NewDataSignatureParser()
-	if !p.RunSubParser(toks, sigParser) {
+	fieldSeqParser := NewFieldSeqParser()
+	if !p.RunSubParser(toks, fieldSeqParser) {
 		return false
 	}
 
-	p.StructStmt = statements.NewStruct(name, sigParser.NameTypes...)
+	p.StructStmt = statements.NewStruct(name, fieldSeqParser.GetFields()...)
 
 	p.StructStmt.SetComment(comment)
 

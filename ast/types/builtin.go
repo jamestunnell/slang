@@ -5,6 +5,7 @@ import (
 )
 
 type Bool struct{}
+type Empty struct{}
 type Err struct{}
 type Flt struct{}
 type Int struct{}
@@ -12,6 +13,10 @@ type Str struct{}
 
 func NewBool() *Type {
 	return NewType(slang.TypeBOOLEAN, &Bool{})
+}
+
+func NewEmpty() *Type {
+	return NewType(slang.TypeEMPTY, &Empty{})
 }
 
 func NewErr() *Type {
@@ -36,6 +41,16 @@ func (t *Bool) String() string {
 
 func (t *Bool) IsEqual(other Core) bool {
 	_, ok := other.(*Bool)
+
+	return ok
+}
+
+func (t *Empty) String() string {
+	return slang.StrTypeEMPTY
+}
+
+func (t *Empty) IsEqual(other Core) bool {
+	_, ok := other.(*Empty)
 
 	return ok
 }
