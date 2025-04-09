@@ -20,7 +20,7 @@ func (p *ConstStatementParser) GetStatement() *statements.Statement {
 	return p.ConstStmt
 }
 
-func (p *ConstStatementParser) Run(toks slang.TokenSeq, comment string) bool {
+func (p *ConstStatementParser) Run(toks parsing.TokenSeq, comment string) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenCONST) {
 		return false
 	}

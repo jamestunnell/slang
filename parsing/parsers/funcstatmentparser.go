@@ -3,6 +3,7 @@ package parsers
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type FuncStatementParser struct {
@@ -22,7 +23,7 @@ func (p *FuncStatementParser) GetStatement() *statements.Statement {
 }
 
 func (p *FuncStatementParser) Run(
-	toks slang.TokenSeq,
+	toks parsing.TokenSeq,
 	comment string,
 ) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFUNC) {

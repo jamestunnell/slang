@@ -26,7 +26,7 @@ func (p *UseStatementParser) GetStatement() *statements.Statement {
 }
 
 func (p *UseStatementParser) Run(
-	toks slang.TokenSeq,
+	toks parsing.TokenSeq,
 	comment string,
 ) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenUSE) {

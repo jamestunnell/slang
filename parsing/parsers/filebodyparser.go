@@ -3,11 +3,12 @@ package parsers
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 func NewFileParser() BodyParser {
 	return NewBodyParser(
-		func(slang.TokenSeq) error { return nil },
+		func(parsing.TokenSeq) error { return nil },
 		slang.TokenEOF,
 		MakeFileBodyStmtParser,
 	)

@@ -13,8 +13,8 @@ type ExprParser struct {
 	Expr *expressions.Expression
 }
 
-type prefixParseFn func(slang.TokenSeq) *expressions.Expression
-type infixParseFn func(slang.TokenSeq, *expressions.Expression) *expressions.Expression
+type prefixParseFn func(parsing.TokenSeq) *expressions.Expression
+type infixParseFn func(parsing.TokenSeq, *expressions.Expression) *expressions.Expression
 
 func NewExprParser(prec parsing.Precedence) *ExprParser {
 	return &ExprParser{
@@ -23,7 +23,7 @@ func NewExprParser(prec parsing.Precedence) *ExprParser {
 	}
 }
 
-func (p *ExprParser) Run(toks slang.TokenSeq) bool {
+func (p *ExprParser) Run(toks parsing.TokenSeq) bool {
 	p.Expr = p.parseExpression(toks, p.prec)
 
 	return p.Expr != nil

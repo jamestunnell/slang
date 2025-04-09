@@ -3,6 +3,7 @@ package parsers
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/field"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type FuncSignatureParser struct {
@@ -20,7 +21,7 @@ func NewFuncSignatureParser() *FuncSignatureParser {
 	}
 }
 
-func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
+func (p *FuncSignatureParser) Run(toks parsing.TokenSeq) bool {
 	p.Inputs = []*field.Field{}
 	p.Outputs = []*field.Field{}
 
@@ -117,7 +118,7 @@ func (p *FuncSignatureParser) Run(toks slang.TokenSeq) bool {
 	// return true
 }
 
-// func (p *FuncSignatureParser) parseParam(toks slang.TokenSeq) bool {
+// func (p *FuncSignatureParser) parseParam(toks parsing.TokenSeq) bool {
 // 	names, typ, ok := p.ParseNamesType(toks)
 // 	if !ok {
 // 		return false

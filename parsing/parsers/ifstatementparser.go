@@ -23,7 +23,7 @@ func (p *IfStatementParser) GetStatement() *statements.Statement {
 }
 
 func (p *IfStatementParser) Run(
-	toks slang.TokenSeq,
+	toks parsing.TokenSeq,
 	comment string,
 ) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenIF) {

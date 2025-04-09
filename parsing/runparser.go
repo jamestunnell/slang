@@ -1,16 +1,11 @@
 package parsing
 
 import (
-	"bufio"
-	"io"
-
+	"github.com/jamestunnell/slang"
 	"go.uber.org/multierr"
-
-	"github.com/jamestunnell/slang/lexing"
 )
 
-func RunParser(p Parser, r io.Reader) error {
-	l := lexing.NewLexer(bufio.NewReader(r))
+func RunParser(l slang.Lexer, p Parser) error {
 	toks := NewTokenSeq(l)
 
 	if !p.Run(toks) {

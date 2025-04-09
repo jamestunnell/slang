@@ -9,6 +9,7 @@ import (
 	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/ast/types"
+	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
@@ -304,8 +305,10 @@ func testFileParserSuccess(
 	input string,
 	expectedStmts []*statements.Statement,
 ) {
+	runes := lexing.NewRuneSource(strings.NewReader(input))
+	l := lexing.NewLexer(runes)
 	p := parsers.NewFileParser()
-	err := parsing.RunParser(p, strings.NewReader(input))
+	err := parsing.RunParser(l, p)
 
 	assert.NoError(t, err)
 
@@ -313,8 +316,10 @@ func testFileParserSuccess(
 }
 
 func testFileParserFail(t *testing.T, input string) {
+	runes := lexing.NewRuneSource(strings.NewReader(input))
+	l := lexing.NewLexer(runes)
 	p := parsers.NewFileParser()
-	err := parsing.RunParser(p, strings.NewReader(input))
+	err := parsing.RunParser(l, p)
 
 	assert.Error(t, err)
 }

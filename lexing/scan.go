@@ -11,7 +11,7 @@ import (
 )
 
 func Scan(r io.Reader) []*slang.Token {
-	l := NewLexer(bufio.NewReader(r))
+	l := NewLexer(NewRuneSource(r))
 	toks := []*slang.Token{}
 	keepGoing := func(tok *slang.Token) bool {
 		return tok != nil && tok.Info.Type() != slang.TokenEOF

@@ -5,6 +5,7 @@ import (
 	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/sliceutil"
 )
 
@@ -14,7 +15,7 @@ type FieldSeqParser struct {
 
 func NewFieldSeqParser() *FieldSeqParser {
 	bodyParser := NewBodyParser(
-		func(toks slang.TokenSeq) error {
+		func(toks parsing.TokenSeq) error {
 			if !toks.Current().Is(slang.TokenLPAREN) {
 				return customerrs.NewErrWrongTokenType(toks.Current(), slang.TokenLPAREN)
 			}

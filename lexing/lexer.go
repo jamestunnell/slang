@@ -1,7 +1,6 @@
 package lexing
 
 import (
-	"io"
 	"strings"
 	"unicode"
 
@@ -13,7 +12,7 @@ import (
 )
 
 type Lexer struct {
-	scanner       io.RuneScanner
+	runes         RuneSource
 	cur, next     rune
 	line, col     int
 	interpContext *lane.Stack[slang.TokenType]
@@ -22,9 +21,9 @@ type Lexer struct {
 
 const eof = 0
 
-func NewLexer(scanner io.RuneScanner) slang.Lexer {
+func NewLexer(runes RuneSource) slang.Lexer {
 	l := &Lexer{
-		scanner:       scanner,
+		runes:         runes,
 		cur:           0,
 		next:          0,
 		line:          1,
@@ -91,7 +90,10 @@ func (l *Lexer) emit(info slang.TokenInfo, loc slang.SourceLocation) {
 }
 
 func (l *Lexer) advance() {
-	r, _, _ := l.scanner.ReadRune()
+	r, ok := l.runes.NextRune()
+	if !ok {
+		r = eof
+	}
 
 	l.col++
 

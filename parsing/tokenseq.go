@@ -4,37 +4,43 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type TokenSeq struct {
-	lexer slang.Lexer
+type TokenSeq interface {
+	Current() *slang.Token
+	Next() *slang.Token
 
-	current, prev, next *slang.Token
+	Advance()
+	AdvanceUntil(types ...slang.TokenType) int
+	AdvanceSkip(skipTypes ...slang.TokenType) int
+	Skip(skipTypes ...slang.TokenType) int
 }
 
-func NewTokenSeq(l slang.Lexer) *TokenSeq {
+type tokenSeq struct {
+	lexer slang.Lexer
+
+	current, next *slang.Token
+}
+
+func NewTokenSeq(l slang.Lexer) TokenSeq {
 	current := l.NextToken()
 	next := l.NextToken()
 
-	return &TokenSeq{
+	return &tokenSeq{
 		lexer:   l,
 		current: current,
 		next:    next,
 	}
 }
 
-func (seq *TokenSeq) Previous() *slang.Token {
-	return seq.prev
-}
-
-func (seq *TokenSeq) Current() *slang.Token {
+func (seq *tokenSeq) Current() *slang.Token {
 	return seq.current
 }
 
 // CurrIndex() int
-func (seq *TokenSeq) Next() *slang.Token {
+func (seq *tokenSeq) Next() *slang.Token {
 	return seq.next
 }
 
-// func (seq *TokenSeq) Skip(types ...slang.TokenType) {
+// func (seq *tokenSeq) Skip(types ...slang.TokenType) {
 // 	if slices.Contains(types, slang.TokenEOF) {
 // 		log.Fatal().Msg("cannot skip EOF")
 // 	}
@@ -44,13 +50,12 @@ func (seq *TokenSeq) Next() *slang.Token {
 // 	}
 // }
 
-func (seq *TokenSeq) Advance() {
-	seq.prev = seq.current
+func (seq *tokenSeq) Advance() {
 	seq.current = seq.next
 	seq.next = seq.lexer.NextToken()
 }
 
-func (seq *TokenSeq) AdvanceUntil(types ...slang.TokenType) int {
+func (seq *tokenSeq) AdvanceUntil(types ...slang.TokenType) int {
 	types = append([]slang.TokenType{slang.TokenEOF}, types...)
 
 	advances := 0
@@ -64,13 +69,13 @@ func (seq *TokenSeq) AdvanceUntil(types ...slang.TokenType) int {
 	return advances
 }
 
-func (seq *TokenSeq) AdvanceSkip(skipTypes ...slang.TokenType) int {
+func (seq *tokenSeq) AdvanceSkip(skipTypes ...slang.TokenType) int {
 	seq.Advance()
 
 	return seq.Skip(skipTypes...)
 }
 
-func (seq *TokenSeq) Skip(skipTypes ...slang.TokenType) int {
+func (seq *tokenSeq) Skip(skipTypes ...slang.TokenType) int {
 	advances := 0
 
 	for seq.current.Is(skipTypes...) {

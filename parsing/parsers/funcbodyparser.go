@@ -3,11 +3,12 @@ package parsers
 import (
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/customerrs"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 func NewFuncBodyParser() BodyParser {
 	return NewBodyParser(
-		func(toks slang.TokenSeq) error {
+		func(toks parsing.TokenSeq) error {
 			if !toks.Current().Is(slang.TokenLBRACE) {
 				return customerrs.NewErrWrongTokenType(toks.Current(), slang.TokenLBRACE)
 			}

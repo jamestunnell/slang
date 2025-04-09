@@ -1,8 +1,8 @@
 package parsers
 
 import (
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/parsing"
 )
 
 type RecordFieldStatementParser struct {
@@ -19,7 +19,7 @@ func (p *RecordFieldStatementParser) GetStatement() *statements.Statement {
 	return p.FieldStmt
 }
 
-func (p *RecordFieldStatementParser) Run(toks slang.TokenSeq, comment string) bool {
+func (p *RecordFieldStatementParser) Run(toks parsing.TokenSeq, comment string) bool {
 	names, typ, ok := p.ParseNamesType(toks)
 	if !ok {
 		return false

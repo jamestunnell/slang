@@ -17,10 +17,11 @@ func testBodyParserSuccess(
 	input string,
 	expected ...*statements.Statement,
 ) {
-	l := lexing.NewLexer(strings.NewReader(input))
-	seq := parsing.NewTokenSeq(l)
+	runes := lexing.NewRuneSource(strings.NewReader(input))
+	l := lexing.NewLexer(runes)
+	toks := parsing.NewTokenSeq(l)
 
-	if !assert.True(t, p.Run(seq)) {
+	if !assert.True(t, p.Run(toks)) {
 		for _, err := range p.GetErrors() {
 			t.Logf("parse failure: %v", err)
 		}
@@ -34,10 +35,14 @@ func testBodyParserFail(
 	p parsers.BodyParser,
 	input string,
 ) {
-	l := lexing.NewLexer(strings.NewReader(input))
-	seq := parsing.NewTokenSeq(l)
-
-	p.Run(seq)
+	p.Run(tokenSeqFromStr(input))
 
 	assert.NotEmpty(t, p.GetErrors)
+}
+
+func tokenSeqFromStr(input string) parsing.TokenSeq {
+	runes := lexing.NewRuneSource(strings.NewReader(input))
+	l := lexing.NewLexer(runes)
+
+	return parsing.NewTokenSeq(l)
 }

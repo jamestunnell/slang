@@ -20,7 +20,7 @@ func (p *VarStatementParser) GetStatement() *statements.Statement {
 	return p.VarStmt
 }
 
-func (p *VarStatementParser) Run(toks slang.TokenSeq, comment string) bool {
+func (p *VarStatementParser) Run(toks parsing.TokenSeq, comment string) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenVAR) {
 		return false
 	}

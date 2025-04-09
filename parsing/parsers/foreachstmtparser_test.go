@@ -1,13 +1,10 @@
 package parsers_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
-	"github.com/jamestunnell/slang/lexing"
-	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -110,10 +107,8 @@ func TestForStatementParser(t *testing.T) {
 func testForEachStmtParser(t *testing.T, test *forEachStmtParserTest) {
 	t.Run(test.Name, func(t *testing.T) {
 		p := parsers.NewForEachStmtParser()
-		l := lexing.NewLexer(strings.NewReader(test.Input))
-		seq := parsing.NewTokenSeq(l)
 
-		assert.True(t, p.Run(seq, ""))
+		assert.True(t, p.Run(tokenSeqFromStr(test.Input), ""))
 
 		if !assert.Len(t, p.GetErrors(), test.ErrorCount) {
 			logParseErrs(t, p.GetErrors())

@@ -11,6 +11,7 @@ import (
 
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/statements"
+	"github.com/jamestunnell/slang/lexing"
 )
 
 func ParsePackage(rootFS fs.FS, fp FileParser) ([]*ast.Module, error) {
@@ -35,7 +36,10 @@ func ParsePackage(rootFS fs.FS, fp FileParser) ([]*ast.Module, error) {
 
 		fmt.Printf("parsing %s -> ", entryPath)
 
-		if parseErr := RunParser(fp, bufio.NewReader(f)); parseErr != nil {
+		runes := lexing.NewRuneSource(bufio.NewReader(f))
+		l := lexing.NewLexer(runes)
+
+		if parseErr := RunParser(l, fp); parseErr != nil {
 			return parseErr
 		}
 

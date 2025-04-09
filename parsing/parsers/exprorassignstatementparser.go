@@ -21,7 +21,7 @@ func (p *ExprOrAssignStatementParser) GetStatement() *statements.Statement {
 }
 
 func (p *ExprOrAssignStatementParser) Run(
-	toks slang.TokenSeq,
+	toks parsing.TokenSeq,
 	comment string,
 ) bool {
 	exprParser := NewExprParser(parsing.PrecedenceLOWEST)

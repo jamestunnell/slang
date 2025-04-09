@@ -23,7 +23,7 @@ func (p *ForEachStmtParser) GetStatement() *statements.Statement {
 }
 
 func (p *ForEachStmtParser) Run(
-	toks slang.TokenSeq,
+	toks parsing.TokenSeq,
 	comment string,
 ) bool {
 	if !p.ExpectToken(toks.Current(), slang.TokenFOREACH) {

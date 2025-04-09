@@ -1,7 +1,6 @@
 package parsers_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,8 +8,6 @@ import (
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/field"
 	"github.com/jamestunnell/slang/ast/types"
-	"github.com/jamestunnell/slang/lexing"
-	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
 )
 
@@ -95,10 +92,8 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest) {
 	t.Run(test.TestName, func(t *testing.T) {
 		p := parsers.NewFuncSignatureParser()
-		l := lexing.NewLexer(strings.NewReader(test.Input))
-		seq := parsing.NewTokenSeq(l)
 
-		p.Run(seq)
+		p.Run(tokenSeqFromStr(test.Input))
 
 		if !assert.Empty(t, p.GetErrors()) {
 			logParseErrs(t, p.GetErrors())
@@ -115,10 +110,8 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 
 func testFuncSignatureParserFail(t *testing.T, input string) {
 	p := parsers.NewFuncSignatureParser()
-	l := lexing.NewLexer(strings.NewReader(input))
-	seq := parsing.NewTokenSeq(l)
 
-	p.Run(seq)
+	p.Run(tokenSeqFromStr(input))
 
 	assert.NotEmpty(t, p.GetErrors)
 }

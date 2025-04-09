@@ -19,7 +19,7 @@ type bodyParser struct {
 
 	Statements []*statements.Statement
 
-	handleStartTok func(slang.TokenSeq) error
+	handleStartTok func(parsing.TokenSeq) error
 	endToken       slang.TokenType
 	makeStmtParser MakeStmtParserFunc
 }
@@ -27,7 +27,7 @@ type bodyParser struct {
 type MakeStmtParserFunc func(cur *slang.Token) (StatementParser, error)
 
 func NewBodyParser(
-	handleStartTok func(slang.TokenSeq) error,
+	handleStartTok func(parsing.TokenSeq) error,
 	endToken slang.TokenType,
 	makeStmtParser MakeStmtParserFunc,
 ) *bodyParser {
@@ -44,7 +44,7 @@ func (p *bodyParser) GetStatements() []*statements.Statement {
 	return p.Statements
 }
 
-func (p *bodyParser) readCommentLines(toks slang.TokenSeq) ([]string, bool) {
+func (p *bodyParser) readCommentLines(toks parsing.TokenSeq) ([]string, bool) {
 	var commentLines []string
 
 	for toks.Current().Is(slang.TokenCOMMENT) {
@@ -71,7 +71,7 @@ func (p *bodyParser) addCommentStatement(lines []string) {
 	p.Statements = append(p.Statements, stmt)
 }
 
-func (p *bodyParser) Run(toks slang.TokenSeq) bool {
+func (p *bodyParser) Run(toks parsing.TokenSeq) bool {
 	p.Statements = []*statements.Statement{}
 
 	if err := p.handleStartTok(toks); err != nil {
@@ -137,7 +137,7 @@ func (p *bodyParser) Run(toks slang.TokenSeq) bool {
 	return true
 }
 
-func (p *bodyParser) parseStatement(toks slang.TokenSeq, commentLines []string) bool {
+func (p *bodyParser) parseStatement(toks parsing.TokenSeq, commentLines []string) bool {
 	stmtParser, err := p.makeStmtParser(toks.Current())
 	if stmtParser == nil {
 		p.errors = append(p.errors, parsing.NewParseError(err, toks.Current()))

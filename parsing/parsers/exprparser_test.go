@@ -1,11 +1,9 @@
 package parsers_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jamestunnell/slang/ast/expressions"
-	"github.com/jamestunnell/slang/lexing"
 	"github.com/jamestunnell/slang/parsing"
 	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/stretchr/testify/assert"
@@ -161,20 +159,16 @@ func TestExprParser_MixedMapArray(t *testing.T) {
 }
 
 func testExprParserFail(t *testing.T, input string) {
-	l := lexing.NewLexer(strings.NewReader(input))
-	toks := parsing.NewTokenSeq(l)
 	p := parsers.NewExprParser(parsing.PrecedenceLOWEST)
 
-	assert.False(t, p.Run(toks))
+	assert.False(t, p.Run(tokenSeqFromStr(input)))
 }
 
 func testExprParser(t *testing.T, input string, expected *expressions.Expression) {
 	t.Run(input, func(t *testing.T) {
-		l := lexing.NewLexer(strings.NewReader(input))
-		toks := parsing.NewTokenSeq(l)
 		p := parsers.NewExprParser(parsing.PrecedenceLOWEST)
 
-		assert.True(t, p.Run(toks))
+		assert.True(t, p.Run(tokenSeqFromStr(input)))
 
 		if !assert.Empty(t, p.GetErrors()) {
 			logParseErrs(t, p.GetErrors())
