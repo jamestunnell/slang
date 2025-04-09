@@ -5,7 +5,6 @@ import (
 
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/statements"
-	"github.com/jamestunnell/slang/ast/types"
 	"github.com/jamestunnell/slang/parsing/parsers"
 )
 
@@ -15,14 +14,14 @@ func TestFuncBodyParser_EmptyBody(t *testing.T) {
 
 func TestFuncBodyParser_VarsAndConsts(t *testing.T) {
 	testFuncBodyParserSuccess(t, `{
-			var a int
+			var a 0
 			const b "hello"
-			var c flt
+			var c 0.0
 			const d 12
 		}`,
-		statements.NewVar("a", types.NewInt()),
+		statements.NewVar("a", expressions.NewInt(0)),
 		statements.NewConst("b", expressions.NewStr("hello")),
-		statements.NewVar("c", types.NewFlt()),
+		statements.NewVar("c", expressions.NewFloat(0.0)),
 		statements.NewConst("d", expressions.NewInt(12)),
 	)
 }

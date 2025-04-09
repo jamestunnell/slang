@@ -2,16 +2,16 @@ package statements
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/ast/types"
+	"github.com/jamestunnell/slang/ast/expressions"
 )
 
 type Var struct {
-	Name      string      `json:"name"`
-	ValueType *types.Type `json:"type"`
+	Name         string                  `json:"name"`
+	InitialValue *expressions.Expression `json:"initialValue"`
 }
 
-func NewVar(name string, valueType *types.Type) *Statement {
-	core := &Var{Name: name, ValueType: valueType}
+func NewVar(name string, initialVal *expressions.Expression) *Statement {
+	core := &Var{Name: name, InitialValue: initialVal}
 
 	return NewStatement(slang.StatementVAR, core)
 }
@@ -22,7 +22,7 @@ func (f *Var) IsEqual(other Core) bool {
 		return false
 	}
 
-	if !f.ValueType.IsEqual(f2.ValueType) {
+	if !f.InitialValue.IsEqual(f2.InitialValue) {
 		return false
 	}
 

@@ -18,8 +18,8 @@ func TestFileParserGlobalVars(t *testing.T) {
 	const input = `
 		use "rand"
 
-		var x int
-		var y int
+		var x 0
+		var y 0
 
 		func init() {
 			x = rand.Int()
@@ -37,8 +37,8 @@ func TestFileParserGlobalVars(t *testing.T) {
 
 	expected := []*statements.Statement{
 		statements.NewUse("", []string{"rand"}),
-		statements.NewVar("x", types.NewInt()),
-		statements.NewVar("y", types.NewInt()),
+		statements.NewVar("x", expressions.NewInt(0)),
+		statements.NewVar("y", expressions.NewInt(0)),
 		statements.NewFunc("init",
 			[]*field.Field{},
 			[]*field.Field{},
@@ -83,12 +83,12 @@ func TestFileParserGlobalVars(t *testing.T) {
 func TestFileParserGlobalConst(t *testing.T) {
 	const input = `
 		const myConst 25.7
-		var x int
+		var x 12
 	`
 
 	expected := []*statements.Statement{
 		statements.NewConst("myConst", expressions.NewFloat(25.7)),
-		statements.NewVar("x", types.NewInt()),
+		statements.NewVar("x", expressions.NewInt(12)),
 	}
 
 	testFileParserSuccess(t, input, expected)

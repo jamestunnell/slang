@@ -89,7 +89,7 @@ func TestExprParser(t *testing.T) {
 }
 
 func TestExprParser_InvokeBasic(t *testing.T) {
-	testExprParser(t, "sum(1 2 3)", invokePos(id("sub"), i(10), i(5)))
+	testExprParser(t, "sum(1 2 3)", invokePos(id("sum"), i(1), i(2), i(3)))
 }
 
 func TestExprParser_InvokeKW(t *testing.T) {
