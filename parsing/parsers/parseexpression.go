@@ -56,50 +56,99 @@ func (p *ExprParser) parseGroupedExpression(toks slang.TokenSeq) *expressions.Ex
 	return expr
 }
 
-// func (p *ExprParser) parseArrayAuto(toks slang.TokenSeq) *expressions.Expression {
-// 	toks.Advance() // past [
+var errEmptyAutoArrayOrMap = errors.New("empty auto array/map")
 
-// 	// // type includes brackets
-// 	// typ, ok := p.ParseArrayType(toks)
-// 	// if !ok {
-// 	// 	return nil
-// 	// }
+func (p *ExprParser) parseAutoArrayOrMap(toks slang.TokenSeq) *expressions.Expression {
+	_ = toks.AdvanceSkip(slang.TokenNEWLINE) // past the [ and any newlines
 
-// 	// if !p.ExpectToken(toks.Current(), slang.TokenLBRACE) {
-// 	// 	return nil
-// 	// }
+	// check for no args
+	if toks.Current().Is(slang.TokenRBRACKET) {
+		p.AddError(parsing.NewParseError(errEmptyAutoArrayOrMap, toks.Current()))
 
-// 	// toks.Advance()
+		return nil
+	}
 
-// 	vals := []*expressions.Expression{}
+	expr := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 
-// 	// check for empty array
-// 	if toks.Current().Is(slang.TokenRBRACKET) {
-// 		return expressions.NewArrayAuto()
-// 	}
+	if toks.Current().Is(slang.TokenCOLON) {
+		toks.Advance()
 
-// 	// first value
-// 	v := p.parseExpression(toks, PrecedenceLOWEST)
+		return p.finishParsingAutoMap(toks, expr)
+	}
 
-// 	vals = append(vals, v)
+	return p.finishParsingAutoArray(toks, expr)
+}
 
-// 	// more values
-// 	for toks.Current().Is(slang.TokenCOMMA) {
-// 		toks.Advance()
+func (p *ExprParser) finishParsingAutoMap(
+	toks slang.TokenSeq,
+	firstKey *expressions.Expression,
+) *expressions.Expression {
+	// finish first key-val pair
+	firstVal := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+	if firstVal == nil {
+		return nil
+	}
 
-// 		v := p.parseExpression(toks, PrecedenceLOWEST)
+	keys := []*expressions.Expression{firstKey}
+	vals := []*expressions.Expression{firstVal}
 
-// 		vals = append(vals, v)
-// 	}
+	for {
+		_ = toks.Skip(slang.TokenNEWLINE)
 
-// 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
-// 		return nil
-// 	}
+		if toks.Current().Is(slang.TokenRBRACKET) {
+			toks.Advance()
 
-// 	toks.Advance()
+			break
+		}
 
-// 	return expressions.NewArrayAuto(vals...)
-// }
+		key := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+		if key == nil {
+			return nil
+		}
+
+		if !p.ExpectToken(toks.Current(), slang.TokenCOLON) {
+			return nil
+		}
+
+		toks.Advance()
+
+		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+		if val == nil {
+			return nil
+		}
+
+		keys = append(keys, key)
+		vals = append(vals, val)
+	}
+
+	return expressions.NewMapAuto(keys, vals)
+}
+
+func (p *ExprParser) finishParsingAutoArray(
+	toks slang.TokenSeq,
+	firstVal *expressions.Expression,
+) *expressions.Expression {
+	vals := []*expressions.Expression{firstVal}
+
+	for {
+		_ = toks.Skip(slang.TokenNEWLINE)
+
+		if toks.Current().Is(slang.TokenRBRACKET) {
+			toks.Advance()
+
+			break
+		}
+
+		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+		if val == nil {
+			return nil
+		}
+
+		vals = append(vals, val)
+	}
+
+	return expressions.NewArrayAuto(vals...)
+}
 
 // func (p *ExprParser) parseMapAuto(toks slang.TokenSeq) *expressions.Expression {
 // 	toks.Advance() // past <
@@ -210,18 +259,6 @@ func (p *ExprParser) parseBoolVal(toks slang.TokenSeq) *expressions.Expression {
 	return expressions.NewBool(b)
 }
 
-func (p *ExprParser) parseTrue(toks slang.TokenSeq) *expressions.Expression {
-	toks.Advance()
-
-	return expressions.NewBool(true)
-}
-
-func (p *ExprParser) parseFalse(toks slang.TokenSeq) *expressions.Expression {
-	toks.Advance()
-
-	return expressions.NewBool(false)
-}
-
 func (p *ExprParser) parseNegative(toks slang.TokenSeq) *expressions.Expression {
 	toks.Advance()
 
@@ -327,16 +364,31 @@ func (p *ExprParser) parseAccessMember(toks slang.TokenSeq, object *expressions.
 	return expressions.NewAccessMember(object, member)
 }
 
-func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expression) *expressions.Expression {
-	toks.AdvanceSkip(slang.TokenNEWLINE) // past the LPAREN and any newlines
+func (p *ExprParser) parseAnyInvokeArg(toks slang.TokenSeq) (*expressions.InvokeArg, bool) {
+	var nameTok *slang.Token
 
-	// check for no args
-	if toks.Current().Is(slang.TokenRPAREN) {
+	if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
+		nameTok = toks.Current()
+
 		toks.Advance()
-
-		return expressions.NewInvoke(subject)
+		toks.AdvanceSkip(slang.TokenNEWLINE)
 	}
 
+	val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+	if val == nil {
+		return nil, false
+	}
+
+	var name string
+
+	if nameTok != nil {
+		name = nameTok.Value()
+	}
+
+	return &expressions.InvokeArg{Name: name, Value: val}, true
+}
+
+func (p *ExprParser) parseInvokePosArgs(toks slang.TokenSeq) ([]*expressions.InvokeArg, bool) {
 	args := []*expressions.InvokeArg{}
 
 	for {
@@ -348,28 +400,86 @@ func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expre
 			break
 		}
 
-		var nameTok *slang.Token
-
-		if toks.Current().Is(slang.TokenSYMBOL) && toks.Next().Is(slang.TokenCOLON) {
-			nameTok = toks.Current()
-
-			toks.Advance()
-			toks.AdvanceSkip(slang.TokenNEWLINE)
+		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
+		if val == nil {
+			return []*expressions.InvokeArg{}, false
 		}
+
+		args = append(args, expressions.NewInvokeArgPos(val))
+	}
+
+	return args, true
+}
+
+func (p *ExprParser) parseInvokeKWArgs(toks slang.TokenSeq) ([]*expressions.InvokeArg, bool) {
+	args := []*expressions.InvokeArg{}
+
+	for {
+		toks.Skip(slang.TokenNEWLINE)
+
+		if toks.Current().Is(slang.TokenRPAREN) {
+			toks.Advance()
+
+			break
+		}
+
+		if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
+			return []*expressions.InvokeArg{}, false
+		}
+
+		name := toks.Current().Value()
+
+		toks.Advance()
+
+		if !p.ExpectToken(toks.Current(), slang.TokenCOLON) {
+			return []*expressions.InvokeArg{}, false
+		}
+
+		toks.Advance()
 
 		val := p.parseExpression(toks, parsing.PrecedenceLOWEST)
 		if val == nil {
+			return []*expressions.InvokeArg{}, false
+		}
+
+		args = append(args, expressions.NewInvokeArgKW(name, val))
+	}
+
+	return args, true
+}
+
+func (p *ExprParser) parseInvoke(toks slang.TokenSeq, subject *expressions.Expression) *expressions.Expression {
+	_ = toks.AdvanceSkip(slang.TokenNEWLINE) // past the ( and any newlines
+
+	// check for no args
+	if toks.Current().Is(slang.TokenRPAREN) {
+		toks.Advance()
+
+		return expressions.NewInvoke(subject)
+	}
+
+	_ = toks.Skip(slang.TokenNEWLINE)
+
+	firstArg, ok := p.parseAnyInvokeArg(toks)
+	if !ok {
+		return nil
+	}
+
+	var moreArgs []*expressions.InvokeArg
+
+	if firstArg.Name == "" {
+		moreArgs, ok = p.parseInvokePosArgs(toks)
+		if !ok {
 			return nil
 		}
-
-		var name string
-
-		if nameTok != nil {
-			name = nameTok.Value()
+	} else {
+		moreArgs, ok = p.parseInvokeKWArgs(toks)
+		if !ok {
+			return nil
 		}
-
-		args = append(args, &expressions.InvokeArg{Name: name, Value: val})
 	}
+
+	args := append([]*expressions.InvokeArg{firstArg}, moreArgs...)
 
 	return expressions.NewInvoke(subject, args...)
 }

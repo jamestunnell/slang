@@ -45,10 +45,6 @@ func TestExprParser(t *testing.T) {
 		// grouped expression
 		"(15 + 2) * 12": mul(add(i(15), i(2)), i(12)),
 
-		// invokation
-		"sum(1 2 3)":    invokePos(id("sum"), i(1), i(2), i(3)),
-		"5 * sub(10 5)": mul(i(5), invokePos(id("sub"), i(10), i(5))),
-
 		// strings
 		`"abc" + "123"`: add(str("abc"), str("123")),
 
@@ -71,8 +67,8 @@ func TestExprParser(t *testing.T) {
 		// 	exprs(m(types.NewStr(), exprs(str("b")), types.NewInt(), exprs(i(2)))),
 		// ),
 
-		// // array literal value
-		// `[]int{1, 2, 3}`: ary(types.NewInt(), i(1), i(2), i(3)),
+		// array literal value
+		`[1 2 3]`: arrayauto(i(1), i(2), i(3)),
 
 		// // nested array values
 		// `[][]string{[]string{"a", "b", "c"}, []string{"x", "y", "z"}}`: ary(
@@ -92,12 +88,16 @@ func TestExprParser(t *testing.T) {
 	}
 }
 
+func TestExprParser_InvokeBasic(t *testing.T) {
+	testExprParser(t, "sum(1 2 3)", invokePos(id("sub"), i(10), i(5)))
+}
+
 func TestExprParser_InvokeKW(t *testing.T) {
+	const oneline = `X(a:f(1) b:"okay")`
 	const multiline = `X(
 		a: f(1)
 		b: "okay"
 	)`
-	const oneline = `X(a:f(1) b:"okay")`
 
 	expected := expressions.NewInvoke(
 		id("X"),
@@ -110,16 +110,62 @@ func TestExprParser_InvokeKW(t *testing.T) {
 }
 
 func TestExprParser_InvokePos(t *testing.T) {
+	const oneline = `X(f(1) "okay")`
 	const multiline = `X(
 		f(1)
 		"okay"
 	)`
-	const oneline = `X(f(1) "okay")`
 
 	expected := invokePos(id("X"), invokePos(id("f"), i(1)), str("okay"))
 
 	testExprParser(t, multiline, expected)
 	testExprParser(t, oneline, expected)
+}
+
+func TestExprParser_InvokeMixedPosAndKWArgs(t *testing.T) {
+	testExprParserFail(t, "sum(1 a:10 3)")
+	testExprParserFail(t, "sum(a:10 2 3)")
+	testExprParserFail(t, "sum(1 2 a:10)")
+}
+
+func TestExprParser_ArrayAuto(t *testing.T) {
+	testExprParser(t, "[1 2 3]", arrayauto(i(1), i(2), i(3)))
+	testExprParser(t, `["a" "b" "c"]`, arrayauto(str("a"), str("b"), str("c")))
+	testExprParser(t, `[
+		2.0
+		4.0
+	]`, arrayauto(f(2.0), f(4.0)))
+}
+
+func TestExprParser_MapAuto(t *testing.T) {
+	testExprParser(t, "[1:33 2:66 3:99]",
+		mapauto(
+			exprs(i(1), i(2), i(3)),
+			exprs(i(33), i(66), i(99)),
+		),
+	)
+	testExprParser(t, `[
+		"a":1
+		"b":2
+	]`,
+		mapauto(
+			exprs(str("a"), str("b")),
+			exprs(i(1), i(2)),
+		),
+	)
+}
+
+func TestExprParser_MixedMapArray(t *testing.T) {
+	testExprParserFail(t, "[1:33 12]")
+	testExprParserFail(t, "[12 1:33]")
+}
+
+func testExprParserFail(t *testing.T, input string) {
+	l := lexing.NewLexer(strings.NewReader(input))
+	toks := parsing.NewTokenSeq(l)
+	p := parsers.NewExprParser(parsing.PrecedenceLOWEST)
+
+	assert.False(t, p.Run(toks))
 }
 
 func testExprParser(t *testing.T, input string, expected *expressions.Expression) {
@@ -208,12 +254,18 @@ func not(val *expressions.Expression) *expressions.Expression {
 	return expressions.NewNot(val)
 }
 
-// func ary(valType slang.Type, vals ...*expressions.Expression) slang.Expression {
-// 	return expressions.NewArray(valType, vals...)
-// }
+func arrayauto(vals ...*expressions.Expression) *expressions.Expression {
+	return expressions.NewArrayAuto(vals...)
+}
 
 func exprs(vals ...*expressions.Expression) []*expressions.Expression {
 	return vals
+}
+
+func mapauto(
+	keys []*expressions.Expression,
+	vals []*expressions.Expression) *expressions.Expression {
+	return expressions.NewMapAuto(keys, vals)
 }
 
 // func m(keyType slang.Type, keys []slang.Expression,

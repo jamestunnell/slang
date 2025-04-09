@@ -26,5 +26,4 @@ func TestParsePackag_GarageExample(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, modules, 2)
-
 }
