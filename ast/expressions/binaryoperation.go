@@ -32,6 +32,8 @@ func (binop *BinaryOperation) IsEqual(other Core) bool {
 func (binop *BinaryOperation) Render(level int, w slang.CodeWriter) {
 	binop.Left.Render(level, w)
 
+	w.WriteString(" ")
+
 	switch binop.typ {
 	case slang.ExprADD:
 		w.WriteString(tokens.StrPLUS)
@@ -60,6 +62,8 @@ func (binop *BinaryOperation) Render(level int, w slang.CodeWriter) {
 	default:
 		w.WriteString("???")
 	}
+
+	w.WriteString(" ")
 
 	binop.Right.Render(level, w)
 }
