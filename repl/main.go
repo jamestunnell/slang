@@ -339,7 +339,7 @@ func (m *Model) updateAddStmts(msg tea.Msg) []tea.Cmd {
 	rowStatus := fmt.Sprintf("row: %d/%d", 1+m.inputArea.Line(), m.inputArea.LineCount())
 	columnStatus := fmt.Sprintf("col: %d/%d", 1+lineInfo.ColumnOffset, lineInfo.Width)
 
-	m.setStatusBar(rowStatus, columnStatus)
+	m.updateStatusBar(rowStatus, columnStatus)
 
 	if cmd != nil {
 		return []tea.Cmd{cmd}
@@ -353,7 +353,7 @@ func (m *Model) updateViewStmts(msg tea.Msg) []tea.Cmd {
 
 	m.viewerArea, cmd = m.viewerArea.Update(msg)
 
-	m.setStatusBar("", "")
+	m.updateStatusBar("", "")
 
 	if cmd != nil {
 		return []tea.Cmd{cmd}
@@ -367,6 +367,8 @@ func (m *Model) updateDialog(msg tea.Msg) []tea.Cmd {
 		m.confirmForm = f
 	}
 
+	m.updateStatusBar("", "")
+
 	if cmd != nil {
 		return []tea.Cmd{cmd}
 	}
@@ -374,7 +376,7 @@ func (m *Model) updateDialog(msg tea.Msg) []tea.Cmd {
 	return []tea.Cmd{}
 }
 
-func (m *Model) setStatusBar(rowStatus, colStatus string) {
+func (m *Model) updateStatusBar(rowStatus, colStatus string) {
 	wd, _ := os.Getwd()
 
 	m.statusBar.SetContent(m.focus.String(), wd, rowStatus, colStatus)
@@ -431,7 +433,7 @@ func (m *Model) View() string {
 	return helpers.PlaceOverlay(
 		m.width/2-confirmWidth/2,
 		m.height/2-confirmHeight/2,
-		m.confirmForm.View(),
+		m.boxStyle(focusDialog).Render(m.confirmForm.View()),
 		everything, false)
 }
 
