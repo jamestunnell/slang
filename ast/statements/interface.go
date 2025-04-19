@@ -5,6 +5,7 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/field"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Interface struct {
@@ -13,9 +14,9 @@ type Interface struct {
 }
 
 type FuncSpec struct {
-	Name    string         `json:"Name"`
-	Inputs  []*field.Field `json:"Inputs"`
-	Outputs []*field.Field `json:"Outputs"`
+	Name    string    `json:"Name"`
+	Inputs  field.Seq `json:"Inputs"`
+	Outputs field.Seq `json:"Outputs"`
 }
 
 func NewInterface(name string, specs ...*FuncSpec) *Statement {
@@ -24,17 +25,49 @@ func NewInterface(name string, specs ...*FuncSpec) *Statement {
 	return NewStatement(slang.StatementINTERFACE, core)
 }
 
-func (c *Interface) IsEqual(other Core) bool {
-	c2, ok := other.(*Interface)
+func (i *Interface) GetName() (string, bool) {
+	return i.Name, true
+}
+
+func (i *Interface) IsEqual(other Core) bool {
+	i2, ok := other.(*Interface)
 	if !ok {
 		return false
 	}
 
-	if c.Name != c2.Name {
+	if i.Name != i2.Name {
 		return false
 	}
 
-	return slices.EqualFunc(c.Specs, c2.Specs, funcSpecsEqual)
+	return slices.EqualFunc(i.Specs, i2.Specs, funcSpecsEqual)
+}
+
+func (i *Interface) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrINTERFACE)
+	w.WriteString(" ")
+	w.WriteString(i.Name)
+	w.WriteString(" {")
+	w.WriteNewline()
+
+	subLevel := level + 1
+
+	for _, spec := range i.Specs {
+		w.WriteIndent(subLevel)
+		w.WriteString(spec.Name)
+
+		spec.Inputs.Render(level, w)
+
+		if len(spec.Outputs) > 0 {
+			w.WriteString(" ")
+
+			spec.Outputs.Render(level, w)
+		}
+
+		w.WriteNewline()
+	}
+
+	w.WriteIndent(level)
+	w.WriteString("}")
 }
 
 func funcSpecsEqual(a, b *FuncSpec) bool {

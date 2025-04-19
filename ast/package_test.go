@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slices"
 
+	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/field"
@@ -16,8 +17,6 @@ import (
 )
 
 func TestPackage_MarshalUnmarshal(t *testing.T) {
-	const pkgName = "garage"
-
 	models := ast.NewModule([]string{"models"},
 		statements.NewStruct("Car",
 			field.New("Make", types.NewStr()),
@@ -75,7 +74,10 @@ func TestPackage_MarshalUnmarshal(t *testing.T) {
 			),
 		),
 	)
-	pkg := ast.NewPackage(pkgName, cars, models)
+	meta := slang.PackageMeta{
+		Path: "garage",
+	}
+	pkg := ast.NewPackage(meta, cars, models)
 
 	d, err := json.Marshal(pkg)
 
@@ -85,7 +87,7 @@ func TestPackage_MarshalUnmarshal(t *testing.T) {
 
 	require.NoError(t, json.Unmarshal(d, &pkg2))
 
-	assert.Equal(t, pkg2.PackageInfo.GetName(), pkgName)
+	assert.True(t, pkg2.Meta.IsEqual(meta))
 	assert.True(t, slices.EqualFunc(pkg.Modules, pkg2.Modules, modulesEqual))
 }
 

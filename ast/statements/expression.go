@@ -15,6 +15,10 @@ func NewExpression(val *expressions.Expression) *Statement {
 	return NewStatement(slang.StatementEXPRESSION, core)
 }
 
+func (e *Expression) GetName() (string, bool) {
+	return "", false
+}
+
 func (e *Expression) IsEqual(other Core) bool {
 	e2, ok := other.(*Expression)
 	if !ok {
@@ -22,6 +26,10 @@ func (e *Expression) IsEqual(other Core) bool {
 	}
 
 	return e2.Value.IsEqual(e.Value)
+}
+
+func (e *Expression) Render(level int, w slang.CodeWriter) {
+	e.Value.Render(level, w)
 }
 
 // func (st *Expression) Eval(env *slang.Environment) (slang.Object, error) {

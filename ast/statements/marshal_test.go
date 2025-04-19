@@ -22,7 +22,6 @@ func TestMarshalJSON(t *testing.T) {
 		field.New("z", types.NewStr()),
 	))
 	testMarshalJSON(t, statements.NewFunc("myfunc", []*field.Field{}, []*field.Field{}))
-	testMarshalJSON(t, statements.NewReturnVal(expressions.NewInt(7)))
 	testMarshalJSON(t, statements.NewUse("", []string{"my", "path"}))
 }
 

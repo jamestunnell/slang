@@ -1,6 +1,8 @@
 package statements
 
 import (
+	"strings"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/types"
 	"golang.org/x/exp/slices"
@@ -20,6 +22,10 @@ func NewField(typ *types.Type, names ...string) *Statement {
 	return NewStatement(slang.StatementFIELD, core)
 }
 
+func (f *Field) GetName() (string, bool) {
+	return "", false
+}
+
 func (f *Field) IsEqual(other Core) bool {
 	f2, ok := other.(*Field)
 	if !ok {
@@ -31,6 +37,11 @@ func (f *Field) IsEqual(other Core) bool {
 	}
 
 	return f.Type.IsEqual(f2.Type)
+}
+
+func (f *Field) Render(level int, w slang.CodeWriter) {
+	w.WriteString(strings.Join(f.Names, ", "))
+	w.WriteString(f.Type.String())
 }
 
 // func (expr *Continue) Eval(env *slang.Environment) (slang.Object, error) {

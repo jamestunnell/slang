@@ -58,8 +58,8 @@ func (p *ExprParser) findPrefixParseFn(
 		prefixParse = p.parseAutoArrayOrMap
 	// case slang.TokenLESS:
 	// 	prefixParse = p.parseMapAuto
-	case slang.TokenFUNC:
-		prefixParse = p.parseFuncAnon
+	case slang.TokenLAMBDAOP:
+		prefixParse = p.parseLambda
 	case slang.TokenSTRUCT:
 		prefixParse = p.parseStructAnon
 	}

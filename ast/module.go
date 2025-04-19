@@ -26,6 +26,10 @@ func (m *Module) GetPathParts() []string {
 	return m.PathParts
 }
 
+func (m *Module) GetStatementsWhere(keep func(*statements.Statement) bool) []*statements.Statement {
+	return sliceutil.Where(m.Statements, keep)
+}
+
 func (m *Module) GetConstants() []slang.Constant {
 	return sliceutil.MapWhere(m.Statements,
 		func(s *statements.Statement) bool { return s.GetType() == slang.StatementCONST },

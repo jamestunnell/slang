@@ -16,6 +16,10 @@ func NewAssign(target, val *expressions.Expression) *Statement {
 	return NewStatement(slang.StatementASSIGN, core)
 }
 
+func (a *Assign) GetName() (string, bool) {
+	return "", false
+}
+
 func (a *Assign) IsEqual(other Core) bool {
 	a2, ok := other.(*Assign)
 	if !ok {
@@ -23,6 +27,14 @@ func (a *Assign) IsEqual(other Core) bool {
 	}
 
 	return a.Target.IsEqual(a2.Target) && a2.Value.IsEqual(a.Value)
+}
+
+func (a *Assign) Render(level int, w slang.CodeWriter) {
+	a.Target.Render(level, w)
+
+	w.WriteString(" = ")
+
+	a.Value.Render(level, w)
 }
 
 // func (st *Assign) Eval(env *slang.Environment) (slang.Object, error) {

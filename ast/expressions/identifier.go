@@ -23,6 +23,10 @@ func (i *Identifier) IsEqual(other Core) bool {
 	return i2.Name == i.Name
 }
 
+func (i *Identifier) Render(level int, w slang.CodeWriter) {
+	w.WriteString(i.Name)
+}
+
 // func (expr *Identifier) Eval(env *slang.Environment) (slang.Object, error) {
 // 	obj, found := env.Get(expr.Name)
 // 	if !found {

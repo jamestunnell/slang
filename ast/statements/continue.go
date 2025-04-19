@@ -1,6 +1,9 @@
 package statements
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/tokens"
+)
 
 type Continue struct {
 }
@@ -9,10 +12,18 @@ func NewContinue() *Statement {
 	return NewStatement(slang.StatementCONTINUE, &Continue{})
 }
 
-func (f *Continue) IsEqual(other Core) bool {
+func (c *Continue) GetName() (string, bool) {
+	return "", false
+}
+
+func (c *Continue) IsEqual(other Core) bool {
 	_, ok := other.(*Continue)
 
 	return ok
+}
+
+func (c *Continue) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrCONTINUE)
 }
 
 // func (expr *Continue) Eval(env *slang.Environment) (slang.Object, error) {

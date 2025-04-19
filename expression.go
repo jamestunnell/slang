@@ -5,6 +5,7 @@ type ExprType int
 type Expression interface {
 	GetType() ExprType
 	IsEqual(Expression) bool
+	Render(level int, w CodeWriter)
 	// Eval(env *objects.Environment) (objects.Object, error)
 }
 
@@ -20,12 +21,12 @@ const (
 	ExprEMPTY
 	ExprEQUAL
 	ExprFLOAT
-	ExprFUNC
 	ExprINVOKE
 	ExprGREATER
 	ExprGREATEREQUAL
 	ExprIDENTIFIER
 	ExprINT
+	ExprLAMBDA
 	ExprLESS
 	ExprLESSEQUAL
 	ExprMAP
@@ -51,12 +52,12 @@ const (
 	StrExprEMPTY        = "EMPTY"
 	StrExprEQUAL        = "EQUAL"
 	StrExprFLOAT        = "FLOAT"
-	StrExprFUNC         = "FUNC"
 	StrExprGREATER      = "GREATER"
 	StrExprGREATEREQUAL = "GREATEREQUAL"
 	StrExprIDENTIFIER   = "IDENTIFIER"
 	StrExprINT          = "INT"
 	StrExprINVOKE       = "INVOKE"
+	StrExprLAMBDA       = "LAMBDA"
 	StrExprLESS         = "LESS"
 	StrExprLESSEQUAL    = "LESSEQUAL"
 	StrExprMAP          = "MAP"
@@ -111,8 +112,6 @@ func ParseExprTypeStr(s string) (ExprType, bool) {
 		et = ExprEQUAL
 	case StrExprFLOAT:
 		et = ExprFLOAT
-	case StrExprFUNC:
-		et = ExprFUNC
 	case StrExprGREATER:
 		et = ExprGREATER
 	case StrExprGREATEREQUAL:
@@ -123,6 +122,8 @@ func ParseExprTypeStr(s string) (ExprType, bool) {
 		et = ExprINT
 	case StrExprINVOKE:
 		et = ExprINVOKE
+	case StrExprLAMBDA:
+		et = ExprLAMBDA
 	case StrExprLESS:
 		et = ExprLESS
 	case StrExprLESSEQUAL:
@@ -180,8 +181,6 @@ func (et ExprType) String() string {
 		str = StrExprEQUAL
 	case ExprFLOAT:
 		str = StrExprFLOAT
-	case ExprFUNC:
-		str = StrExprFUNC
 	case ExprGREATER:
 		str = StrExprGREATER
 	case ExprGREATEREQUAL:
@@ -192,6 +191,8 @@ func (et ExprType) String() string {
 		str = StrExprINT
 	case ExprINVOKE:
 		str = StrExprINVOKE
+	case ExprLAMBDA:
+		str = StrExprLAMBDA
 	case ExprLESS:
 		str = StrExprLESS
 	case ExprLESSEQUAL:

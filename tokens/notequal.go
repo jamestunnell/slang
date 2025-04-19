@@ -4,6 +4,8 @@ import "github.com/jamestunnell/slang"
 
 type NotEqual struct{}
 
+const StrNOTEQ = "!="
+
 func NOTEQUAL() slang.TokenInfo           { return &NotEqual{} }
 func (t *NotEqual) Type() slang.TokenType { return slang.TokenNOTEQUAL }
-func (t *NotEqual) Value() string         { return "!=" }
+func (t *NotEqual) Value() string         { return StrNOTEQ }

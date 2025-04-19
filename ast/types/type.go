@@ -17,8 +17,8 @@ type Type struct {
 }
 
 type Core interface {
-	IsEqual(Core) bool
 	String() string
+	IsEqual(Core) bool
 }
 
 func NewType(typ slang.TypeType, core Core) *Type {

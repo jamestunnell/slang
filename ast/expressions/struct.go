@@ -5,10 +5,11 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/field"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Struct struct {
-	Fields []*field.Field `json:"fields"`
+	Fields field.Seq `json:"fields"`
 }
 
 func NewStruct(fields ...*field.Field) *Expression {
@@ -26,4 +27,10 @@ func (s *Struct) IsEqual(other Core) bool {
 	}
 
 	return true
+}
+
+func (s *Struct) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrSTRUCT)
+
+	s.Fields.Render(level, w)
 }

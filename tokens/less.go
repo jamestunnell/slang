@@ -4,6 +4,8 @@ import "github.com/jamestunnell/slang"
 
 type Less struct{}
 
+const StrLESS = "<"
+
 func LESS() slang.TokenInfo           { return &Less{} }
 func (t *Less) Type() slang.TokenType { return slang.TokenLESS }
-func (t *Less) Value() string         { return "<" }
+func (t *Less) Value() string         { return StrLESS }

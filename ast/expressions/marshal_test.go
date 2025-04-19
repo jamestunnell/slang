@@ -25,7 +25,7 @@ func TestMarshalJSON(t *testing.T) {
 	testMarshalJSON(t, e.NewDivide(a, b))
 	testMarshalJSON(t, e.NewEqual(a, b))
 	testMarshalJSON(t, e.NewFloat(0.0))
-	testMarshalJSON(t, e.NewFunc(
+	testMarshalJSON(t, e.NewLambda(
 		[]*field.Field{field.New("x", types.NewInt())},
 		[]*field.Field{field.New("result", types.NewBool())},
 	))

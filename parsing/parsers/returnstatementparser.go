@@ -30,22 +30,7 @@ func (p *ReturnStatementParser) Run(
 
 	toks.Advance()
 
-	if toks.Current().Is(slang.TokenNEWLINE, slang.TokenRBRACE) {
-		p.ReturnStmt = statements.NewReturn()
-
-		p.ReturnStmt.SetComment(comment)
-
-		return true
-	}
-
-	exprParser := NewExprParser(parsing.PrecedenceLOWEST)
-	if !p.RunSubParser(toks, exprParser) {
-		return false
-	}
-
-	p.ReturnStmt = statements.NewReturnVal(exprParser.Expr)
-
-	p.ReturnStmt.SetComment(comment)
+	p.ReturnStmt = statements.NewReturn()
 
 	return true
 }

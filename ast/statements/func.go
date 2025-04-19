@@ -4,19 +4,22 @@ import (
 	"slices"
 
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/ast/field"
+	"github.com/jamestunnell/slang/sliceutil"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Func struct {
-	Name       string         `json:"name"`
-	Inputs     []*field.Field `json:"inputs"`
-	Outputs    []*field.Field `json:"outputs"`
-	Statements []*Statement   `json:"statements"`
+	Name       string       `json:"name"`
+	Inputs     field.Seq    `json:"inputs"`
+	Outputs    field.Seq    `json:"outputs"`
+	Statements []*Statement `json:"statements"`
 }
 
 func NewFunc(
 	name string,
-	inputs, outputs []*field.Field,
+	inputs, outputs field.Seq,
 	statements ...*Statement,
 ) *Statement {
 	core := &Func{
@@ -27,6 +30,10 @@ func NewFunc(
 	}
 
 	return NewStatement(slang.StatementFUNC, core)
+}
+
+func (f *Func) GetName() (string, bool) {
+	return f.Name, false
 }
 
 func (f *Func) IsEqual(other Core) bool {
@@ -54,8 +61,14 @@ func (f *Func) IsEqual(other Core) bool {
 	return true
 }
 
-func (f *Func) GetName() string {
-	return f.Name
+func (f *Func) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrFUNC)
+	w.WriteString(" ")
+	w.WriteString(f.Name)
+
+	stmts := sliceutil.Map(f.Statements, func(s *Statement) slang.Statement { return s })
+
+	expressions.RenderFunction(level, w, f.Inputs, f.Outputs, stmts)
 }
 
 func (f *Func) GetInputs() []slang.Param {

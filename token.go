@@ -76,6 +76,7 @@ const (
 	TokenGREATEREQUAL
 	TokenIF
 	TokenILLEGAL
+	TokenUSE
 	TokenIN
 	TokenINT
 	TokenINTERFACE
@@ -113,7 +114,6 @@ const (
 	TokenSYMBOL
 	TokenVAR
 	TokenVERBATIMSTRING
-	TokenUSE
 )
 
 func (tt TokenType) String() string {
@@ -170,6 +170,8 @@ func (tt TokenType) String() string {
 		str = "IF"
 	case TokenILLEGAL:
 		str = "ILLEGAL"
+	case TokenUSE:
+		str = "USE"
 	case TokenIN:
 		str = "IN"
 	case TokenINT:
@@ -240,8 +242,6 @@ func (tt TokenType) String() string {
 		str = "SYMBOL"
 	case TokenVERBATIMSTRING:
 		str = "VERBATIMSTRING"
-	case TokenUSE:
-		str = "USE"
 	case TokenVAR:
 		str = "VAR"
 	}

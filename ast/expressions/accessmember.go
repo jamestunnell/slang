@@ -16,13 +16,20 @@ func NewAccessMember(object *Expression, member string) *Expression {
 	})
 }
 
-func (c *AccessMember) IsEqual(other Core) bool {
-	c2, ok := other.(*AccessMember)
+func (a *AccessMember) IsEqual(other Core) bool {
+	a2, ok := other.(*AccessMember)
 	if !ok {
 		return false
 	}
 
-	return c2.Receiver.IsEqual(c.Receiver) && c2.Member == c.Member
+	return a2.Receiver.IsEqual(a.Receiver) && a2.Member == a.Member
+}
+
+func (a *AccessMember) Render(level int, w slang.CodeWriter) {
+	a.Receiver.Render(level, w)
+
+	w.WriteString(".")
+	w.WriteString(a.Member)
 }
 
 // func (c *Member) Eval(env *slang.Environment) (slang.Object, error) {

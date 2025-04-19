@@ -1,6 +1,10 @@
 package expressions
 
-import "github.com/jamestunnell/slang"
+import (
+	"fmt"
+
+	"github.com/jamestunnell/slang"
+)
 
 type Const[T comparable] struct {
 	Value T
@@ -17,4 +21,8 @@ func (c *Const[T]) IsEqual(other Core) bool {
 	}
 
 	return c2.Value == c.Value
+}
+
+func (c *Const[T]) Render(level int, w slang.CodeWriter) {
+	w.WriteString(fmt.Sprintf("%v", c.Value))
 }

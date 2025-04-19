@@ -101,8 +101,8 @@ func testFuncSignatureParserSuccess(t *testing.T, test *funcSigParserSuccessTest
 			t.FailNow()
 		}
 
-		actual := expressions.NewFunc(p.Inputs, p.Outputs)
-		expected := expressions.NewFunc(test.Inputs, test.Outputs)
+		actual := expressions.NewLambda(p.Inputs, p.Outputs)
+		expected := expressions.NewLambda(test.Inputs, test.Outputs)
 
 		assert.True(t, actual.IsEqual(expected))
 	})

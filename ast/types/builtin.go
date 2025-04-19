@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Bool struct{}
@@ -45,8 +46,12 @@ func (t *Bool) IsEqual(other Core) bool {
 	return ok
 }
 
+func (t *Bool) Render(w slang.CodeWriter) {
+	w.WriteString(tokens.StrBOOL)
+}
+
 func (t *Empty) String() string {
-	return slang.StrTypeEMPTY
+	return "???"
 }
 
 func (t *Empty) IsEqual(other Core) bool {
@@ -56,7 +61,7 @@ func (t *Empty) IsEqual(other Core) bool {
 }
 
 func (t *Err) String() string {
-	return slang.StrTypeERROR
+	return tokens.StrERR
 }
 
 func (t *Err) IsEqual(other Core) bool {
@@ -66,7 +71,7 @@ func (t *Err) IsEqual(other Core) bool {
 }
 
 func (t *Flt) String() string {
-	return slang.StrTypeFLOAT
+	return tokens.StrFLT
 }
 
 func (t *Flt) IsEqual(other Core) bool {
@@ -76,7 +81,7 @@ func (t *Flt) IsEqual(other Core) bool {
 }
 
 func (t *Int) String() string {
-	return slang.StrTypeINTEGER
+	return tokens.StrINT
 }
 
 func (t *Int) IsEqual(other Core) bool {
@@ -86,7 +91,7 @@ func (t *Int) IsEqual(other Core) bool {
 }
 
 func (t *Str) String() string {
-	return slang.StrTypeSTRING
+	return tokens.StrSTR
 }
 
 func (t *Str) IsEqual(other Core) bool {

@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/sliceutil"
 	"go.uber.org/multierr"
 )
 
@@ -10,11 +11,8 @@ func RunParser(l slang.Lexer, p Parser) error {
 
 	if !p.Run(toks) {
 		parseErrs := p.GetErrors()
-		errs := make([]error, len(parseErrs))
 
-		for i, parseErr := range parseErrs {
-			errs[i] = parseErr
-		}
+		errs := sliceutil.Map(parseErrs, func(parseErr *ParseErr) error { return parseErr })
 
 		return multierr.Combine(errs...)
 	}

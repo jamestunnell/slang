@@ -3,16 +3,19 @@ package ast
 import "github.com/jamestunnell/slang"
 
 type Package struct {
-	*slang.PackageInfo
-
+	Meta    slang.PackageMeta
 	Modules []*Module `json:"modules"`
 }
 
-func NewPackage(name string, modules ...*Module) *Package {
+func NewPackage(meta slang.PackageMeta, modules ...*Module) *Package {
 	return &Package{
-		PackageInfo: &slang.PackageInfo{Name: name},
-		Modules:     modules,
+		Meta:    meta,
+		Modules: modules,
 	}
+}
+
+func (pkg *Package) GetMeta() slang.PackageMeta {
+	return pkg.Meta
 }
 
 func (pkg *Package) GetModules() []slang.Module {

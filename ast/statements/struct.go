@@ -5,11 +5,12 @@ import (
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/field"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type Struct struct {
-	Name   string         `json:"name"`
-	Fields []*field.Field `json:"fields"`
+	Name   string    `json:"name"`
+	Fields field.Seq `json:"fields"`
 }
 
 func NewStruct(name string, fields ...*field.Field) *Statement {
@@ -18,15 +19,27 @@ func NewStruct(name string, fields ...*field.Field) *Statement {
 	return NewStatement(slang.StatementSTRUCT, core)
 }
 
-func (c *Struct) IsEqual(other Core) bool {
-	c2, ok := other.(*Struct)
+func (s *Struct) GetName() (string, bool) {
+	return s.Name, true
+}
+
+func (s *Struct) IsEqual(other Core) bool {
+	s2, ok := other.(*Struct)
 	if !ok {
 		return false
 	}
 
-	if c.Name != c2.Name {
+	if s.Name != s2.Name {
 		return false
 	}
 
-	return slices.EqualFunc(c.Fields, c2.Fields, fieldsEqual)
+	return slices.EqualFunc(s.Fields, s2.Fields, fieldsEqual)
+}
+
+func (s *Struct) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrSTRUCT)
+	w.WriteString(" ")
+	w.WriteString(s.Name)
+
+	s.Fields.Render(level, w)
 }

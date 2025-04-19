@@ -1,6 +1,8 @@
 package types
 
-import "github.com/jamestunnell/slang"
+import (
+	"github.com/jamestunnell/slang"
+)
 
 type Struct struct {
 	ModuleName string `json:"module"`

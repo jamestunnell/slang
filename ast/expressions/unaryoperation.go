@@ -2,14 +2,17 @@ package expressions
 
 import (
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type UnaryOperation struct {
 	Value *Expression `json:"value"`
+
+	typ slang.ExprType
 }
 
 func NewUnaryOperation(typ slang.ExprType, val *Expression) *Expression {
-	return NewExpression(typ, &UnaryOperation{Value: val})
+	return NewExpression(typ, &UnaryOperation{Value: val, typ: typ})
 }
 
 func (op *UnaryOperation) IsEqual(other Core) bool {
@@ -19,6 +22,19 @@ func (op *UnaryOperation) IsEqual(other Core) bool {
 	}
 
 	return op.Value.IsEqual(op2.Value)
+}
+
+func (op *UnaryOperation) Render(level int, w slang.CodeWriter) {
+	switch op.typ {
+	case slang.ExprNOT:
+		w.WriteString(tokens.StrBANG)
+	case slang.ExprNEGATIVE:
+		w.WriteString(tokens.StrMINUS)
+	default:
+		w.WriteString("???")
+	}
+
+	op.Value.Render(level, w)
 }
 
 // func (bo *UnaryOperation) Eval(env *slang.Environment) (slang.Object, error) {

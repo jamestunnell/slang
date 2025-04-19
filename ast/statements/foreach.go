@@ -1,10 +1,13 @@
 package statements
 
 import (
+	"strings"
+
 	"golang.org/x/exp/slices"
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/tokens"
 )
 
 type ForEach struct {
@@ -23,6 +26,10 @@ func NewForEach(
 	return NewStatement(slang.StatementFOREACH, core)
 }
 
+func (f *ForEach) GetName() (string, bool) {
+	return "", false
+}
+
 func (f *ForEach) IsEqual(other Core) bool {
 	f2, ok := other.(*ForEach)
 	if !ok {
@@ -38,6 +45,27 @@ func (f *ForEach) IsEqual(other Core) bool {
 	}
 
 	return slices.EqualFunc(f.Statements, f2.Statements, statementsEqual)
+}
+
+func (f *ForEach) Render(level int, w slang.CodeWriter) {
+	w.WriteString(tokens.StrFOREACH)
+	w.WriteString(" ")
+	w.WriteString(strings.Join(f.Vars, ", "))
+	w.WriteString(" in ")
+
+	f.Expr.Render(level, w)
+
+	w.WriteString("{")
+	w.WriteNewline()
+
+	subLevel := level + 1
+
+	for _, stmt := range f.Statements {
+		stmt.Render(subLevel, w)
+	}
+
+	w.WriteIndent(level)
+	w.WriteString("}")
 }
 
 // func (expr *ForEach) Eval(env *slang.Environment) (slang.Object, error) {

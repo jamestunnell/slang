@@ -4,6 +4,8 @@ import "github.com/jamestunnell/slang"
 
 type GreaterEqual struct{}
 
+const StrGREATEREQ = ">="
+
 func GREATEREQUAL() slang.TokenInfo           { return &GreaterEqual{} }
 func (t *GreaterEqual) Type() slang.TokenType { return slang.TokenGREATEREQUAL }
-func (t *GreaterEqual) Value() string         { return ">=" }
+func (t *GreaterEqual) Value() string         { return StrGREATEREQ }

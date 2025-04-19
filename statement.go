@@ -1,11 +1,14 @@
 package slang
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type StatementType int
 
 type Statement interface {
-	// SetComment(lines []string)
+	Render(level int, w CodeWriter)
+	GetName() (string, bool)
 	GetType() StatementType
 	GetComment() string
 	IsEqual(Statement) bool
@@ -25,12 +28,10 @@ const (
 	StatementVAR
 	StatementFUNC
 	StatementIF
-	StatementIFELSE
-	StatementMETHOD
-	StatementRETURN
-	StatementRETURNVAL
-	StatementSTRUCT
 	StatementUSE
+	StatementIFELSE
+	StatementRETURN
+	StatementSTRUCT
 
 	StrStatementASSIGN     = "ASSIGN"
 	StrStatementBREAK      = "BREAK"
@@ -40,16 +41,14 @@ const (
 	StrStatementEXPRESSION = "EXPRESSION"
 	StrStatementFIELD      = "FIELD"
 	StrStatementFOREACH    = "FOREACH"
+	StrStatementFUNC       = "FUNC"
 	StrStatementINTERFACE  = "INTERFACE"
 	StrStatementIF         = "IF"
 	StrStatementIFELSE     = "IFELSE"
-	StrStatementFUNC       = "FUNC"
-	StrStatementVAR        = "VAR"
-	StrStatementMETHOD     = "METHOD"
-	StrStatementRETURN     = "RETURN"
-	StrStatementRETURNVAL  = "RETURNVAL"
-	StrStatementSTRUCT     = "STRUCT"
 	StrStatementUSE        = "USE"
+	StrStatementVAR        = "VAR"
+	StrStatementRETURN     = "RETURN"
+	StrStatementSTRUCT     = "STRUCT"
 )
 
 func StatementsEqual(a, b Statement) bool {
@@ -76,24 +75,20 @@ func ParseStatementTypeStr(s string) (StatementType, bool) {
 		st = StatementFIELD
 	case StrStatementFOREACH:
 		st = StatementFOREACH
+	case StrStatementFUNC:
+		st = StatementFUNC
 	case StrStatementINTERFACE:
 		st = StatementINTERFACE
 	case StrStatementIF:
 		st = StatementIF
 	case StrStatementIFELSE:
 		st = StatementIFELSE
-	case StrStatementFUNC:
-		st = StatementFUNC
-	case StrStatementMETHOD:
-		st = StatementMETHOD
-	case StrStatementRETURN:
-		st = StatementRETURN
-	case StrStatementRETURNVAL:
-		st = StatementRETURNVAL
-	case StrStatementSTRUCT:
-		st = StatementSTRUCT
 	case StrStatementUSE:
 		st = StatementUSE
+	case StrStatementRETURN:
+		st = StatementRETURN
+	case StrStatementSTRUCT:
+		st = StatementSTRUCT
 	case StrStatementVAR:
 		st = StatementVAR
 	default:
@@ -127,24 +122,20 @@ func (st StatementType) String() string {
 		str = StrStatementFIELD
 	case StatementFOREACH:
 		str = StrStatementFOREACH
+	case StatementFUNC:
+		str = StrStatementFUNC
 	case StatementINTERFACE:
 		str = StrStatementINTERFACE
 	case StatementIF:
 		str = StrStatementIF
 	case StatementIFELSE:
 		str = StrStatementIFELSE
-	case StatementFUNC:
-		str = StrStatementFUNC
-	case StatementMETHOD:
-		str = StrStatementMETHOD
-	case StatementRETURN:
-		str = StrStatementRETURN
-	case StatementRETURNVAL:
-		str = StrStatementRETURNVAL
-	case StatementSTRUCT:
-		str = StrStatementSTRUCT
 	case StatementUSE:
 		str = StrStatementUSE
+	case StatementRETURN:
+		str = StrStatementRETURN
+	case StatementSTRUCT:
+		str = StrStatementSTRUCT
 	case StatementVAR:
 		str = StrStatementVAR
 	}

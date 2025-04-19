@@ -18,6 +18,7 @@ type Expression struct {
 
 type Core interface {
 	IsEqual(Core) bool
+	Render(level int, w slang.CodeWriter)
 }
 
 func NewExpression(typ slang.ExprType, core Core) *Expression {
@@ -56,6 +57,10 @@ func (s *Expression) MarshalJSON() ([]byte, error) {
 	}
 
 	return d, nil
+}
+
+func (s *Expression) Render(level int, w slang.CodeWriter) {
+	s.Core.Render(level, w)
 }
 
 var (
@@ -103,8 +108,8 @@ func (s *Expression) UnmarshalJSON(d []byte) error {
 		core, err = jsonutil.UnmarshalAs[BinaryOperation](d)
 	case slang.ExprFLOAT:
 		core, err = jsonutil.UnmarshalAs[Const[float64]](d)
-	case slang.ExprFUNC:
-		core, err = jsonutil.UnmarshalAs[Func](d)
+	case slang.ExprLAMBDA:
+		core, err = jsonutil.UnmarshalAs[Lambda](d)
 	case slang.ExprGREATER:
 		core, err = jsonutil.UnmarshalAs[BinaryOperation](d)
 	case slang.ExprGREATEREQUAL:

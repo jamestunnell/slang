@@ -25,6 +25,10 @@ func NewIfElse(
 	return NewStatement(slang.StatementIFELSE, core)
 }
 
+func (i *IfElse) GetName() (string, bool) {
+	return "", false
+}
+
 func (i *IfElse) IsEqual(other Core) bool {
 	i2, ok := other.(*IfElse)
 	if !ok {
@@ -40,6 +44,32 @@ func (i *IfElse) IsEqual(other Core) bool {
 	}
 
 	return slices.EqualFunc(i.ElseStatements, i2.ElseStatements, statementsEqual)
+}
+
+func (i *IfElse) Render(level int, w slang.CodeWriter) {
+	w.WriteString("if ")
+
+	i.Condition.Render(level, w)
+
+	w.WriteString(" {")
+	w.WriteNewline()
+
+	subLevel := level + 1
+
+	for _, stmt := range i.IfStatements {
+		stmt.Render(subLevel, w)
+	}
+
+	w.WriteIndent(level)
+	w.WriteString("} else {")
+	w.WriteNewline()
+
+	for _, stmt := range i.ElseStatements {
+		stmt.Render(subLevel, w)
+	}
+
+	w.WriteIndent(level)
+	w.WriteString("}")
 }
 
 // func (expr *IfElse) Eval(env *slang.Environment) (slang.Object, error) {

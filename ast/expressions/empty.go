@@ -13,3 +13,5 @@ func (e *Empty) IsEqual(other Core) bool {
 
 	return ok
 }
+
+func (e *Empty) Render(level int, w slang.CodeWriter) {}

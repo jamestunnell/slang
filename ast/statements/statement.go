@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -19,7 +20,9 @@ type Statement struct {
 }
 
 type Core interface {
+	GetName() (string, bool)
 	IsEqual(Core) bool
+	Render(level int, w slang.CodeWriter)
 }
 
 func NewStatement(typ slang.StatementType, core Core) *Statement {
@@ -40,6 +43,27 @@ func (s *Statement) GetComment() string {
 
 func (s *Statement) GetType() slang.StatementType {
 	return s.Type
+}
+
+func (s *Statement) GetName() (string, bool) {
+	return s.Core.GetName()
+}
+
+func (s *Statement) Render(level int, w slang.CodeWriter) {
+	if s.Comment != "" {
+		for _, line := range strings.Split(s.Comment, "\n") {
+			w.WriteIndent(level)
+			w.WriteString("// ")
+			w.WriteString(line)
+			w.WriteNewline()
+		}
+	}
+
+	w.WriteIndent(level)
+
+	s.Core.Render(level, w)
+
+	w.WriteNewline()
 }
 
 func (s *Statement) IsEqual(other slang.Statement) bool {
@@ -124,8 +148,6 @@ func (s *Statement) UnmarshalJSON(d []byte) error {
 		core, err = jsonutil.UnmarshalAs[IfElse](d)
 	case slang.StatementRETURN:
 		core, err = jsonutil.UnmarshalAs[Return](d)
-	case slang.StatementRETURNVAL:
-		core, err = jsonutil.UnmarshalAs[ReturnVal](d)
 	case slang.StatementSTRUCT:
 		core, err = jsonutil.UnmarshalAs[Struct](d)
 	case slang.StatementUSE:

@@ -34,21 +34,59 @@ func NewInvokeArgPos(val *Expression) *InvokeArg {
 	return &InvokeArg{Name: "", Value: val}
 }
 
-func (c *Invoke) IsEqual(other Core) bool {
-	c2, ok := other.(*Invoke)
+func (i *Invoke) IsEqual(other Core) bool {
+	i2, ok := other.(*Invoke)
 	if !ok {
 		return false
 	}
 
-	if !c2.Subject.IsEqual(c.Subject) {
+	if !i2.Subject.IsEqual(i.Subject) {
 		return false
 	}
 
-	if !slices.EqualFunc(c.Args, c2.Args, invokeArgsEqual) {
+	if !slices.EqualFunc(i.Args, i2.Args, invokeArgsEqual) {
 		return false
 	}
 
 	return true
+}
+
+func (i *Invoke) Render(level int, w slang.CodeWriter) {
+	i.Subject.Render(level, w)
+
+	switch len(i.Args) {
+	case 0:
+		w.WriteString("()")
+	case 1:
+		w.WriteString("(")
+
+		i.Args[0].Render(level, w)
+
+		w.WriteString(")")
+	default:
+		w.WriteString("[")
+
+		subLevel := level + 1
+		for _, arg := range i.Args {
+			w.WriteNewline()
+			w.WriteIndent(subLevel)
+
+			arg.Render(subLevel, w)
+		}
+
+		w.WriteIndent(level)
+		w.WriteString(")")
+	}
+}
+
+func (a *InvokeArg) Render(level int, w slang.CodeWriter) {
+	if a.Name != "" {
+		w.WriteString(a.Name)
+		w.WriteString(":")
+
+	}
+
+	a.Value.Render(level, w)
 }
 
 // func (expr *Call) Eval(env *slang.Environment) (slang.Object, error) {

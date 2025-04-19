@@ -215,7 +215,7 @@ func (p *ExprParser) finishParsingAutoArray(
 // 	return k, v, true
 // }
 
-func (p *ExprParser) parseFuncAnon(toks parsing.TokenSeq) *expressions.Expression {
+func (p *ExprParser) parseLambda(toks parsing.TokenSeq) *expressions.Expression {
 	toks.AdvanceSkip(slang.TokenNEWLINE) // past func
 
 	sigParser := NewFuncSignatureParser()
@@ -230,7 +230,7 @@ func (p *ExprParser) parseFuncAnon(toks parsing.TokenSeq) *expressions.Expressio
 
 	bodyStatements := sliceutil.Map(bodyParser.GetStatements(), func(s *statements.Statement) slang.Statement { return s })
 
-	return expressions.NewFunc(
+	return expressions.NewLambda(
 		sigParser.Inputs, sigParser.Outputs, bodyStatements...)
 }
 
