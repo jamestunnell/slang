@@ -13,8 +13,10 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/teacup/statusbar"
+	"github.com/mrusme/neonmodem/ui/helpers"
 	"golang.org/x/exp/maps"
 
 	"github.com/jamestunnell/slang"
@@ -32,16 +34,26 @@ type Model struct {
 	width            int
 	height           int
 	help             help.Model
-	addStmts         textarea.Model
-	viewStmts        viewport.Model
+	inputArea        textarea.Model
+	viewerArea       viewport.Model
 	statementsByName map[string]*statements.Statement
 	statusBar        statusbar.Model
+	confirmForm      *huh.Form
 }
 
+type addStmtsMsg struct {
+	Statements []*statements.Statement
+}
+
+type focusOnInputMsg struct{}
+
 const (
-	focusAddStmtsInput focusArea = iota
-	focusParseStmtsBtn
-	focusViewStmts
+	confirmHeight = 10
+	confirmWidth  = 30
+
+	focusInput focusArea = iota
+	focusViewer
+	focusDialog
 )
 
 var (
@@ -84,13 +96,13 @@ var (
 	// 			Border(lipgloss.RoundedBorder()).
 	// 			BorderForeground(borderColorInactive)
 
-	activeBoxStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(borderColorActive)
+	// activeBoxStyle = lipgloss.NewStyle().
+	// 		Border(lipgloss.RoundedBorder()).
+	// 		BorderForeground(borderColorActive)
 
-	inactiveBoxStyle = lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(borderColorActive)
+	// inactiveBoxStyle = lipgloss.NewStyle().
+	// 			Border(lipgloss.RoundedBorder()).
+	// 			BorderForeground(borderColorActive)
 )
 
 func newTextarea(placeholder string) textarea.Model {
@@ -117,9 +129,9 @@ func newTextarea(placeholder string) textarea.Model {
 
 func newModel() *Model {
 	m := &Model{
-		focus:    focusAddStmtsInput,
-		addStmts: newTextarea("Type something"),
-		help:     help.New(),
+		focus:     focusInput,
+		inputArea: newTextarea("Type something"),
+		help:      help.New(),
 		// viewStmts: viewport.New(,),
 		statementsByName: map[string]*statements.Statement{},
 		statusBar: statusbar.New(
@@ -140,51 +152,72 @@ func newModel() *Model {
 				Background: lipgloss.AdaptiveColor{Light: "#6124DF", Dark: "#6124DF"},
 			},
 		),
+		confirmForm: newConfirmForm(),
 	}
 
-	m.addStmts.Focus()
+	m.inputArea.Focus()
 
 	return m
 }
 
+func newConfirmForm() *huh.Form {
+	return huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Key("confirm").
+				Title("Override existing?").
+				Affirmative("Yes").
+				Negative("No"),
+		),
+	)
+}
+
 func (f focusArea) String() string {
 	switch f {
-	case focusAddStmtsInput:
-		return "INPUTSTMTS"
-	case focusViewStmts:
-		return "VIEWSTMTS"
-	case focusParseStmtsBtn:
-		return "PARSESTMTS"
+	case focusInput:
+		return "INPUT"
+	case focusDialog:
+		return "DIALOG"
+	case focusViewer:
+		return "VIEWER"
 	}
 
 	return ""
 }
 
 func (m *Model) Init() tea.Cmd {
-	return textarea.Blink
+	return tea.Batch(textarea.Blink, m.confirmForm.Init())
 }
 
-func (m *Model) switchFocus() {
+func (m *Model) focusOnInput() {
+	m.inputArea.Focus()
+	m.viewerArea.Style.BorderForeground(borderColorInactive)
+
+	m.focus = focusInput
+}
+
+func (m *Model) focusOnViewer() {
+	m.inputArea.Blur()
+	m.viewerArea.Style.BorderForeground(borderColorActive)
+
+	m.focus = focusViewer
+}
+
+func (m *Model) cycleFocus() {
 	switch m.focus {
-	case focusAddStmtsInput:
-		m.addStmts.Blur()
-		m.viewStmts.Style.BorderForeground(borderColorActive)
-
-		m.focus = focusViewStmts
-	case focusViewStmts:
-		m.addStmts.Focus()
-		m.viewStmts.Style.BorderForeground(borderColorInactive)
-
-		m.focus = focusAddStmtsInput
+	case focusInput:
+		m.focusOnViewer()
+	case focusViewer:
+		m.focusOnInput()
 	}
 }
 
-func (m *Model) parseAndAdd() {
-	if m.focus != focusAddStmtsInput {
+func (m *Model) parseStatements() {
+	if m.focus != focusInput {
 		return
 	}
 
-	newStmts, err := parseInput(m.addStmts.Value())
+	newStmts, err := parseInput(m.inputArea.Value())
 	if err != nil {
 		log.Printf("failed to parse input: %v", err)
 
@@ -193,16 +226,44 @@ func (m *Model) parseAndAdd() {
 
 	log.Printf("parsed %d statements", len(newStmts))
 
-	for _, stmt := range newStmts {
+	names := sliceutil.Map(newStmts, func(s *statements.Statement) string {
+		name, _ := s.GetName()
+
+		return name
+	})
+	conflicts := sliceutil.Where(names, func(name string) bool {
+		_, found := m.statementsByName[name]
+
+		return found
+	})
+
+	if len(conflicts) == 0 {
+		m.addStatements(newStmts)
+
+		return
+	}
+
+	m.focus = focusDialog
+
+	m.confirmForm.WithWidth(confirmWidth)
+	m.confirmForm.WithHeight(confirmHeight)
+	m.confirmForm.SubmitCmd = tea.Batch(
+		m.confirmForm.Init(),
+		func() tea.Msg { return addStmtsMsg{Statements: newStmts} },
+		func() tea.Msg { return focusOnInputMsg{} },
+	)
+	m.confirmForm.CancelCmd = func() tea.Msg { return focusOnInputMsg{} }
+}
+
+func (m *Model) addStatements(stmts []*statements.Statement) {
+	for _, stmt := range stmts {
 		name, _ := stmt.GetName()
 
 		m.statementsByName[name] = stmt
 	}
 
-	allStmts := maps.Values(m.statementsByName)
-
-	m.addStmts.SetValue("")
-	m.viewStmts.SetContent(renderStatements(allStmts))
+	m.inputArea.SetValue("")
+	m.viewerArea.SetContent(renderStatements(maps.Values(m.statementsByName)))
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -213,43 +274,55 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmds []tea.Cmd
 
-	log.Printf("got msg: %#v", msg)
-
 	switch mm := msg.(type) {
+	case focusOnInputMsg:
+		m.focusOnInput()
+	case addStmtsMsg:
+		if m.confirmForm.GetBool("confirm") {
+			m.addStatements(mm.Statements)
+		}
+
+		m.confirmForm = newConfirmForm()
+
+		cmds = append(cmds, m.confirmForm.Init())
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(mm, bindingParseAdd):
-			m.parseAndAdd()
+			m.parseStatements()
 		case key.Matches(mm, bindingSwitch):
-			m.switchFocus()
+			m.cycleFocus()
 		case key.Matches(mm, bindingQuit):
-			m.addStmts.Blur()
+			m.inputArea.Blur()
 
 			cmds = append(cmds, tea.Quit)
 		}
 	case tea.WindowSizeMsg:
+		if mm.Width == m.width && mm.Height == m.height {
+			break
+		}
+
 		m.height = mm.Height
 		m.width = mm.Width
 
 		mainHeight := mm.Height - helpHeight
 
-		m.addStmts.SetHeight(mainHeight)
-		m.addStmts.SetWidth(mm.Width / 2)
+		m.inputArea.SetHeight(mainHeight)
+		m.inputArea.SetWidth(mm.Width / 2)
 
-		m.viewStmts = viewport.New(mm.Width/2-10, mainHeight)
+		m.viewerArea = viewport.New(mm.Width/2-10, mainHeight)
 
 		m.statusBar.SetSize(mm.Width)
-
-		// cmds = append(cmds, m.addStmts.Focus())
 	}
 
 	var update func(msg tea.Msg) []tea.Cmd
 
 	switch m.focus {
-	case focusAddStmtsInput:
+	case focusInput:
 		update = m.updateAddStmts
-	case focusViewStmts:
+	case focusViewer:
 		update = m.updateViewStmts
+	case focusDialog:
+		update = m.updateDialog
 	}
 
 	cmds = append(cmds, update(msg)...)
@@ -260,31 +333,45 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) updateAddStmts(msg tea.Msg) []tea.Cmd {
 	var cmd tea.Cmd
 
-	m.addStmts, cmd = m.addStmts.Update(msg)
-	if cmd != nil {
-		return []tea.Cmd{cmd}
-	}
+	m.inputArea, cmd = m.inputArea.Update(msg)
 
-	lineInfo := m.addStmts.LineInfo()
-	rowStatus := fmt.Sprintf("row: %d/%d", 1+m.addStmts.Line(), m.addStmts.LineCount())
+	lineInfo := m.inputArea.LineInfo()
+	rowStatus := fmt.Sprintf("row: %d/%d", 1+m.inputArea.Line(), m.inputArea.LineCount())
 	columnStatus := fmt.Sprintf("col: %d/%d", 1+lineInfo.ColumnOffset, lineInfo.Width)
 
 	m.setStatusBar(rowStatus, columnStatus)
 
-	return []tea.Cmd{cmd}
+	if cmd != nil {
+		return []tea.Cmd{cmd}
+	}
+
+	return []tea.Cmd{}
 }
 
 func (m *Model) updateViewStmts(msg tea.Msg) []tea.Cmd {
 	var cmd tea.Cmd
 
-	m.viewStmts, cmd = m.viewStmts.Update(msg)
+	m.viewerArea, cmd = m.viewerArea.Update(msg)
+
+	m.setStatusBar("", "")
+
+	if cmd != nil {
+		return []tea.Cmd{cmd}
+	}
+	return []tea.Cmd{}
+}
+
+func (m *Model) updateDialog(msg tea.Msg) []tea.Cmd {
+	form, cmd := m.confirmForm.Update(msg)
+	if f, ok := form.(*huh.Form); ok {
+		m.confirmForm = f
+	}
+
 	if cmd != nil {
 		return []tea.Cmd{cmd}
 	}
 
-	m.setStatusBar("", "")
-
-	return []tea.Cmd{cmd}
+	return []tea.Cmd{}
 }
 
 func (m *Model) setStatusBar(rowStatus, colStatus string) {
@@ -297,9 +384,9 @@ func (m *Model) currentBindings() []key.Binding {
 	var bindings []key.Binding
 
 	switch m.focus {
-	case focusAddStmtsInput:
+	case focusInput:
 		bindings = []key.Binding{bindingParseAdd, bindingSwitch, bindingQuit}
-	case focusViewStmts:
+	case focusViewer:
 		bindings = []key.Binding{bindingSwitch, bindingQuit}
 	}
 
@@ -325,17 +412,27 @@ func (m *Model) View() string {
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			m.boxStyle(focusAddStmtsInput).Render(m.addStmts.View()),
-			m.boxStyle(focusViewStmts).Render(m.viewStmts.View()),
+			m.boxStyle(focusInput).Render(m.inputArea.View()),
+			m.boxStyle(focusViewer).Render(m.viewerArea.View()),
 		),
 		m.help.ShortHelpView(m.currentBindings()),
 	)
 
-	return lipgloss.JoinVertical(
+	everything := lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.NewStyle().Height(m.height-statusbar.Height).Render(mainBody),
 		m.statusBar.View(),
 	)
+
+	if m.focus != focusDialog {
+		return everything
+	}
+
+	return helpers.PlaceOverlay(
+		m.width/2-confirmWidth/2,
+		m.height/2-confirmHeight/2,
+		m.confirmForm.View(),
+		everything, false)
 }
 
 func main() {
