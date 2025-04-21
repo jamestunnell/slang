@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textarea"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
@@ -35,7 +34,7 @@ type Model struct {
 	height           int
 	help             help.Model
 	inputArea        textarea.Model
-	viewerArea       viewport.Model
+	viewerArea       textarea.Model
 	statementsByName map[string]*statements.Statement
 	statusBar        statusbar.Model
 	confirmForm      *huh.Form
@@ -74,35 +73,6 @@ var (
 	borderColorInactive = lipgloss.Color("238")
 
 	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-
-	// cursorLineStyle = lipgloss.NewStyle().
-	// 		Background(lipgloss.Color("57")).
-	// 		Foreground(lipgloss.Color("230"))
-
-	// placeholderStyle = lipgloss.NewStyle().
-	// 			Foreground(lipgloss.Color("238"))
-
-	// endOfBufferStyle = lipgloss.NewStyle().
-	// 			Foreground(lipgloss.Color("235"))
-
-	// focusedPlaceholderStyle = lipgloss.NewStyle().
-	// 			Foreground(lipgloss.Color("99"))
-
-	// focusedBorderStyle = lipgloss.NewStyle().
-	// 			Border(lipgloss.RoundedBorder()).
-	// 			BorderForeground(borderColorActive)
-
-	// blurredBorderStyle = lipgloss.NewStyle().
-	// 			Border(lipgloss.RoundedBorder()).
-	// 			BorderForeground(borderColorInactive)
-
-	// activeBoxStyle = lipgloss.NewStyle().
-	// 		Border(lipgloss.RoundedBorder()).
-	// 		BorderForeground(borderColorActive)
-
-	// inactiveBoxStyle = lipgloss.NewStyle().
-	// 			Border(lipgloss.RoundedBorder()).
-	// 			BorderForeground(borderColorActive)
 )
 
 func newTextarea(placeholder string) textarea.Model {
@@ -111,28 +81,16 @@ func newTextarea(placeholder string) textarea.Model {
 	t.Placeholder = placeholder
 	t.ShowLineNumbers = true
 	t.Cursor.Style = cursorStyle
-	// t.FocusedStyle.Placeholder = focusedPlaceholderStyle
-	// t.BlurredStyle.Placeholder = placeholderStyle
-	// t.FocusedStyle.CursorLine = cursorLineStyle
-	// t.FocusedStyle.Base = focusedBorderStyle
-	// t.BlurredStyle.Base = blurredBorderStyle
-	// t.FocusedStyle.EndOfBuffer = endOfBufferStyle
-	// t.BlurredStyle.EndOfBuffer = endOfBufferStyle
-	t.KeyMap.DeleteWordBackward.SetEnabled(false)
-	t.KeyMap.LineNext = key.NewBinding(key.WithKeys("down"))
-	t.KeyMap.LinePrevious = key.NewBinding(key.WithKeys("up"))
-
-	t.Blur()
 
 	return t
 }
 
 func newModel() *Model {
 	m := &Model{
-		focus:     focusInput,
-		inputArea: newTextarea("Type something"),
-		help:      help.New(),
-		// viewStmts: viewport.New(,),
+		focus:            focusInput,
+		inputArea:        newTextarea("Type something"),
+		viewerArea:       newTextarea(""),
+		help:             help.New(),
 		statementsByName: map[string]*statements.Statement{},
 		statusBar: statusbar.New(
 			statusbar.ColorConfig{
@@ -156,6 +114,17 @@ func newModel() *Model {
 	}
 
 	m.inputArea.Focus()
+
+	m.viewerArea.Blur()
+	m.viewerArea.KeyMap.DeleteWordBackward.Unbind()
+	m.viewerArea.KeyMap.DeleteWordForward.Unbind()
+	m.viewerArea.KeyMap.DeleteAfterCursor.Unbind()
+	m.viewerArea.KeyMap.DeleteBeforeCursor.Unbind()
+	m.viewerArea.KeyMap.InsertNewline.Unbind()
+	m.viewerArea.KeyMap.DeleteCharacterBackward.Unbind()
+	m.viewerArea.KeyMap.DeleteCharacterForward.Unbind()
+	m.viewerArea.KeyMap.Paste.Unbind()
+	m.viewerArea.KeyMap.TransposeCharacterBackward.Unbind()
 
 	return m
 }
@@ -191,14 +160,14 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) focusOnInput() {
 	m.inputArea.Focus()
-	m.viewerArea.Style.BorderForeground(borderColorInactive)
+	m.viewerArea.Blur()
 
 	m.focus = focusInput
 }
 
 func (m *Model) focusOnViewer() {
 	m.inputArea.Blur()
-	m.viewerArea.Style.BorderForeground(borderColorActive)
+	m.viewerArea.Focus()
 
 	m.focus = focusViewer
 }
@@ -263,7 +232,7 @@ func (m *Model) addStatements(stmts []*statements.Statement) {
 	}
 
 	m.inputArea.SetValue("")
-	m.viewerArea.SetContent(renderStatements(maps.Values(m.statementsByName)))
+	m.viewerArea.SetValue(renderStatements(maps.Values(m.statementsByName)))
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -293,6 +262,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.cycleFocus()
 		case key.Matches(mm, bindingQuit):
 			m.inputArea.Blur()
+			m.viewerArea.Blur()
 
 			cmds = append(cmds, tea.Quit)
 		}
@@ -304,12 +274,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = mm.Height
 		m.width = mm.Width
 
-		mainHeight := mm.Height - helpHeight
+		areaHeight := mm.Height - helpHeight
+		areaWidth := (mm.Width / 2) - 5
 
-		m.inputArea.SetHeight(mainHeight)
-		m.inputArea.SetWidth(mm.Width / 2)
+		m.inputArea.SetHeight(areaHeight)
+		m.inputArea.SetWidth(areaWidth)
 
-		m.viewerArea = viewport.New(mm.Width/2-10, mainHeight)
+		m.viewerArea.SetHeight(areaHeight)
+		m.viewerArea.SetWidth(areaWidth)
 
 		m.statusBar.SetSize(mm.Width)
 	}
@@ -318,9 +290,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch m.focus {
 	case focusInput:
-		update = m.updateAddStmts
+		update = m.updateInputArea
 	case focusViewer:
-		update = m.updateViewStmts
+		update = m.updateViewerArea
 	case focusDialog:
 		update = m.updateDialog
 	}
@@ -330,16 +302,20 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m *Model) updateAddStmts(msg tea.Msg) []tea.Cmd {
+func (m *Model) updateTextAreaStatusBar(ta textarea.Model) {
+	lineInfo := ta.LineInfo()
+	rowStatus := fmt.Sprintf("row: %d/%d", 1+ta.Line(), ta.LineCount())
+	columnStatus := fmt.Sprintf("col: %d/%d", 1+lineInfo.ColumnOffset, lineInfo.Width)
+
+	m.updateStatusBar(rowStatus, columnStatus)
+}
+
+func (m *Model) updateInputArea(msg tea.Msg) []tea.Cmd {
 	var cmd tea.Cmd
 
 	m.inputArea, cmd = m.inputArea.Update(msg)
 
-	lineInfo := m.inputArea.LineInfo()
-	rowStatus := fmt.Sprintf("row: %d/%d", 1+m.inputArea.Line(), m.inputArea.LineCount())
-	columnStatus := fmt.Sprintf("col: %d/%d", 1+lineInfo.ColumnOffset, lineInfo.Width)
-
-	m.updateStatusBar(rowStatus, columnStatus)
+	m.updateTextAreaStatusBar(m.inputArea)
 
 	if cmd != nil {
 		return []tea.Cmd{cmd}
@@ -348,12 +324,18 @@ func (m *Model) updateAddStmts(msg tea.Msg) []tea.Cmd {
 	return []tea.Cmd{}
 }
 
-func (m *Model) updateViewStmts(msg tea.Msg) []tea.Cmd {
+func (m *Model) updateViewerArea(msg tea.Msg) []tea.Cmd {
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		if len(keyMsg.Runes) > 0 {
+			return []tea.Cmd{}
+		}
+	}
+
 	var cmd tea.Cmd
 
 	m.viewerArea, cmd = m.viewerArea.Update(msg)
 
-	m.updateStatusBar("", "")
+	m.updateTextAreaStatusBar(m.viewerArea)
 
 	if cmd != nil {
 		return []tea.Cmd{cmd}
