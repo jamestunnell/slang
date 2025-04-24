@@ -7,6 +7,7 @@ toolchain go1.24.0
 require (
 	github.com/akrennmair/slice v0.0.0-20220105203817-49445747ab81
 	github.com/alexflint/go-arg v1.5.1
+	github.com/blueimp/passphrase v0.0.0-20201024011604-f4e42b62b824
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/charmbracelet/huh v0.7.0
