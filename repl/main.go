@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/alexflint/go-arg"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/repl/app"
-	"github.com/jamestunnell/slang/rpc/client"
 	"github.com/jamestunnell/slang/virtualmachine"
 )
 
@@ -22,9 +22,11 @@ func main() {
 
 	arg.MustParse(&args)
 
+	os.Remove("debug.log")
+
 	logFile, err := tea.LogToFile("debug.log", "debug")
 	if err != nil {
-		fmt.Println("Failed to set up debug file logging:", err)
+		log.Printf("REPL: failed to set up debug file logging: %v\n", err)
 
 		os.Exit(1)
 	}
@@ -42,48 +44,65 @@ func runNew() {
 	vm := virtualmachine.New(virtualmachine.RandomID(2))
 
 	if err := vm.Start(); err != nil {
-		log.Printf("Failed to start VM: %v", err)
+		log.Printf("REPL: failed to start VM: %v\n", err)
 
 		os.Exit(1)
+	}
+
+	for !vm.IsRunning() {
+		log.Println("REPL: waiting for VM to run")
+
+		time.Sleep(25 * time.Millisecond)
 	}
 
 	defer func() {
 		vm.Stop()
 	}()
 
-	runREPL(&app.Args{
-		VMID:    vm.GetID(),
-		RPCAddr: vm.GetRPCAddr(),
-	})
+	c := makeClient(vm.GetRPCAddr())
+
+	runREPL(c, vm.GetInfo())
 }
 
 func runExisting(rpcAddr string) {
+	c := makeClient(rpcAddr)
+
 	// use existing VM check for if connecting to RPC server for an existing VM
-	vmInfo, err := client.NewVMInfo(rpcAddr)
+	vmInfo, err := c.GetInfo()
 	if err != nil {
-		fmt.Println("Failed to connect with VM RPC:", err)
+		log.Printf("REPL: failed to get VM info: %v\n", err)
 
 		os.Exit(1)
 	}
 
-	vmID, err := vmInfo.GetID()
-	if err != nil {
-		fmt.Println("Failed to get VM ID:", err)
-
-		os.Exit(1)
-	}
-
-	runREPL(&app.Args{
-		VMID:    vmID,
-		RPCAddr: rpcAddr,
-	})
+	runREPL(c, vmInfo)
 }
 
-func runREPL(args *app.Args) {
-	p := tea.NewProgram(app.New(args), tea.WithAltScreen())
+func makeClient(tcpAddr string) virtualmachine.Client {
+	log.Printf("REPL: making client for VM RPC at %s\n", tcpAddr)
+
+	c, err := virtualmachine.MakeClient(tcpAddr)
+	if err != nil {
+		log.Printf("REPL: failed to make VM client: %v\n", err)
+
+		os.Exit(1)
+	}
+
+	return c
+}
+
+func runREPL(
+	c virtualmachine.Client,
+	info slang.VMInfo,
+) {
+	log.Println("REPL: starting app")
+
+	app := app.New(c, info)
+	p := tea.NewProgram(app, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Failed to run:", err)
+		log.Printf("REPL: failed to run: %v\n", err)
+
 		os.Exit(1)
 	}
 

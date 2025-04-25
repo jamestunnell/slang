@@ -1,73 +1,73 @@
 package objects
 
-import (
-	"reflect"
-	"strconv"
+// import (
+// 	"reflect"
+// 	"strconv"
 
-	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
-)
+// 	"github.com/jamestunnell/slang"
+// 	"github.com/jamestunnell/slang/customerrs"
+// )
 
-type Bool struct {
-	Value bool
-}
+// type Bool struct {
+// 	Value bool
+// }
 
-const ClassBOOL = "Bool"
+// const ClassBOOL = "Bool"
 
-// var boolClass = NewBuiltInClass(ClassBOOL)
+// // var boolClass = NewBuiltInClass(ClassBOOL)
 
-func NewBool(val bool) slang.Object {
-	return &Bool{Value: val}
-}
+// func NewBool(val bool) slang.Object {
+// 	return &Bool{Value: val}
+// }
 
-func (obj *Bool) Equal(other slang.Object) bool {
-	obj2, ok := other.(*Bool)
-	if !ok {
-		return false
-	}
+// func (obj *Bool) Equal(other slang.Object) bool {
+// 	obj2, ok := other.(*Bool)
+// 	if !ok {
+// 		return false
+// 	}
 
-	return obj.Value == obj2.Value
-}
+// 	return obj.Value == obj2.Value
+// }
 
-func (obj *Bool) Inspect() string {
-	return strconv.FormatBool(obj.Value)
-}
+// func (obj *Bool) Inspect() string {
+// 	return strconv.FormatBool(obj.Value)
+// }
 
-func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := boolClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
+// func (obj *Bool) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+// 	// // an added instance method would override a standard one
+// 	// if m, found := boolClass.GetInstanceMethod(methodName); found {
+// 	// 	return m.Run(args)
+// 	// }
 
-	switch methodName {
-	case slang.MethodNOT:
-		return NewBool(!obj.Value), nil
-	case slang.MethodEQ, slang.MethodNEQ, slang.MethodAND, slang.MethodOR:
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
+// 	switch methodName {
+// 	case slang.MethodNOT:
+// 		return NewBool(!obj.Value), nil
+// 	case slang.MethodEQ, slang.MethodNEQ, slang.MethodAND, slang.MethodOR:
+// 		if err := checkArgCount(args, 1); err != nil {
+// 			return nil, err
+// 		}
 
-		arg, ok := args[0].(*Bool)
-		if !ok {
-			return nil, customerrs.NewErrArgType(ClassBOOL, reflect.TypeOf(args[0]).String())
-		}
+// 		arg, ok := args[0].(*Bool)
+// 		if !ok {
+// 			return nil, customerrs.NewErrArgType(ClassBOOL, reflect.TypeOf(args[0]).String())
+// 		}
 
-		var ret slang.Object
-		switch methodName {
-		case slang.MethodEQ:
-			ret = NewBool(obj.Value == arg.Value)
-		case slang.MethodNEQ:
-			ret = NewBool(obj.Value != arg.Value)
-		case slang.MethodAND:
-			ret = NewBool(obj.Value && arg.Value)
-		case slang.MethodOR:
-			ret = NewBool(obj.Value || arg.Value)
-		}
+// 		var ret slang.Object
+// 		switch methodName {
+// 		case slang.MethodEQ:
+// 			ret = NewBool(obj.Value == arg.Value)
+// 		case slang.MethodNEQ:
+// 			ret = NewBool(obj.Value != arg.Value)
+// 		case slang.MethodAND:
+// 			ret = NewBool(obj.Value && arg.Value)
+// 		case slang.MethodOR:
+// 			ret = NewBool(obj.Value || arg.Value)
+// 		}
 
-		return ret, nil
-	}
+// 		return ret, nil
+// 	}
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
+// 	err := customerrs.NewErrMethodUndefined(methodName, ClassBOOL)
 
-	return nil, err
-}
+// 	return nil, err
+// }

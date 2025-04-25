@@ -34,8 +34,6 @@ func ParsePackage(rootFS fs.FS, fp FileParser) ([]*ast.Module, error) {
 			return openErr
 		}
 
-		fmt.Printf("parsing %s -> ", entryPath)
-
 		runes := lexing.NewRuneSource(bufio.NewReader(f))
 		l := lexing.NewLexer(runes)
 

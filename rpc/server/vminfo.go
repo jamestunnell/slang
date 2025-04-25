@@ -1,19 +1,19 @@
 package server
 
 import (
+	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
 type VMInfo struct {
-	id string
+	VM slang.VirtualMachine
 }
 
-func NewVMInfo(id string) *VMInfo {
-	return &VMInfo{id: id}
-}
+func (api *VMInfo) GetInfo(_ *models.GetVMInfoArgs, reply *slang.VMInfo) error {
+	info := api.VM.GetInfo()
 
-func (api *VMInfo) GetID(_ *models.GetVMIDArgs, reply *models.GetVMIDReply) error {
-	reply.ID = api.id
+	reply.ID = info.ID
+	reply.Name = info.Name
 
 	return nil
 }

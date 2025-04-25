@@ -5,11 +5,11 @@ import (
 	"github.com/jamestunnell/slang/archives"
 )
 
-type AddArchiveArgs struct {
+type AddTarGzArgs struct {
 	Archive *archives.TarGz
 }
 
-type AddArchiveReply struct {
+type AddTarGzReply struct {
 }
 
 type RemoveArchiveArgs struct {

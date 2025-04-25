@@ -2,84 +2,71 @@ package client
 
 import (
 	"fmt"
-	"net/rpc"
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
-type Archives interface {
-	Add(*archives.TarGz) error
-	List() ([]slang.PackageMeta, error)
-	Get(slang.PackageMeta) (slang.PackageArchive, bool, error)
-	Remove(slang.PackageMeta) (bool, error)
-}
+func (client *Client) AddPackage(archive slang.PackageArchive) error {
+	const method = "Archives.Add"
 
-type archivesClient struct {
-	rpcClient *rpc.Client
-}
-
-func NewArchives(serverAddress string) (Archives, error) {
-	rpcc, err := rpc.DialHTTP("tcp", serverAddress)
-	if err != nil {
-		return nil, fmt.Errorf("failed to dial server: %w", err)
+	tgz, ok := archive.(*archives.TarGz)
+	if !ok {
+		return fmt.Errorf("unsupported data format %s", archive.GetDataFormat())
 	}
 
-	client := &archivesClient{
-		rpcClient: rpcc,
-	}
+	args := &models.AddTarGzArgs{Archive: tgz}
 
-	return client, nil
-}
+	var reply models.AddTarGzReply
 
-func (client *archivesClient) Add(archive *archives.TarGz) error {
-	args := &models.AddArchiveArgs{Archive: archive}
-
-	var reply models.AddArchiveReply
-
-	err := client.rpcClient.Call("Archives.Add", args, &reply)
+	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
-		return fmt.Errorf("add-archive error: %w", err)
+		return newErrMethodFailed(method, err)
 	}
 
 	return nil
 }
 
-func (client *archivesClient) List() ([]slang.PackageMeta, error) {
+func (client *Client) ListPackages() ([]slang.PackageMeta, error) {
+	const method = "Archives.List"
 	args := &models.ListArchivesArgs{}
 
 	var reply models.ListArchivesReply
 
-	err := client.rpcClient.Call("Archives.List", args, &reply)
+	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
-		return []slang.PackageMeta{}, fmt.Errorf("list-archives error: %w", err)
+		return []slang.PackageMeta{}, newErrMethodFailed(method, err)
 	}
 
 	return reply.Metas, nil
 }
 
-func (client *archivesClient) Get(meta slang.PackageMeta) (slang.PackageArchive, bool, error) {
+func (client *Client) GetPackage(meta slang.PackageMeta) (slang.PackageArchive, bool, error) {
+	const method = "Archives.Get"
+
 	args := &models.GetArchiveArgs{Meta: meta}
 
 	var reply models.GetArchiveReply
 
-	err := client.rpcClient.Call("Archives.Get", args, &reply)
+	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
-		return nil, false, fmt.Errorf("get-archive error: %w", err)
+		return nil, false, newErrMethodFailed(method, err)
 	}
 
 	return reply.Archive, reply.Found, nil
 }
 
-func (client *archivesClient) Remove(meta slang.PackageMeta) (bool, error) {
+func (client *Client) RemovePackage(meta slang.PackageMeta) (bool, error) {
+	const method = "Archives.Remove"
+
 	args := &models.RemoveArchiveArgs{Meta: meta}
 
 	var reply models.RemoveArchiveReply
 
-	err := client.rpcClient.Call("Archives.Remove", args, &reply)
+	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
-		return false, fmt.Errorf("get-archive error: %w", err)
+		return false, newErrMethodFailed(method, err)
 	}
 
 	return reply.Removed, nil

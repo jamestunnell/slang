@@ -131,10 +131,6 @@ func (archive *TarGz) Unpack() (fs.FS, error) {
 		return nil, fmt.Errorf("name %s does not match expected %s", meta.Path, archive.Meta.Path)
 	}
 
-	if meta.Commit != archive.Meta.Commit {
-		return nil, fmt.Errorf("commit %s does not match expected %s", meta.Commit, archive.Meta.Commit)
-	}
-
 	if meta.Version != archive.Meta.Version {
 		return nil, fmt.Errorf("version %s does not match expected %s", meta.Version, archive.Meta.Version)
 	}

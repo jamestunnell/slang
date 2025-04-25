@@ -20,9 +20,9 @@ type PackageArchive interface {
 }
 
 type PackageMeta struct {
-	Path    string `json:"path"`
-	Commit  string `json:"commit,omitempty"`
-	Version string `json:"version"`
+	Path         string   `json:"path"`
+	Version      string   `json:"version"`
+	Dependencies []string `json:"dependencies,omitempty"`
 }
 
 type PackageRepoEntry struct {
@@ -32,7 +32,11 @@ type PackageRepoEntry struct {
 }
 
 func (m PackageMeta) String() string {
-	return fmt.Sprintf("%s-%s-%s", m.Path, m.Version, m.Commit)
+	if m.Version == "" {
+		return m.Path
+	}
+
+	return fmt.Sprintf("%s-%s", m.Path, m.Version)
 }
 
 func (m PackageMeta) IsEqual(other PackageMeta) bool {
@@ -40,9 +44,5 @@ func (m PackageMeta) IsEqual(other PackageMeta) bool {
 		return false
 	}
 
-	if m.Version != other.Version {
-		return false
-	}
-
-	return m.Commit == other.Commit
+	return m.Version == other.Version
 }

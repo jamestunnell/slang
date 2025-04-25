@@ -1,42 +1,21 @@
 package client
 
 import (
-	"fmt"
-	"net/rpc"
-
+	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
-type VMInfo interface {
-	GetID() (string, error)
-}
+func (client *Client) GetInfo() (slang.VMInfo, error) {
+	const method = "VMInfo.GetInfo"
 
-type vmInfoClient struct {
-	rpcClient *rpc.Client
-}
+	args := &models.GetVMInfoArgs{}
 
-func NewVMInfo(serverAddress string) (VMInfo, error) {
-	rpcc, err := rpc.DialHTTP("tcp", serverAddress)
+	var reply slang.VMInfo
+
+	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
-		return nil, fmt.Errorf("failed to dial server: %w", err)
+		return slang.VMInfo{}, newErrMethodFailed(method, err)
 	}
 
-	client := &vmInfoClient{
-		rpcClient: rpcc,
-	}
-
-	return client, nil
-}
-
-func (client *vmInfoClient) GetID() (string, error) {
-	args := &models.GetVMIDArgs{}
-
-	var reply models.GetVMIDReply
-
-	err := client.rpcClient.Call("VMInfo.GetID", args, &reply)
-	if err != nil {
-		return "", fmt.Errorf("get-vminfo-id error: %w", err)
-	}
-
-	return reply.ID, nil
+	return reply, nil
 }

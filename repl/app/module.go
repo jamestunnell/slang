@@ -1,32 +1,47 @@
 package app
 
 import (
+	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Module struct {
+	focused  bool
 	textArea textarea.Model
 }
 
 func NewModule() *Module {
 	return &Module{
-		textArea: textarea.New(),
+		textArea: newTextArea(),
+		focused:  false,
 	}
 }
 
-func (m *Module) Focus() {
-	m.textArea.Focus()
+func (m *Module) GetName() string {
+	return "Module"
+}
+
+func (m *Module) IsFocused() bool {
+	return m.focused
+}
+
+func (m *Module) Focus() tea.Cmd {
+	m.focused = true
+
+	return m.textArea.Focus()
 }
 
 func (m *Module) Blur() {
 	m.textArea.Blur()
+
+	m.focused = false
 }
 
 // Init is the first function that will be called. It returns an optional
 // initial command. To not perform an initial command return nil.
 func (m *Module) Init() tea.Cmd {
-	return nil
+	return cursor.Blink
 }
 
 // Update is called when a message is received. Use it to inspect messages
@@ -34,7 +49,12 @@ func (m *Module) Init() tea.Cmd {
 func (m *Module) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	m.textArea, cmd = m.textArea.Update(msg)
+	switch mm := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.textArea.SetWidth(mm.Width)
+	default:
+		m.textArea, cmd = m.textArea.Update(msg)
+	}
 
 	return m, cmd
 }

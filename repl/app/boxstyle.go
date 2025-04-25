@@ -16,5 +16,5 @@ func boxStyle(active bool) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(borderColor).
-		Padding(1)
+		Padding(0)
 }

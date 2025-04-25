@@ -1,96 +1,96 @@
 package objects
 
-import (
-	"reflect"
+// import (
+// 	"reflect"
 
-	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/customerrs"
-)
+// 	"github.com/jamestunnell/slang"
+// 	"github.com/jamestunnell/slang/customerrs"
+// )
 
-type String struct {
-	Value string
-}
-
-const ClassSTRING = "String"
-
-// var strClass = NewBuiltInClass(ClassSTRING)
-
-func NewString(val string) slang.Object {
-	return &String{Value: val}
-}
-
-func (obj *String) Equal(other slang.Object) bool {
-	obj2, ok := other.(*String)
-	if !ok {
-		return false
-	}
-
-	return obj.Value == obj2.Value
-}
-
-func (obj *String) Inspect() string {
-	return obj.Value
-}
-
-// func (obj *String) Class() Class {
-// 	return strClass
+// type String struct {
+// 	Value string
 // }
 
-// func (obj *String) Truthy() bool {
-// 	return true
+// const ClassSTRING = "String"
+
+// // var strClass = NewBuiltInClass(ClassSTRING)
+
+// func NewString(val string) slang.Object {
+// 	return &String{Value: val}
 // }
 
-func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, error) {
-	// // an added instance method would override a standard one
-	// if m, found := strClass.GetInstanceMethod(methodName); found {
-	// 	return m.Run(args)
-	// }
+// func (obj *String) Equal(other slang.Object) bool {
+// 	obj2, ok := other.(*String)
+// 	if !ok {
+// 		return false
+// 	}
 
-	switch methodName {
-	case slang.MethodSIZE:
-		sz := NewInt(int64(len(obj.Value)))
-		return sz, nil
-	case slang.MethodADD,
-		slang.MethodEQ, slang.MethodNEQ,
-		slang.MethodLT, slang.MethodLEQ,
-		slang.MethodGT, slang.MethodGEQ:
+// 	return obj.Value == obj2.Value
+// }
 
-		if err := checkArgCount(args, 1); err != nil {
-			return nil, err
-		}
+// func (obj *String) Inspect() string {
+// 	return obj.Value
+// }
 
-		return obj.sendOne(methodName, args[0])
-	}
+// // func (obj *String) Class() Class {
+// // 	return strClass
+// // }
 
-	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
+// // func (obj *String) Truthy() bool {
+// // 	return true
+// // }
 
-	return nil, err
-}
+// func (obj *String) Send(methodName string, args ...slang.Object) (slang.Object, error) {
+// 	// // an added instance method would override a standard one
+// 	// if m, found := strClass.GetInstanceMethod(methodName); found {
+// 	// 	return m.Run(args)
+// 	// }
 
-func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
-	flt, ok := arg.(*String)
-	if !ok {
-		return nil, customerrs.NewErrArgType(ClassSTRING, reflect.TypeOf(arg).String())
-	}
+// 	switch methodName {
+// 	case slang.MethodSIZE:
+// 		sz := NewInt(int64(len(obj.Value)))
+// 		return sz, nil
+// 	case slang.MethodADD,
+// 		slang.MethodEQ, slang.MethodNEQ,
+// 		slang.MethodLT, slang.MethodLEQ,
+// 		slang.MethodGT, slang.MethodGEQ:
 
-	var ret slang.Object
+// 		if err := checkArgCount(args, 1); err != nil {
+// 			return nil, err
+// 		}
 
-	switch method {
-	case slang.MethodADD:
-		ret = NewString(obj.Value + flt.Value)
-	case slang.MethodEQ:
-		ret = NewBool(obj.Value == flt.Value)
-	case slang.MethodNEQ:
-		ret = NewBool(obj.Value != flt.Value)
-	case slang.MethodLT:
-		ret = NewBool(obj.Value < flt.Value)
-	case slang.MethodLEQ:
-		ret = NewBool(obj.Value <= flt.Value)
-	case slang.MethodGT:
-		ret = NewBool(obj.Value > flt.Value)
-	case slang.MethodGEQ:
-		ret = NewBool(obj.Value >= flt.Value)
-	}
+// 		return obj.sendOne(methodName, args[0])
+// 	}
 
-	return ret, nil
-}
+// 	err := customerrs.NewErrMethodUndefined(methodName, ClassSTRING)
+
+// 	return nil, err
+// }
+
+// func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
+// 	flt, ok := arg.(*String)
+// 	if !ok {
+// 		return nil, customerrs.NewErrArgType(ClassSTRING, reflect.TypeOf(arg).String())
+// 	}
+
+// 	var ret slang.Object
+
+// 	switch method {
+// 	case slang.MethodADD:
+// 		ret = NewString(obj.Value + flt.Value)
+// 	case slang.MethodEQ:
+// 		ret = NewBool(obj.Value == flt.Value)
+// 	case slang.MethodNEQ:
+// 		ret = NewBool(obj.Value != flt.Value)
+// 	case slang.MethodLT:
+// 		ret = NewBool(obj.Value < flt.Value)
+// 	case slang.MethodLEQ:
+// 		ret = NewBool(obj.Value <= flt.Value)
+// 	case slang.MethodGT:
+// 		ret = NewBool(obj.Value > flt.Value)
+// 	case slang.MethodGEQ:
+// 		ret = NewBool(obj.Value >= flt.Value)
+// 	}
+
+// 	return ret, nil
+// }
