@@ -62,6 +62,16 @@ func runNew() {
 	c := makeClient(vm.GetRPCAddr())
 
 	runREPL(c, vm.GetInfo())
+
+	vm.Stop()
+
+	for vm.IsRunning() {
+		log.Println("REPL: waiting for VM to stop")
+
+		time.Sleep(25 * time.Millisecond)
+	}
+
+	os.Exit(0)
 }
 
 func runExisting(rpcAddr string) {
@@ -76,6 +86,8 @@ func runExisting(rpcAddr string) {
 	}
 
 	runREPL(c, vmInfo)
+
+	os.Exit(0)
 }
 
 func makeClient(tcpAddr string) virtualmachine.Client {
@@ -106,5 +118,5 @@ func runREPL(
 		os.Exit(1)
 	}
 
-	os.Exit(0)
+	log.Println("REPL: app stopped")
 }
