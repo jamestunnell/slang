@@ -34,6 +34,8 @@ type Tab interface {
 	GetName() string
 	IsFocused() bool
 
+	Resize(width, height int)
+
 	Focus() tea.Cmd
 	Blur()
 
@@ -77,7 +79,7 @@ func (app *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch mm := msg.(type) {
 	case tea.WindowSizeMsg:
-		cmds = append(cmds, app.handleSize(mm)...)
+		app.handleSize(mm)
 	case tea.KeyMsg:
 		cmds = append(cmds, app.handleKey(mm)...)
 	default:
@@ -105,16 +107,22 @@ func (app *App) View() string {
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
-		lipgloss.JoinHorizontal(lipgloss.Left, tabBoxes...),
 		app.currentTab().View(),
+		lipgloss.JoinHorizontal(lipgloss.Left, tabBoxes...),
 		app.help.View(app.keyMap),
 		app.statusBar.View(),
 	)
 }
 
-func (app *App) handleSize(msg tea.WindowSizeMsg) []tea.Cmd {
+func (app *App) handleSize(msg tea.WindowSizeMsg) {
+	const (
+		helpHeight      = 1
+		statusBarHeight = 1
+		tabBoxHeight    = 3
+	)
+
 	if msg.Width == app.width && msg.Height == app.height {
-		return []tea.Cmd{}
+		return
 	}
 
 	app.height = msg.Height
@@ -122,17 +130,13 @@ func (app *App) handleSize(msg tea.WindowSizeMsg) []tea.Cmd {
 
 	app.statusBar.SetSize(msg.Width)
 
-	cmds := []tea.Cmd{}
+	tabAreaHeight := msg.Height - (helpHeight + statusBarHeight + tabBoxHeight)
 
 	for _, tab := range app.tabs {
-		if _, cmd := tab.Update(msg); cmd != nil {
-			cmds = append(cmds, cmd)
-		}
+		tab.Resize(msg.Width, tabAreaHeight)
 	}
 
 	app.updateStatusBar()
-
-	return cmds
 }
 
 func (app *App) currentTab() Tab {

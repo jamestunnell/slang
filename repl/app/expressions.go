@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -41,7 +42,7 @@ type exprHistoryItem struct {
 }
 
 func NewExpressions(client virtualmachine.Client) *Expressions {
-	exprEditor := newTextArea()
+	exprEditor := newTextArea(4)
 	historyTable := table.New(
 		table.WithColumns([]table.Column{
 			{Title: "Time", Width: 25},
@@ -87,14 +88,23 @@ func (m *Expressions) Init() tea.Cmd {
 	return cursor.Blink
 }
 
+func (m *Expressions) Resize(width, height int) {
+	widthEach := (width / 2) - 10
+	heightEach := height - 2
+
+	m.exprEditor.SetHeight(heightEach)
+	m.exprEditor.SetWidth(widthEach)
+
+	m.historyTable.SetHeight(heightEach)
+	m.historyTable.SetWidth(widthEach)
+}
+
 // Update is called when a message is received. Use it to inspect messages
 // and, in response, update the model and/or send a command.
 func (m *Expressions) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	switch mm := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.exprEditor.SetWidth(mm.Width)
+	switch msg.(type) {
 	case EvaluateMsg:
 		t := time.Now()
 		input := m.exprEditor.Value()
@@ -149,21 +159,19 @@ func (m *Expressions) addHistoryRow(t time.Time, input, result string) {
 		return []string{item.Time.Format(time.RFC3339), item.Input, item.Result}
 	})
 
+	slices.Reverse(rows)
+
 	m.historyTable.SetRows(rows)
 }
 
 // View renders the program's UI, which is just a string. The view is
 // rendered after every Update.
 func (m *Expressions) View() string {
-	vertElems := []string{
-		m.exprEditor.View(),
-	}
-
-	if len(m.history) != 0 {
-		vertElems = append(vertElems, m.historyTable.View())
-	}
-
-	return lipgloss.JoinVertical(lipgloss.Left, vertElems...)
+	return lipgloss.JoinHorizontal(
+		lipgloss.Left,
+		boxStyle(m.exprEditor.Focused()).Render(m.exprEditor.View()),
+		boxStyle(m.historyTable.Focused()).Render(m.historyTable.View()),
+	)
 }
 
 func parseExpr(s string) (*expressions.Expression, error) {
