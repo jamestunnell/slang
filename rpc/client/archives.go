@@ -1,24 +1,16 @@
 package client
 
 import (
-	"fmt"
-
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
 func (client *Client) AddPackage(archive slang.PackageArchive) error {
 	const method = "Archives.Add"
 
-	tgz, ok := archive.(*archives.TarGz)
-	if !ok {
-		return fmt.Errorf("unsupported data format %s", archive.GetDataFormat())
-	}
+	args := &models.AddArchiveArgs{Archive: archive}
 
-	args := &models.AddTarGzArgs{Archive: tgz}
-
-	var reply models.AddTarGzReply
+	var reply models.AddArchiveReply
 
 	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {

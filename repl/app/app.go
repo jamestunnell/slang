@@ -2,27 +2,34 @@ package app
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/virtualmachine"
 	"github.com/mistakenelf/teacup/statusbar"
+	"github.com/psanford/memfs"
 )
 
 type App struct {
 	width  int
 	height int
 
-	tabs      []Tab
-	tabIdx    int
-	help      help.Model
-	replPath  string
-	keyMap    KeyMap
-	statusBar statusbar.Model
+	editor      textarea.Model
+	help        help.Model
+	keyMap      KeyMap
+	inputDigest string
+	replPath    string
+	statusBar   statusbar.Model
+	version     *Version
+	vm          virtualmachine.Client
+	vmInfo      slang.VMInfo
 }
 
 type Args struct {
@@ -30,38 +37,27 @@ type Args struct {
 	RPCAddr string
 }
 
-type Tab interface {
-	GetName() string
-	IsFocused() bool
-
-	Resize(width, height int)
-
-	Focus() tea.Cmd
-	Blur()
-
-	tea.Model
-}
-
 type EvaluateMsg struct{}
-type NavDownMsg struct{}
-type NavUpMsg struct{}
 
 // var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 
 func New(
-	c virtualmachine.Client,
+	vm virtualmachine.Client,
 	info slang.VMInfo,
 ) *App {
 	app := &App{
-		replPath:  fmt.Sprintf("VM: name=%s id=%s ", info.Name, info.ID),
-		statusBar: newStatusBar(),
-		tabs:      []Tab{NewExpressions(c), NewModule()},
-		tabIdx:    0,
-		keyMap:    NewKeyMap(),
-		help:      help.New(),
+		editor:      newTextArea(),
+		help:        help.New(),
+		keyMap:      NewKeyMap(),
+		inputDigest: "",
+		replPath:    fmt.Sprintf("VM: name=%s id=%s ", info.Name, info.ID),
+		statusBar:   newStatusBar(),
+		version:     &Version{Major: 0, Minor: 0, Patch: 0},
+		vm:          vm,
+		vmInfo:      info,
 	}
 
-	app.currentTab().Focus()
+	app.editor.Focus()
 
 	return app
 }
@@ -83,7 +79,9 @@ func (app *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmds = append(cmds, app.handleKey(mm)...)
 	default:
-		_, cmd := app.currentTab().Update(msg)
+		var cmd tea.Cmd
+
+		app.editor, cmd = app.editor.Update(msg)
 		if cmd != nil {
 			cmds = []tea.Cmd{cmd}
 		}
@@ -99,16 +97,9 @@ func (app *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View renders the program's UI, which is just a string. The view is
 // rendered after every Update.
 func (app *App) View() string {
-	tabBoxes := make([]string, len(app.tabs))
-
-	for i, tab := range app.tabs {
-		tabBoxes[i] = boxStyle(tab.IsFocused()).Render(tab.GetName())
-	}
-
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
-		app.currentTab().View(),
-		lipgloss.JoinHorizontal(lipgloss.Left, tabBoxes...),
+		app.editor.View(),
 		app.help.View(app.keyMap),
 		app.statusBar.View(),
 	)
@@ -118,7 +109,6 @@ func (app *App) handleSize(msg tea.WindowSizeMsg) {
 	const (
 		helpHeight      = 1
 		statusBarHeight = 1
-		tabBoxHeight    = 3
 	)
 
 	if msg.Width == app.width && msg.Height == app.height {
@@ -129,30 +119,62 @@ func (app *App) handleSize(msg tea.WindowSizeMsg) {
 	app.width = msg.Width
 
 	app.statusBar.SetSize(msg.Width)
-
-	tabAreaHeight := msg.Height - (helpHeight + statusBarHeight + tabBoxHeight)
-
-	for _, tab := range app.tabs {
-		tab.Resize(msg.Width, tabAreaHeight)
-	}
+	app.editor.SetWidth(msg.Width)
+	app.editor.SetHeight(msg.Height - (helpHeight + statusBarHeight))
 
 	app.updateStatusBar()
 }
 
-func (app *App) currentTab() Tab {
-	return app.tabs[app.tabIdx]
-}
+func (app *App) evaluate() {
+	input := app.editor.Value()
 
-func evaluate() tea.Msg {
-	return EvaluateMsg{}
-}
+	digest := archives.MakeSHA256Digest([]byte(input))
+	if digest == app.inputDigest {
+		return
+	}
 
-func navUp() tea.Msg {
-	return NavUpMsg{}
-}
+	_, err := parseInput(input)
+	if err != nil {
+		log.Printf("failed to parse statements: %v\n", err)
 
-func navDown() tea.Msg {
-	return NavDownMsg{}
+		return
+	}
+
+	app.inputDigest = digest
+
+	app.version.RevMinor()
+
+	log.Printf("parsed input (digest=%s)\n", digest)
+
+	meta := slang.PackageMeta{
+		Address: slang.PackageAddress{
+			Path:    app.vmInfo.Name,
+			Version: app.version.String(),
+		},
+		Dependencies: []slang.PackageAddress{},
+	}
+	tgz := archives.NewTarGz(meta)
+	archiveFs := memfs.New()
+
+	if err = archiveFs.WriteFile("module.sl", []byte(input), 0666); err != nil {
+		log.Printf("failed to write archive file: %v\n", err)
+
+		return
+	}
+
+	if err = tgz.Pack(archiveFs); err != nil {
+		log.Printf("failed to pack archive: %v\n", err)
+
+		return
+	}
+
+	if err = app.vm.AddPackage(tgz); err != nil {
+		log.Printf("failed to add package archive: %v\n", err)
+
+		return
+	}
+
+	log.Printf("added package %s\n", meta.Address)
 }
 
 func (app *App) handleKey(msg tea.KeyMsg) []tea.Cmd {
@@ -160,19 +182,11 @@ func (app *App) handleKey(msg tea.KeyMsg) []tea.Cmd {
 	case key.Matches(msg, app.keyMap.Quit):
 		return []tea.Cmd{tea.Quit}
 	case key.Matches(msg, app.keyMap.Evaluate):
-		return []tea.Cmd{evaluate}
-	case key.Matches(msg, app.keyMap.NavUp):
-		return []tea.Cmd{navUp}
-	case key.Matches(msg, app.keyMap.NavDown):
-		return []tea.Cmd{navDown}
-	case key.Matches(msg, app.keyMap.NextTab):
-		app.currentTab().Blur()
-
-		app.tabIdx = (app.tabIdx + 1) % len(app.tabs)
-
-		return []tea.Cmd{app.currentTab().Focus()}
+		app.evaluate()
 	default:
-		_, cmd := app.currentTab().Update(msg)
+		var cmd tea.Cmd
+
+		app.editor, cmd = app.editor.Update(msg)
 		if cmd != nil {
 			return []tea.Cmd{cmd}
 		}

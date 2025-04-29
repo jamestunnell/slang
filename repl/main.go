@@ -107,7 +107,7 @@ func runREPL(
 	c virtualmachine.Client,
 	info slang.VMInfo,
 ) {
-	log.Println("REPL: starting app")
+	log.Printf("REPL: starting app (VM name=%s)\n", info.Name)
 
 	app := app.New(c, info)
 	p := tea.NewProgram(app, tea.WithAltScreen())

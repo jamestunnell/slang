@@ -1,10 +1,7 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
@@ -12,7 +9,7 @@ type Archives struct {
 	VM slang.VirtualMachine
 }
 
-func (api *Archives) AddTarGz(args *models.AddTarGzArgs, reply *models.AddTarGzReply) error {
+func (api *Archives) Add(args *models.AddArchiveArgs, reply *models.AddArchiveReply) error {
 	api.VM.AddPackage(args.Archive)
 
 	return nil
@@ -24,19 +21,14 @@ func (api *Archives) List(args *models.ListArchivesArgs, reply *models.ListArchi
 	return nil
 }
 
-func (api *Archives) GetTarGz(args *models.GetArchiveArgs, reply *models.GetArchiveReply) error {
+func (api *Archives) Get(args *models.GetArchiveArgs, reply *models.GetArchiveReply) error {
 	pkg, found := api.VM.GetPackage(args.Meta)
 	if !found {
 		reply.Archive = nil
 		reply.Found = false
 	}
 
-	tgz, ok := pkg.(*archives.TarGz)
-	if !ok {
-		return fmt.Errorf("package format '%s' is not TarGz", pkg.GetDataFormat())
-	}
-
-	reply.Archive = tgz
+	reply.Archive = pkg
 	reply.Found = true
 
 	return nil

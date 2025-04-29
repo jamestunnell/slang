@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/ast/expressions"
 	"github.com/jamestunnell/slang/rpc/server"
 )
@@ -44,12 +45,15 @@ func New(name string) *VM {
 		name:      name,
 		rpcServer: rpcServer,
 		rpcAddr:   rpcAddr,
+		archives:  map[string]slang.PackageArchive{},
 	}
 
 	gob.Register(fmt.Errorf("%w", errors.New("")))
 	gob.Register(&expressions.Identifier{})
 	gob.Register(&expressions.Float{})
 	gob.Register(&expressions.Int{})
+
+	gob.Register(&archives.TarGz{})
 
 	rpcServer.Register(&server.Archives{VM: vm})
 	rpcServer.Register(&server.Expressions{VM: vm})
@@ -83,7 +87,7 @@ func (vm *VM) Start() error {
 		return fmt.Errorf("failed to start RPC net listener: %w", err)
 	}
 
-	log.Printf("VM: starting RPC server on %s", listener.Addr())
+	log.Printf("VM: starting RPC server on %s\n", listener.Addr())
 
 	go vm.rpcServer.Accept(listener)
 
@@ -110,7 +114,7 @@ func (vm *VM) run(listener net.Listener) {
 	log.Println("VM: closing listener")
 
 	if err := listener.Close(); err != nil {
-		log.Printf("failed to close RPC net listener: %v", err)
+		log.Printf("failed to close RPC net listener: %v\n", err)
 	}
 
 	vm.running.Store(false)

@@ -7,13 +7,11 @@ import (
 
 var cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 
-func newTextArea(height int) textarea.Model {
+func newTextArea() textarea.Model {
 	ta := textarea.New()
 
 	ta.ShowLineNumbers = true
 	ta.Cursor.Style = cursorStyle
-
-	ta.SetHeight(height)
 
 	return ta
 }

@@ -48,6 +48,10 @@ func (archive *TarGz) GetDataFormat() string {
 	return FormatTarGz
 }
 
+func (archive *TarGz) GetDigest() string {
+	return archive.Digest
+}
+
 func (archive *TarGz) GetDigestType() string {
 	return DigestSHA256
 }
@@ -75,7 +79,7 @@ func (archive *TarGz) Pack(root fs.FS) error {
 	zw := gzip.NewWriter(&tgzBuf)
 
 	// Setting the Header fields is optional.
-	zw.Name = archive.Meta.Path
+	zw.Name = archive.Meta.Address.String()
 	zw.Extra = metaData
 	zw.ModTime = time.Now()
 
@@ -89,12 +93,12 @@ func (archive *TarGz) Pack(root fs.FS) error {
 	}
 
 	archive.Data = tgzBuf.Bytes()
-	archive.Digest = makeSHA256Digest(archive.Data)
+	archive.Digest = MakeSHA256Digest(archive.Data)
 
 	return nil
 }
 
-func makeSHA256Digest(data []byte) string {
+func MakeSHA256Digest(data []byte) string {
 	hasher := sha256.New()
 
 	hasher.Write(data)
@@ -103,7 +107,7 @@ func makeSHA256Digest(data []byte) string {
 }
 
 func (archive *TarGz) Unpack() (fs.FS, error) {
-	digest := makeSHA256Digest(archive.Data)
+	digest := MakeSHA256Digest(archive.Data)
 	if digest != archive.Digest {
 		return nil, errDigestMismatch
 	}
@@ -127,13 +131,7 @@ func (archive *TarGz) Unpack() (fs.FS, error) {
 		return nil, fmt.Errorf("failed to unmarshal metadata JSON from extra: %w", err)
 	}
 
-	if meta.Path != archive.Meta.Path {
-		return nil, fmt.Errorf("name %s does not match expected %s", meta.Path, archive.Meta.Path)
-	}
-
-	if meta.Version != archive.Meta.Version {
-		return nil, fmt.Errorf("version %s does not match expected %s", meta.Version, archive.Meta.Version)
-	}
+	archive.Meta = meta
 
 	var tarData []byte
 

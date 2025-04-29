@@ -2,14 +2,13 @@ package models
 
 import (
 	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/archives"
 )
 
-type AddTarGzArgs struct {
-	Archive *archives.TarGz
+type AddArchiveArgs struct {
+	Archive slang.PackageArchive
 }
 
-type AddTarGzReply struct {
+type AddArchiveReply struct {
 }
 
 type RemoveArchiveArgs struct {
@@ -25,7 +24,7 @@ type GetArchiveArgs struct {
 }
 
 type GetArchiveReply struct {
-	Archive *archives.TarGz
+	Archive slang.PackageArchive
 	Found   bool
 }
 
