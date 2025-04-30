@@ -4,18 +4,19 @@ import (
 	"github.com/jamestunnell/slang"
 )
 
-type AddArchiveArgs struct {
+type AddPackageArgs struct {
 	Archive slang.PackageArchive
 }
 
-type AddArchiveReply struct {
+type AddPackageReply struct {
+	ErrorMsg string
 }
 
-type RemoveArchiveArgs struct {
+type RemovePackageArgs struct {
 	Meta slang.PackageMeta
 }
 
-type RemoveArchiveReply struct {
+type RemovePackageReply struct {
 	Removed bool
 }
 
@@ -28,9 +29,9 @@ type GetArchiveReply struct {
 	Found   bool
 }
 
-type ListArchivesArgs struct {
+type ListPackagesArgs struct {
 }
 
-type ListArchivesReply struct {
+type ListPackagesReply struct {
 	Metas []slang.PackageMeta
 }

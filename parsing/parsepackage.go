@@ -7,8 +7,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/statements"
 	"github.com/jamestunnell/slang/lexing"
@@ -40,8 +38,6 @@ func ParsePackage(rootFS fs.FS, fp FileParser) ([]*ast.Module, error) {
 		if parseErr := RunParser(l, fp); parseErr != nil {
 			return parseErr
 		}
-
-		log.Debug().Str("path", entryPath).Msg("parsed package file")
 
 		dir := path.Dir(entryPath)
 

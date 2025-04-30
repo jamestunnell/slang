@@ -7,24 +7,32 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"sync"
 	"sync/atomic"
-	"time"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/google/uuid"
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/archives"
+	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
+	"github.com/jamestunnell/slang/parsing"
+	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/jamestunnell/slang/rpc/server"
 )
 
 type VM struct {
-	id                     uuid.UUID
-	name                   string
-	rpcServer              *rpc.Server
-	rpcAddr                atomic.Value
-	running, stopRequested atomic.Bool
+	id        uuid.UUID
+	name      string
+	rpcServer *rpc.Server
+	rpcAddr   atomic.Value
+	running   atomic.Bool
+	stop      chan struct{}
 
-	archives map[string]slang.PackageArchive
+	packageMux      sync.RWMutex
+	packageArchives map[string]slang.PackageArchive
+	packageASTs     map[string]slang.Package
 }
 
 var (
@@ -41,11 +49,13 @@ func New(name string) *VM {
 	rpcAddr.Store("")
 
 	vm := &VM{
-		id:        id,
-		name:      name,
-		rpcServer: rpcServer,
-		rpcAddr:   rpcAddr,
-		archives:  map[string]slang.PackageArchive{},
+		id:              id,
+		name:            name,
+		rpcServer:       rpcServer,
+		rpcAddr:         rpcAddr,
+		stop:            make(chan struct{}),
+		packageArchives: map[string]slang.PackageArchive{},
+		packageASTs:     map[string]slang.Package{},
 	}
 
 	gob.Register(fmt.Errorf("%w", errors.New("")))
@@ -55,7 +65,7 @@ func New(name string) *VM {
 
 	gob.Register(&archives.TarGz{})
 
-	rpcServer.Register(&server.Archives{VM: vm})
+	rpcServer.Register(&server.Packages{VM: vm})
 	rpcServer.Register(&server.Expressions{VM: vm})
 	rpcServer.Register(&server.VMInfo{VM: vm})
 
@@ -93,23 +103,21 @@ func (vm *VM) Start() error {
 
 	vm.rpcAddr.Store(listener.Addr().String())
 
-	go vm.run(listener)
+	go vm.runUntilStopped(listener)
 
 	return nil
 }
 
 func (vm *VM) Stop() {
-	vm.stopRequested.Store(true)
+	vm.stop <- struct{}{}
 }
 
-func (vm *VM) run(listener net.Listener) {
+func (vm *VM) runUntilStopped(listener net.Listener) {
 	vm.running.Store(true)
 
 	log.Println("VM: running")
 
-	for !vm.stopRequested.Load() {
-		time.Sleep(100 * time.Millisecond)
-	}
+	<-vm.stop
 
 	log.Println("VM: closing listener")
 
@@ -119,7 +127,6 @@ func (vm *VM) run(listener net.Listener) {
 
 	vm.running.Store(false)
 	vm.rpcAddr.Store("")
-	vm.stopRequested.Store(false)
 
 	log.Println("VM: stopped")
 }
@@ -129,38 +136,68 @@ func (vm *VM) EvaluateExpr(expr slang.Expression) (slang.Object, error) {
 }
 
 func (vm *VM) ListPackages() []slang.PackageMeta {
-	metas := make([]slang.PackageMeta, len(vm.archives))
-	i := 0
+	vm.packageMux.RLock()
 
-	for _, archive := range vm.archives {
+	defer vm.packageMux.RUnlock()
+
+	metas := make([]slang.PackageMeta, len(vm.packageArchives))
+
+	for i, archive := range maps.Values(vm.packageArchives) {
 		metas[i] = archive.GetMeta()
-
-		i++
 	}
 
 	return metas
 }
 
-func (vm *VM) GetPackage(meta slang.PackageMeta) (slang.PackageArchive, bool) {
-	a, found := vm.archives[meta.String()]
+func (vm *VM) GetPackageArchive(meta slang.PackageMeta) (slang.PackageArchive, bool) {
+	vm.packageMux.RLock()
+
+	defer vm.packageMux.RUnlock()
+
+	a, found := vm.packageArchives[meta.String()]
 
 	return a, found
 }
 
-func (vm *VM) AddPackage(a slang.PackageArchive) error {
-	vm.archives[a.GetMeta().String()] = a
+func (vm *VM) AddPackage(archive slang.PackageArchive) error {
+	vm.packageMux.Lock()
+
+	defer vm.packageMux.Unlock()
+
+	key := packageKey(archive.GetMeta())
+
+	archiveFS, err := archive.Unpack()
+	if err != nil {
+		return fmt.Errorf("failed to unpack archive: %w", err)
+	}
+
+	modules, err := parsing.ParsePackage(archiveFS, parsers.NewFileParser())
+	if err != nil {
+		return fmt.Errorf("failed to parse package: %w", err)
+	}
+
+	vm.packageArchives[key] = archive
+	vm.packageASTs[key] = ast.NewPackage(archive.GetMeta(), modules...)
 
 	return nil
 }
 
 func (vm *VM) RemovePackage(meta slang.PackageMeta) bool {
-	key := meta.String()
+	vm.packageMux.Lock()
 
-	if _, found := vm.archives[key]; !found {
+	defer vm.packageMux.Unlock()
+
+	key := packageKey(meta)
+	if _, found := vm.packageArchives[key]; !found {
 		return false
 	}
 
-	delete(vm.archives, key)
+	delete(vm.packageArchives, key)
+	delete(vm.packageASTs, key)
 
 	return true
+}
+
+func packageKey(meta slang.PackageMeta) string {
+	return meta.Address.String()
 }

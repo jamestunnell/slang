@@ -8,7 +8,7 @@ type VirtualMachine interface {
 	IsRunning() bool
 
 	ListPackages() []PackageMeta
-	GetPackage(PackageMeta) (PackageArchive, bool)
+	GetPackageArchive(PackageMeta) (PackageArchive, bool)
 	AddPackage(PackageArchive) error
 	RemovePackage(PackageMeta) bool
 

@@ -1,30 +1,36 @@
 package client
 
 import (
+	"errors"
+
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
 func (client *Client) AddPackage(archive slang.PackageArchive) error {
-	const method = "Archives.Add"
+	const method = "Packages.Add"
 
-	args := &models.AddArchiveArgs{Archive: archive}
+	args := &models.AddPackageArgs{Archive: archive}
 
-	var reply models.AddArchiveReply
+	var reply models.AddPackageReply
 
 	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
 		return newErrMethodFailed(method, err)
 	}
 
+	if reply.ErrorMsg != "" {
+		return errors.New(reply.ErrorMsg)
+	}
+
 	return nil
 }
 
 func (client *Client) ListPackages() ([]slang.PackageMeta, error) {
-	const method = "Archives.List"
-	args := &models.ListArchivesArgs{}
+	const method = "Packages.List"
+	args := &models.ListPackagesArgs{}
 
-	var reply models.ListArchivesReply
+	var reply models.ListPackagesReply
 
 	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {
@@ -34,8 +40,8 @@ func (client *Client) ListPackages() ([]slang.PackageMeta, error) {
 	return reply.Metas, nil
 }
 
-func (client *Client) GetPackage(meta slang.PackageMeta) (slang.PackageArchive, bool, error) {
-	const method = "Archives.Get"
+func (client *Client) GetPackageArchive(meta slang.PackageMeta) (slang.PackageArchive, bool, error) {
+	const method = "Packages.GetArchive"
 
 	args := &models.GetArchiveArgs{Meta: meta}
 
@@ -50,11 +56,11 @@ func (client *Client) GetPackage(meta slang.PackageMeta) (slang.PackageArchive, 
 }
 
 func (client *Client) RemovePackage(meta slang.PackageMeta) (bool, error) {
-	const method = "Archives.Remove"
+	const method = "Packages.Remove"
 
-	args := &models.RemoveArchiveArgs{Meta: meta}
+	args := &models.RemovePackageArgs{Meta: meta}
 
-	var reply models.RemoveArchiveReply
+	var reply models.RemovePackageReply
 
 	err := client.rpcClient.Call(method, args, &reply)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 
 type Package interface {
 	GetMeta() PackageMeta
-	GetModules() ([]Module, bool)
+	GetModules() []Module
 }
 
 type PackageArchive interface {
