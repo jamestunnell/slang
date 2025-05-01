@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/help"
@@ -10,10 +11,12 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jamestunnell/slang"
-	"github.com/jamestunnell/slang/archives"
 	"github.com/mistakenelf/teacup/statusbar"
 	"github.com/psanford/memfs"
+	"golang.org/x/term"
+
+	"github.com/jamestunnell/slang"
+	"github.com/jamestunnell/slang/archives"
 )
 
 type App struct {
@@ -78,14 +81,7 @@ func (app *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmds = append(cmds, app.handleKey(mm)...)
 	case tickMsg:
-		state, found := app.vm.GetPackageState(app.makePkgAddr())
-		if found {
-			app.packageState = state
-
-			app.updateStatusBar()
-		}
-
-		cmds = append(cmds, tick())
+		cmds = append(cmds, app.handleTick()...)
 	default:
 		var cmd tea.Cmd
 
@@ -120,6 +116,24 @@ func (app *App) makePkgAddr() slang.PackageAddress {
 	}
 }
 
+func (app *App) handleTick() []tea.Cmd {
+	state, found := app.vm.GetPackageState(app.makePkgAddr())
+	if found {
+		app.packageState = state
+
+		app.updateStatusBar()
+	}
+
+	cmds := []tea.Cmd{tick()}
+
+	w, h, _ := term.GetSize(int(os.Stdout.Fd()))
+	if w != app.width || h != app.height {
+		cmds = append(cmds, tea.WindowSize())
+	}
+
+	return cmds
+}
+
 func (app *App) handleSize(msg tea.WindowSizeMsg) {
 	const (
 		helpHeight      = 1
@@ -129,8 +143,6 @@ func (app *App) handleSize(msg tea.WindowSizeMsg) {
 	if msg.Width == app.width && msg.Height == app.height {
 		return
 	}
-
-	log.Printf("REPL: resize to %dx%d\n", msg.Width, msg.Height)
 
 	app.height = msg.Height
 	app.width = msg.Width

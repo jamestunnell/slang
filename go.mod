@@ -21,6 +21,7 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/term v0.11.0
 )
 
 require (
