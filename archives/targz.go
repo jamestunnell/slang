@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -14,13 +13,12 @@ import (
 	"path"
 	"time"
 
-	"github.com/jamestunnell/slang"
 	"github.com/psanford/memfs"
 	"github.com/rs/zerolog/log"
 )
 
 type TarGz struct {
-	Meta   slang.PackageMeta
+	name   string
 	Data   []byte
 	Digest string
 }
@@ -32,16 +30,12 @@ const (
 
 var errDigestMismatch = errors.New("digests do not match")
 
-func NewTarGz(meta slang.PackageMeta) *TarGz {
+func NewTarGz(name string) *TarGz {
 	return &TarGz{
-		Meta:   meta,
+		name:   name,
 		Data:   []byte{},
 		Digest: "",
 	}
-}
-
-func (archive *TarGz) GetMeta() slang.PackageMeta {
-	return archive.Meta
 }
 
 func (archive *TarGz) GetDataFormat() string {
@@ -69,26 +63,20 @@ func (archive *TarGz) Pack(root fs.FS) error {
 		return fmt.Errorf("failed to close tar writer: %w", err)
 	}
 
-	metaData, err := json.Marshal(archive.Meta)
-	if err != nil {
-		return fmt.Errorf("failed to marshal metadata JSON: %w", err)
-	}
-
 	var tgzBuf bytes.Buffer
 
 	zw := gzip.NewWriter(&tgzBuf)
 
 	// Setting the Header fields is optional.
-	zw.Name = archive.Meta.Address.String()
-	zw.Extra = metaData
+	zw.Name = archive.name
 	zw.ModTime = time.Now()
 
 	// Copy our data to the gzip writer, which compresses it
-	if _, err = io.Copy(zw, &tarBuf); err != nil {
+	if _, err := io.Copy(zw, &tarBuf); err != nil {
 		return fmt.Errorf("failed to write gzip data: %w", err)
 	}
 
-	if err = zw.Close(); err != nil {
+	if err := zw.Close(); err != nil {
 		return fmt.Errorf("failed to close gzip writer: %w", err)
 	}
 
@@ -124,14 +112,6 @@ func (archive *TarGz) Unpack() (fs.FS, error) {
 			log.Warn().Err(err).Msg("failed to close gzip reader")
 		}
 	}()
-
-	var meta slang.PackageMeta
-
-	if err = json.Unmarshal(zr.Extra, &meta); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal metadata JSON from extra: %w", err)
-	}
-
-	archive.Meta = meta
 
 	var tarData []byte
 

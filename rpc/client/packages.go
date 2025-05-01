@@ -1,71 +1,161 @@
 package client
 
 import (
-	"errors"
+	"io/fs"
 
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/rpc/models"
 )
 
-func (client *Client) AddPackage(archive slang.PackageArchive) error {
-	const method = "Packages.Add"
+func (client *Client) UpsertPackage(meta slang.PackageMeta, archive slang.PackageArchive) {
+	const method = "Packages.Upsert"
 
-	args := &models.AddPackageArgs{Archive: archive}
+	args := &models.UpsertPackageArgs{Meta: meta, Archive: archive}
 
-	var reply models.AddPackageReply
+	var reply models.Empty
 
-	err := client.rpcClient.Call(method, args, &reply)
-	if err != nil {
-		return newErrMethodFailed(method, err)
+	if err := client.rpcClient.Call(method, args, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
 	}
-
-	if reply.ErrorMsg != "" {
-		return errors.New(reply.ErrorMsg)
-	}
-
-	return nil
 }
 
-func (client *Client) ListPackages() ([]slang.PackageMeta, error) {
+func (client *Client) RemovePackage(addr slang.PackageAddress) bool {
+	const method = "Packages.Remove"
+
+	var removed bool
+
+	if err := client.rpcClient.Call(method, &addr, &removed); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return false
+	}
+
+	return removed
+}
+
+func (client *Client) ListPackages() []slang.PackageAddress {
 	const method = "Packages.List"
-	args := &models.ListPackagesArgs{}
+	args := &models.Empty{}
 
 	var reply models.ListPackagesReply
 
-	err := client.rpcClient.Call(method, args, &reply)
-	if err != nil {
-		return []slang.PackageMeta{}, newErrMethodFailed(method, err)
+	if err := client.rpcClient.Call(method, args, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return []slang.PackageAddress{}
 	}
 
-	return reply.Metas, nil
+	return reply.Addresses
 }
 
-func (client *Client) GetPackageArchive(meta slang.PackageMeta) (slang.PackageArchive, bool, error) {
+func (client *Client) GetPackageState(addr slang.PackageAddress) (slang.PackageState, bool) {
+	const method = "Packages.GetState"
+
+	var reply models.GetPackageStateReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return 0, false
+	}
+
+	return reply.State, reply.Found
+}
+
+func (client *Client) GetPackageArchive(addr slang.PackageAddress) (slang.PackageArchive, bool) {
 	const method = "Packages.GetArchive"
 
-	args := &models.GetArchiveArgs{Meta: meta}
+	var reply models.GetPackageArchiveReply
 
-	var reply models.GetArchiveReply
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
 
-	err := client.rpcClient.Call(method, args, &reply)
-	if err != nil {
-		return nil, false, newErrMethodFailed(method, err)
+		return nil, false
 	}
 
-	return reply.Archive, reply.Found, nil
+	return reply.Archive, reply.Found
 }
 
-func (client *Client) RemovePackage(meta slang.PackageMeta) (bool, error) {
-	const method = "Packages.Remove"
+func (client *Client) GetPackageFiles(addr slang.PackageAddress) (fs.FS, bool) {
+	const method = "Packages.GetFiles"
 
-	args := &models.RemovePackageArgs{Meta: meta}
+	var reply models.GetPackageFilesReply
 
-	var reply models.RemovePackageReply
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
 
-	err := client.rpcClient.Call(method, args, &reply)
-	if err != nil {
-		return false, newErrMethodFailed(method, err)
+		return nil, false
 	}
 
-	return reply.Removed, nil
+	return reply.Files, reply.Found
+}
+
+func (client *Client) GetPackageAST(addr slang.PackageAddress) (slang.PackageAST, bool) {
+	const method = "Packages.GetAST"
+
+	var reply models.GetPackageASTReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return nil, false
+	}
+
+	return reply.AST, reply.Found
+}
+
+func (client *Client) GetPackageDependencies(addr slang.PackageAddress) ([]slang.PackageAddress, bool) {
+	const method = "Packages.GetDependencies"
+
+	var reply models.GetPackageDependenciesReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return nil, false
+	}
+
+	return reply.Dependencies, reply.Found
+}
+
+func (client *Client) GetPackageAnalysis(addr slang.PackageAddress) (slang.PackageAnalysis, bool) {
+	const method = "Packages.GetAnalysis"
+
+	var reply models.GetPackageAnalysisReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return slang.PackageAnalysis{}, false
+	}
+
+	return reply.Analysis, reply.Found
+}
+
+func (client *Client) GetPackageBytecode(addr slang.PackageAddress) (slang.PackageBytecode, bool) {
+	const method = "Packages.GetBytecode"
+
+	var reply models.GetPackageBytecodeReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return slang.PackageBytecode{}, false
+	}
+
+	return reply.Bytecode, reply.Found
+}
+
+func (client *Client) GetPackageFailure(addr slang.PackageAddress) (slang.PackageFailure, bool) {
+	const method = "Packages.GetFailure"
+
+	var reply models.GetPackageFailureReply
+
+	if err := client.rpcClient.Call(method, &addr, &reply); err != nil {
+		client.logFailedMethodCall(method, err)
+
+		return slang.PackageFailure{}, false
+	}
+
+	return reply.Failure, reply.Found
 }

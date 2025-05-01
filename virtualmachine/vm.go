@@ -4,9 +4,11 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
 	"net/rpc"
+	"slices"
 	"sync"
 	"sync/atomic"
 
@@ -15,10 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/archives"
-	"github.com/jamestunnell/slang/ast"
 	"github.com/jamestunnell/slang/ast/expressions"
-	"github.com/jamestunnell/slang/parsing"
-	"github.com/jamestunnell/slang/parsing/parsers"
 	"github.com/jamestunnell/slang/rpc/server"
 )
 
@@ -30,15 +29,16 @@ type VM struct {
 	running   atomic.Bool
 	stop      chan struct{}
 
-	packageMux      sync.RWMutex
-	packageArchives map[string]slang.PackageArchive
-	packageASTs     map[string]slang.Package
+	workersMut sync.RWMutex
+	workers    map[string]*Worker
 }
 
 var (
 	errAlreadyRunning = errors.New("VM is already running")
 	errNotImplemented = errors.New("not implemented")
 )
+
+const channelDepth = 10
 
 func New(name string) *VM {
 	id := uuid.New()
@@ -49,13 +49,12 @@ func New(name string) *VM {
 	rpcAddr.Store("")
 
 	vm := &VM{
-		id:              id,
-		name:            name,
-		rpcServer:       rpcServer,
-		rpcAddr:         rpcAddr,
-		stop:            make(chan struct{}),
-		packageArchives: map[string]slang.PackageArchive{},
-		packageASTs:     map[string]slang.Package{},
+		id:        id,
+		name:      name,
+		rpcServer: rpcServer,
+		rpcAddr:   rpcAddr,
+		stop:      make(chan struct{}),
+		workers:   map[string]*Worker{},
 	}
 
 	gob.Register(fmt.Errorf("%w", errors.New("")))
@@ -66,21 +65,9 @@ func New(name string) *VM {
 	gob.Register(&archives.TarGz{})
 
 	rpcServer.Register(&server.Packages{VM: vm})
-	rpcServer.Register(&server.Expressions{VM: vm})
-	rpcServer.Register(&server.VMInfo{VM: vm})
+	rpcServer.Register(&server.Info{VM: vm})
 
 	return vm
-}
-
-func (vm *VM) GetInfo() slang.VMInfo {
-	return slang.VMInfo{
-		Name: vm.name,
-		ID:   vm.id,
-	}
-}
-
-func (vm *VM) IsRunning() bool {
-	return vm.running.Load()
 }
 
 func (vm *VM) GetRPCAddr() string {
@@ -112,6 +99,200 @@ func (vm *VM) Stop() {
 	vm.stop <- struct{}{}
 }
 
+func (vm *VM) GetName() string {
+	return vm.name
+}
+
+func (vm *VM) GetID() uuid.UUID {
+	return vm.id
+}
+
+func (vm *VM) IsRunning() bool {
+	return vm.running.Load()
+}
+
+func (vm *VM) UpsertPackage(meta slang.PackageMeta, archive slang.PackageArchive) {
+	vm.workersMut.Lock()
+
+	defer vm.workersMut.Unlock()
+
+	key := meta.Address.String()
+
+	if worker, found := vm.workers[key]; found {
+		worker.Stop()
+	}
+
+	worker := NewWorker(meta, archive)
+
+	vm.workers[key] = worker
+
+	worker.Start()
+}
+
+func (vm *VM) RemovePackage(addr slang.PackageAddress) bool {
+	vm.workersMut.Lock()
+
+	defer vm.workersMut.Unlock()
+
+	key := addr.String()
+
+	if _, found := vm.workers[key]; !found {
+		return false
+	}
+
+	delete(vm.workers, key)
+
+	return true
+}
+
+func (vm *VM) ListPackages() []slang.PackageAddress {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	keys := maps.Keys(vm.workers)
+
+	slices.Sort(keys)
+
+	addrs := make([]slang.PackageAddress, len(keys))
+
+	for i, key := range keys {
+		addrs[i] = slang.PackageAddress{}
+
+		(&addrs[i]).Parse(key)
+	}
+
+	return addrs
+}
+
+func (vm *VM) GetPackageState(addr slang.PackageAddress) (slang.PackageState, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return 0, false
+	}
+
+	return worker.GetState(), true
+}
+
+func (vm *VM) GetPackageArchive(addr slang.PackageAddress) (slang.PackageArchive, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return nil, false
+	}
+
+	return worker.GetArchive(), true
+}
+
+func (vm *VM) GetPackageFiles(addr slang.PackageAddress) (fs.FS, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return nil, false
+	}
+
+	if worker.GetState() < slang.PkgUnpacked {
+		return nil, false
+	}
+
+	return worker.GetFiles(), true
+}
+
+func (vm *VM) GetPackageAST(addr slang.PackageAddress) (slang.PackageAST, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return nil, false
+	}
+
+	if worker.GetState() < slang.PkgCompiled {
+		return nil, false
+	}
+
+	return worker.GetAST(), true
+}
+
+func (vm *VM) GetPackageDependencies(addr slang.PackageAddress) ([]slang.PackageAddress, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return []slang.PackageAddress{}, false
+	}
+
+	if worker.GetState() < slang.PkgResolved {
+		return []slang.PackageAddress{}, false
+	}
+
+	return worker.GetDependencies(), true
+}
+
+func (vm *VM) GetPackageAnalysis(addr slang.PackageAddress) (slang.PackageAnalysis, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return slang.PackageAnalysis{}, false
+	}
+
+	if worker.GetState() < slang.PkgAnalyzed {
+		return slang.PackageAnalysis{}, false
+	}
+
+	return worker.GetAnalysis(), true
+}
+
+func (vm *VM) GetPackageBytecode(addr slang.PackageAddress) (slang.PackageBytecode, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return slang.PackageBytecode{}, false
+	}
+
+	if worker.GetState() < slang.PkgCompiled {
+		return slang.PackageBytecode{}, false
+	}
+
+	return worker.GetBytecode(), true
+}
+
+func (vm *VM) GetPackageFailure(addr slang.PackageAddress) (slang.PackageFailure, bool) {
+	vm.workersMut.RLock()
+
+	defer vm.workersMut.RUnlock()
+
+	worker, found := vm.workers[addr.String()]
+	if !found {
+		return slang.PackageFailure{}, false
+	}
+
+	if worker.GetState() != slang.PkgFailed {
+		return slang.PackageFailure{}, false
+	}
+
+	return worker.GetFailure(), true
+}
+
 func (vm *VM) runUntilStopped(listener net.Listener) {
 	vm.running.Store(true)
 
@@ -129,75 +310,4 @@ func (vm *VM) runUntilStopped(listener net.Listener) {
 	vm.rpcAddr.Store("")
 
 	log.Println("VM: stopped")
-}
-
-func (vm *VM) EvaluateExpr(expr slang.Expression) (slang.Object, error) {
-	return nil, errNotImplemented
-}
-
-func (vm *VM) ListPackages() []slang.PackageMeta {
-	vm.packageMux.RLock()
-
-	defer vm.packageMux.RUnlock()
-
-	metas := make([]slang.PackageMeta, len(vm.packageArchives))
-
-	for i, archive := range maps.Values(vm.packageArchives) {
-		metas[i] = archive.GetMeta()
-	}
-
-	return metas
-}
-
-func (vm *VM) GetPackageArchive(meta slang.PackageMeta) (slang.PackageArchive, bool) {
-	vm.packageMux.RLock()
-
-	defer vm.packageMux.RUnlock()
-
-	a, found := vm.packageArchives[meta.String()]
-
-	return a, found
-}
-
-func (vm *VM) AddPackage(archive slang.PackageArchive) error {
-	vm.packageMux.Lock()
-
-	defer vm.packageMux.Unlock()
-
-	key := packageKey(archive.GetMeta())
-
-	archiveFS, err := archive.Unpack()
-	if err != nil {
-		return fmt.Errorf("failed to unpack archive: %w", err)
-	}
-
-	modules, err := parsing.ParsePackage(archiveFS, parsers.NewFileParser())
-	if err != nil {
-		return fmt.Errorf("failed to parse package: %w", err)
-	}
-
-	vm.packageArchives[key] = archive
-	vm.packageASTs[key] = ast.NewPackage(archive.GetMeta(), modules...)
-
-	return nil
-}
-
-func (vm *VM) RemovePackage(meta slang.PackageMeta) bool {
-	vm.packageMux.Lock()
-
-	defer vm.packageMux.Unlock()
-
-	key := packageKey(meta)
-	if _, found := vm.packageArchives[key]; !found {
-		return false
-	}
-
-	delete(vm.packageArchives, key)
-	delete(vm.packageASTs, key)
-
-	return true
-}
-
-func packageKey(meta slang.PackageMeta) string {
-	return meta.Address.String()
 }

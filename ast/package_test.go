@@ -75,7 +75,7 @@ func TestPackage_MarshalUnmarshal(t *testing.T) {
 		),
 	)
 	meta := slang.PackageMeta{
-		Path: "garage",
+		Address: slang.PackageAddress{Path: "garage"},
 	}
 	pkg := ast.NewPackage(meta, cars, models)
 

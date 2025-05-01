@@ -1,37 +1,56 @@
 package models
 
 import (
+	"io/fs"
+
 	"github.com/jamestunnell/slang"
 )
 
-type AddPackageArgs struct {
+type UpsertPackageArgs struct {
+	Meta    slang.PackageMeta
 	Archive slang.PackageArchive
 }
 
-type AddPackageReply struct {
-	ErrorMsg string
+type ListPackagesReply struct {
+	Addresses []slang.PackageAddress
 }
 
-type RemovePackageArgs struct {
-	Meta slang.PackageMeta
+type GetPackageStateReply struct {
+	State slang.PackageState
+	Found bool
 }
 
-type RemovePackageReply struct {
-	Removed bool
-}
-
-type GetArchiveArgs struct {
-	Meta slang.PackageMeta
-}
-
-type GetArchiveReply struct {
+type GetPackageArchiveReply struct {
 	Archive slang.PackageArchive
 	Found   bool
 }
 
-type ListPackagesArgs struct {
+type GetPackageFilesReply struct {
+	Files fs.FS
+	Found bool
 }
 
-type ListPackagesReply struct {
-	Metas []slang.PackageMeta
+type GetPackageASTReply struct {
+	AST   slang.PackageAST
+	Found bool
+}
+
+type GetPackageDependenciesReply struct {
+	Dependencies []slang.PackageAddress
+	Found        bool
+}
+
+type GetPackageAnalysisReply struct {
+	Analysis slang.PackageAnalysis
+	Found    bool
+}
+
+type GetPackageBytecodeReply struct {
+	Bytecode slang.PackageBytecode
+	Found    bool
+}
+
+type GetPackageFailureReply struct {
+	Failure slang.PackageFailure
+	Found   bool
 }

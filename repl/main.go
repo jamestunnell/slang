@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -22,16 +23,6 @@ func main() {
 
 	arg.MustParse(&args)
 
-	os.Remove("debug.log")
-
-	logFile, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		log.Printf("REPL: failed to set up debug file logging: %v\n", err)
-
-		os.Exit(1)
-	}
-	defer logFile.Close()
-
 	// use existing VM check for if connecting to RPC server for an existing VM
 	if args.RPCAddr != "" {
 		runExisting(args.RPCAddr)
@@ -44,14 +35,12 @@ func runNew() {
 	vm := virtualmachine.New(virtualmachine.RandomID(2))
 
 	if err := vm.Start(); err != nil {
-		log.Printf("REPL: failed to start VM: %v\n", err)
+		fmt.Printf("REPL: failed to start VM: %v\n", err)
 
 		os.Exit(1)
 	}
 
 	for !vm.IsRunning() {
-		log.Println("REPL: waiting for VM to run")
-
 		time.Sleep(25 * time.Millisecond)
 	}
 
@@ -59,15 +48,11 @@ func runNew() {
 		vm.Stop()
 	}()
 
-	c := makeClient(vm.GetRPCAddr())
-
-	runREPL(c, vm.GetInfo())
+	runREPL(makeClient(vm.GetRPCAddr()))
 
 	vm.Stop()
 
 	for vm.IsRunning() {
-		log.Println("REPL: waiting for VM to stop")
-
 		time.Sleep(25 * time.Millisecond)
 	}
 
@@ -75,27 +60,17 @@ func runNew() {
 }
 
 func runExisting(rpcAddr string) {
-	c := makeClient(rpcAddr)
-
-	// use existing VM check for if connecting to RPC server for an existing VM
-	vmInfo, err := c.GetInfo()
-	if err != nil {
-		log.Printf("REPL: failed to get VM info: %v\n", err)
-
-		os.Exit(1)
-	}
-
-	runREPL(c, vmInfo)
+	runREPL(makeClient(rpcAddr))
 
 	os.Exit(0)
 }
 
-func makeClient(tcpAddr string) virtualmachine.Client {
+func makeClient(tcpAddr string) slang.VirtualMachine {
 	log.Printf("REPL: making client for VM RPC at %s\n", tcpAddr)
 
 	c, err := virtualmachine.MakeClient(tcpAddr)
 	if err != nil {
-		log.Printf("REPL: failed to make VM client: %v\n", err)
+		fmt.Printf("REPL: failed to make VM client: %v\n", err)
 
 		os.Exit(1)
 	}
@@ -103,17 +78,23 @@ func makeClient(tcpAddr string) virtualmachine.Client {
 	return c
 }
 
-func runREPL(
-	c virtualmachine.Client,
-	info slang.VMInfo,
-) {
-	log.Printf("REPL: starting app (VM name=%s)\n", info.Name)
+func runREPL(vm slang.VirtualMachine) {
+	logFile, err := tea.LogToFile(vm.GetName()+".log", "debug")
+	if err != nil {
+		fmt.Printf("REPL: failed to set up debug file logging: %v\n", err)
 
-	app := app.New(c, info)
-	p := tea.NewProgram(app, tea.WithAltScreen())
+		os.Exit(1)
+	}
+
+	defer logFile.Close()
+
+	log.Printf("REPL: starting app (VM name=%s)\n", vm.GetName())
+
+	app := app.New(vm)
+	p := tea.NewProgram(app, tea.WithAltScreen(), tea.WithInputTTY())
 
 	if _, err := p.Run(); err != nil {
-		log.Printf("REPL: failed to run: %v\n", err)
+		fmt.Printf("REPL: failed to run: %v\n", err)
 
 		os.Exit(1)
 	}

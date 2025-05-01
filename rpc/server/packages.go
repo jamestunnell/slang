@@ -9,35 +9,92 @@ type Packages struct {
 	VM slang.VirtualMachine
 }
 
-func (api *Packages) Add(args *models.AddPackageArgs, reply *models.AddPackageReply) error {
-	if err := api.VM.AddPackage(args.Archive); err != nil {
-		reply.ErrorMsg = err.Error()
-	}
+func (api *Packages) Upsert(args *models.UpsertPackageArgs, reply *models.Empty) error {
+	api.VM.UpsertPackage(args.Meta, args.Archive)
 
 	return nil
 }
 
-func (api *Packages) List(args *models.ListPackagesArgs, reply *models.ListPackagesReply) error {
-	reply.Metas = api.VM.ListPackages()
+func (api *Packages) Remove(addr *slang.PackageAddress, removed *bool) error {
+	*removed = api.VM.RemovePackage(*addr)
 
 	return nil
 }
 
-func (api *Packages) GetPackageArchive(args *models.GetArchiveArgs, reply *models.GetArchiveReply) error {
-	pkg, found := api.VM.GetPackageArchive(args.Meta)
-	if !found {
-		reply.Archive = nil
-		reply.Found = false
-	}
-
-	reply.Archive = pkg
-	reply.Found = true
+func (api *Packages) List(args *models.Empty, reply *models.ListPackagesReply) error {
+	reply.Addresses = api.VM.ListPackages()
 
 	return nil
 }
 
-func (api *Packages) Remove(args *models.RemovePackageArgs, reply *models.RemovePackageReply) error {
-	reply.Removed = api.VM.RemovePackage(args.Meta)
+func (api *Packages) GetState(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageStateReply,
+) error {
+	reply.State, reply.Found = api.VM.GetPackageState(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetArchive(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageArchiveReply,
+) error {
+	reply.Archive, reply.Found = api.VM.GetPackageArchive(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetFiles(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageFilesReply,
+) error {
+	reply.Files, reply.Found = api.VM.GetPackageFiles(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetAST(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageASTReply,
+) error {
+	reply.AST, reply.Found = api.VM.GetPackageAST(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetDependencies(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageDependenciesReply,
+) error {
+	reply.Dependencies, reply.Found = api.VM.GetPackageDependencies(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetAnalysis(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageAnalysisReply,
+) error {
+	reply.Analysis, reply.Found = api.VM.GetPackageAnalysis(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetBytecode(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageBytecodeReply,
+) error {
+	reply.Bytecode, reply.Found = api.VM.GetPackageBytecode(*addr)
+
+	return nil
+}
+
+func (api *Packages) GetFailure(
+	addr *slang.PackageAddress,
+	reply *models.GetPackageFailureReply,
+) error {
+	reply.Failure, reply.Found = api.VM.GetPackageFailure(*addr)
 
 	return nil
 }

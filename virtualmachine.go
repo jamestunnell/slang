@@ -1,21 +1,27 @@
 package slang
 
-import "github.com/google/uuid"
+import (
+	"io/fs"
+
+	"github.com/google/uuid"
+)
 
 type VirtualMachine interface {
-	GetInfo() VMInfo
+	GetName() string
+	GetID() uuid.UUID
 
 	IsRunning() bool
 
-	ListPackages() []PackageMeta
-	GetPackageArchive(PackageMeta) (PackageArchive, bool)
-	AddPackage(PackageArchive) error
-	RemovePackage(PackageMeta) bool
+	UpsertPackage(PackageMeta, PackageArchive)
+	RemovePackage(PackageAddress) bool
+	ListPackages() []PackageAddress
 
-	EvaluateExpr(Expression) (Object, error)
-}
-
-type VMInfo struct {
-	Name string
-	ID   uuid.UUID
+	GetPackageState(PackageAddress) (PackageState, bool)
+	GetPackageArchive(PackageAddress) (PackageArchive, bool)
+	GetPackageFiles(PackageAddress) (fs.FS, bool)
+	GetPackageAST(PackageAddress) (PackageAST, bool)
+	GetPackageDependencies(PackageAddress) ([]PackageAddress, bool)
+	GetPackageAnalysis(PackageAddress) (PackageAnalysis, bool)
+	GetPackageBytecode(PackageAddress) (PackageBytecode, bool)
+	GetPackageFailure(PackageAddress) (PackageFailure, bool)
 }

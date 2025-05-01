@@ -10,18 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/maps"
 
-	"github.com/jamestunnell/slang"
 	"github.com/jamestunnell/slang/archives"
 	"github.com/jamestunnell/slang/examples"
 )
 
 func TestTarGz_PackUnpack(t *testing.T) {
-	meta := slang.PackageMeta{
-		Path:    "examples/garage",
-		Version: "0.1.0",
-		Commit:  "",
-	}
-	tgz := archives.NewTarGz(meta)
+	tgz := archives.NewTarGz("garage")
 	exampleFS := examples.Garage()
 
 	expectedData, err := makeFileTreeData(exampleFS)
