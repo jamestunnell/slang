@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/alexflint/go-arg"
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,62 +22,19 @@ func main() {
 
 	arg.MustParse(&args)
 
+	var vm slang.VirtualMachine
+
 	// use existing VM check for if connecting to RPC server for an existing VM
 	if args.RPCAddr != "" {
-		runExisting(args.RPCAddr)
+		vm = makeClient(args.RPCAddr)
+
+		log.Printf("REPL: connected to existing VM %s\n", vm.GetName())
 	} else {
-		runNew()
-	}
-}
+		vm = virtualmachine.New(virtualmachine.RandomID(2))
 
-func runNew() {
-	vm := virtualmachine.New(virtualmachine.RandomID(2))
-
-	if err := vm.Start(); err != nil {
-		fmt.Printf("REPL: failed to start VM: %v\n", err)
-
-		os.Exit(1)
+		log.Printf("REPL: created new VM %s\n", vm.GetName())
 	}
 
-	for !vm.IsRunning() {
-		time.Sleep(25 * time.Millisecond)
-	}
-
-	defer func() {
-		vm.Stop()
-	}()
-
-	runREPL(makeClient(vm.GetRPCAddr()))
-
-	vm.Stop()
-
-	for vm.IsRunning() {
-		time.Sleep(25 * time.Millisecond)
-	}
-
-	os.Exit(0)
-}
-
-func runExisting(rpcAddr string) {
-	runREPL(makeClient(rpcAddr))
-
-	os.Exit(0)
-}
-
-func makeClient(tcpAddr string) slang.VirtualMachine {
-	log.Printf("REPL: making client for VM RPC at %s\n", tcpAddr)
-
-	c, err := virtualmachine.MakeClient(tcpAddr)
-	if err != nil {
-		fmt.Printf("REPL: failed to make VM client: %v\n", err)
-
-		os.Exit(1)
-	}
-
-	return c
-}
-
-func runREPL(vm slang.VirtualMachine) {
 	logFile, err := tea.LogToFile(vm.GetName()+".log", "debug")
 	if err != nil {
 		fmt.Printf("REPL: failed to set up debug file logging: %v\n", err)
@@ -100,4 +56,17 @@ func runREPL(vm slang.VirtualMachine) {
 	}
 
 	log.Println("REPL: app stopped")
+}
+
+func makeClient(tcpAddr string) slang.VirtualMachine {
+	log.Printf("REPL: making client for VM RPC at %s\n", tcpAddr)
+
+	c, err := virtualmachine.MakeClient(tcpAddr)
+	if err != nil {
+		fmt.Printf("REPL: failed to make VM client: %v\n", err)
+
+		os.Exit(1)
+	}
+
+	return c
 }

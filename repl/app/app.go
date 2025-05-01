@@ -130,6 +130,8 @@ func (app *App) handleSize(msg tea.WindowSizeMsg) {
 		return
 	}
 
+	log.Printf("REPL: resize to %dx%d\n", msg.Width, msg.Height)
+
 	app.height = msg.Height
 	app.width = msg.Width
 
