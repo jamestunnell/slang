@@ -14,6 +14,7 @@ import (
 )
 
 type Args struct {
+	KeepLog bool   `help:"Keep REPL app log" default:"false"`
 	RPCAddr string `help:"RPC server address for a running slang VM" default:""`
 }
 
@@ -43,6 +44,12 @@ func main() {
 	}
 
 	defer logFile.Close()
+
+	defer func() {
+		if !args.KeepLog {
+			os.Remove(logFile.Name())
+		}
+	}()
 
 	log.Printf("REPL: starting app (VM name=%s)\n", vm.GetName())
 
