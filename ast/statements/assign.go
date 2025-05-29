@@ -26,7 +26,15 @@ func (a *Assign) IsEqual(other Core) bool {
 		return false
 	}
 
-	return a.Target.IsEqual(a2.Target) && a2.Value.IsEqual(a.Value)
+	if !a.Target.IsEqual(a2.Target) {
+		return false
+	}
+
+	if !a2.Value.IsEqual(a.Value) {
+		return false
+	}
+
+	return true
 }
 
 func (a *Assign) Render(level int, w slang.CodeWriter) {

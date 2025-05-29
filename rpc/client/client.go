@@ -14,5 +14,5 @@ func New(c *rpc.Client) *Client {
 }
 
 func (c *Client) logFailedMethodCall(method string, err error) {
-	log.Printf("RPC: client failed to call method %s: %w", method, err)
+	log.Printf("RPC: client failed to call method %s: %v", method, err)
 }

@@ -59,8 +59,9 @@ func New(name string) *VM {
 
 	gob.Register(fmt.Errorf("%w", errors.New("")))
 	gob.Register(&expressions.Identifier{})
-	gob.Register(&expressions.Float{})
-	gob.Register(&expressions.Int{})
+	gob.Register(&expressions.Const[float64]{})
+	gob.Register(&expressions.Const[int64]{})
+	gob.Register(&expressions.Const[string]{})
 
 	gob.Register(&archives.TarGz{})
 
