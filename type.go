@@ -5,11 +5,13 @@ import "encoding/json"
 type TypeType int
 
 const (
-	TypeBOOLEAN TypeType = iota
+	TypeARRAY TypeType = iota
+	TypeBOOLEAN
 	TypeEMPTY
 	TypeERROR
 	TypeFLOAT
 	TypeINTEGER
+	TypeMAP
 	TypeSTRING
 	TypeSTRUCT
 )
@@ -24,11 +26,13 @@ type Type interface {
 }
 
 const (
+	StrTypeARRAY   = "ARRAY"
 	StrTypeBOOLEAN = "BOOLEAN"
 	StrTypeEMPTY   = "EMPTY"
 	StrTypeERROR   = "ERROR"
 	StrTypeFLOAT   = "FLOAT"
 	StrTypeINTEGER = "INTEGER"
+	StrTypeMAP     = "MAP"
 	StrTypeSTRING  = "STRING"
 	StrTypeSTRUCT  = "STRUCT"
 )
@@ -41,6 +45,8 @@ func ParseTypeTypeStr(s string) (TypeType, bool) {
 	var tt TypeType
 
 	switch s {
+	case StrTypeARRAY:
+		tt = TypeARRAY
 	case StrTypeBOOLEAN:
 		tt = TypeBOOLEAN
 	case StrTypeEMPTY:
@@ -51,6 +57,8 @@ func ParseTypeTypeStr(s string) (TypeType, bool) {
 		tt = TypeFLOAT
 	case StrTypeINTEGER:
 		tt = TypeINTEGER
+	case StrTypeMAP:
+		tt = TypeMAP
 	case StrTypeSTRING:
 		tt = TypeSTRING
 	case StrTypeSTRUCT:
@@ -70,6 +78,8 @@ func (tt TypeType) String() string {
 	var s string
 
 	switch tt {
+	case TypeARRAY:
+		s = StrTypeARRAY
 	case TypeBOOLEAN:
 		s = StrTypeBOOLEAN
 	case TypeEMPTY:
@@ -80,6 +90,8 @@ func (tt TypeType) String() string {
 		s = StrTypeFLOAT
 	case TypeINTEGER:
 		s = StrTypeINTEGER
+	case TypeMAP:
+		s = StrTypeMAP
 	case TypeSTRING:
 		s = StrTypeSTRING
 	case TypeSTRUCT:

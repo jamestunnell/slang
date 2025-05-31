@@ -77,6 +77,8 @@ func (p *ParserBase) RunSubStmtParser(
 
 func (p *ParserBase) ParseType(toks parsing.TokenSeq) (*types.Type, bool) {
 	switch toks.Current().Type() {
+	case slang.TokenARY:
+		return p.ParseArrayType(toks)
 	case slang.TokenBOOL:
 		toks.Advance()
 
@@ -89,6 +91,8 @@ func (p *ParserBase) ParseType(toks parsing.TokenSeq) (*types.Type, bool) {
 		toks.Advance()
 
 		return types.NewInt(), true
+	case slang.TokenMAP:
+		return p.ParseMapType(toks)
 	case slang.TokenSTR:
 		toks.Advance()
 
@@ -144,48 +148,60 @@ func (p *ParserBase) ParseType(toks parsing.TokenSeq) (*types.Type, bool) {
 // 	return ast.NewBasicType(parts...), true
 // }
 
-// func (p *ParserBase) ParseArrayType(toks parsing.TokenSeq) (*ast.ArrayType, bool) {
-// 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) ||
-// 		!p.ExpectToken(toks.Next(), slang.TokenRBRACKET) {
-// 		return nil, false
-// 	}
+func (p *ParserBase) ParseArrayType(toks parsing.TokenSeq) (*types.Type, bool) {
+	if !p.ExpectToken(toks.Next(), slang.TokenLESS) {
+		return nil, false
+	}
 
-// 	toks.Advance()
-// 	toks.Advance()
+	toks.Advance()
+	toks.Advance()
 
-// 	valType, ok := p.ParseType(toks)
-// 	if !ok {
-// 		return nil, false
-// 	}
+	valType, ok := p.ParseType(toks)
+	if !ok {
+		return nil, false
+	}
 
-// 	return ast.NewArrayType(valType), true
-// }
+	if !p.ExpectToken(toks.Current(), slang.TokenGREATER) {
+		return nil, false
+	}
 
-// func (p *ParserBase) ParseMapType(toks parsing.TokenSeq) (*ast.MapType, bool) {
-// 	if !p.ExpectToken(toks.Current(), slang.TokenLBRACKET) {
-// 		return nil, false
-// 	}
+	toks.Advance()
 
-// 	toks.Advance()
+	return types.NewArray(valType), true
+}
 
-// 	keyType, ok := p.ParseType(toks)
-// 	if !ok {
-// 		return nil, false
-// 	}
+func (p *ParserBase) ParseMapType(toks parsing.TokenSeq) (*types.Type, bool) {
+	if !p.ExpectToken(toks.Next(), slang.TokenLESS) {
+		return nil, false
+	}
 
-// 	if !p.ExpectToken(toks.Current(), slang.TokenRBRACKET) {
-// 		return nil, false
-// 	}
+	toks.Advance()
+	toks.Advance()
 
-// 	toks.Advance()
+	keyType, ok := p.ParseType(toks)
+	if !ok {
+		return nil, false
+	}
 
-// 	valType, ok := p.ParseType(toks)
-// 	if !ok {
-// 		return nil, false
-// 	}
+	if !p.ExpectToken(toks.Current(), slang.TokenCOMMA) {
+		return nil, false
+	}
 
-// 	return ast.NewMapType(keyType, valType), true
-// }
+	toks.Advance()
+
+	valType, ok := p.ParseType(toks)
+	if !ok {
+		return nil, false
+	}
+
+	if !p.ExpectToken(toks.Current(), slang.TokenGREATER) {
+		return nil, false
+	}
+
+	toks.Advance()
+
+	return types.NewMap(keyType, valType), true
+}
 
 func (p *ParserBase) ParseNameTypePair(toks parsing.TokenSeq) (string, *types.Type, bool) {
 	if !p.ExpectToken(toks.Current(), slang.TokenSYMBOL) {
