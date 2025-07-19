@@ -4,10 +4,13 @@ Slang is a statically-typed scripting language.
 
 ## Fundamental Types
 
-The fundamental data types are: `int`, `float`, `bool`, `string` (and `error`, `test`, and `time`?).
+The fundamental data types are: `int`, `float`, `bool`, `string`, `cmp` (and `error`, `test`, and `time`?).
 
-These data types are used to create constants, variables, structure fields, and function parameters.
+These data types are used to create constants, variables, structure fields, array/tuple elements, and function parameters.
 
+### cmp
+
+The `cmp` is a built-in enum type is used to compare ordinal values. It will either have nil/invalid value, if unassigned, or one of the three valid values: `lt`, `eq`, and `gt`.
 
 ## Compound Types
 
@@ -30,19 +33,36 @@ var p1 Point2D(x:10 y:22.8)  // non-empty struct
 var p2 Point2D               // nil (empty) struct
 ```
 
-### Tuples
+#### Anonymous Structs
 
-Tuples store typed, ordered data in unnamed fields. A tuple is defined using the `tuple` keyword.
+A struct value can be created without specifying a defined type. An anonymous type will be defined based on the fields.
 
 ```
-tuple StrFltInt(string float int)
+var x (x:10 y:22.8)  // anonymous type is struct(x, y float)
+```
+
+
+### Tuples
+
+Tuples store positional data (fields are typed and ordered, but not named). A tuple type is defined using the `tuple` keyword.
+
+```
+tuple Point2D(float float)
 ```
 
 A tuple value is created using the tuple name and a function call-like syntax where fields are specified by their order. Either all fields are be specified (non-empty tuple) or none (empty tuple). An empty tuple assigns zero values to each field.
 
 ```
-var t1 StrFltInt("height" 65.7 18)  // non-empty tuple
-var t2 StrFltInt                    // nil (empty) tuple
+var t1 Point2D(65.7 29.9)  // non-empty tuple
+var t2 Point2D             // nil (empty) tuple
+```
+
+#### Anonymous Tuples
+
+A tuple value can be created without specifying a defined type. An anonymous type will be defined based on the fields.
+
+```
+var x (67.5 "okay")  // anonymous type is tuple(float string)
 ```
 
 ## Nil Values
@@ -95,3 +115,13 @@ Functions can have the same name as long as the signature is different.
 ### Return Statement
 
 Function execution can be terminated early using the `return` keyword. Output parameter values must be set (or left at their zero values) before returning.
+
+### Calling Convention
+
+#### Ordinal Arguments
+
+#### Keyword Arguments
+
+#### Method Call Syntax
+
+
