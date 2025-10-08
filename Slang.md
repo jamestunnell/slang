@@ -8,9 +8,29 @@ The fundamental data types are: `int`, `float`, `bool`, `string`, `cmp` (and `er
 
 These data types are used to create constants, variables, structure fields, array/tuple elements, and function parameters.
 
+### string
+
+Strings are immutable.
+
+String interpolation occurs when an expression is placed in double braces, like `var str "my name is {{getName()}}"`. The expression value must be string or have a `toString`  method.
+
+### error
+
+`error` is a built-in type used to convey failure. It will either have nil value, if unassigned, or it will contain an error category and message.
+
+```
+use "errors"
+
+func verifyPositive(x int) (err error) {
+    if x <= 0 {
+        err = errors.constraintViolation("{{x}} is not positive")
+    }
+}
+```
+
 ### cmp
 
-The `cmp` is a built-in enum type is used to compare ordinal values. It will either have nil/invalid value, if unassigned, or one of the three valid values: `lt`, `eq`, and `gt`.
+`cmp` is a built-in type is used to compare ordinal values. It will either have nil value, if unassigned, or one of the three valid values: `lt`, `eq`, and `gt`.
 
 ## Compound Types
 
