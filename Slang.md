@@ -107,9 +107,10 @@ Functions execute code. A function is defined using the `func` keyword.
 
 ### Environment
 
-A function environment starts with variables from input and output parameters. Output variables are assigned zero values.
+A function environment starts with variables from input and output parameters. Output variables are assigned zero values if they are not assigned values at the top of function scope.
 
-Additional function-scope variables At each scope within the function body, new variables must be declared at the top of scope.
+#### Additional function-scope variables
+At each scope within the function body, new variables must be declared at the top of scope.
 
 ```
 func average(nums array<float>) (avg float) {
