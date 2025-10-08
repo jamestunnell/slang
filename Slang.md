@@ -171,10 +171,119 @@ Function execution can be terminated early using the `return` keyword. Output pa
 
 ### Calling Convention
 
+Some examples that demonstrate the calling conventions, using the function below.
+
+```
+func linearEqn(x, slope, intercept int) (y int) {
+    y = x * slope + intercept
+}
+```
+
 #### Ordinal Arguments
 
-#### Keyword Arguments
+```
+func main() {
+    const m 2.5
+    const c -0.7
+    var ys ary<float>
+
+    for x in [-1.0...1.0] {
+        var y linearEqn(x, m, c)
+        
+        ys.push(y)
+    }
+}
+```
+
+#### Auto-Keyword Arguments
+
+```
+func main() {
+    const slope 2.5
+    const intercept -0.7
+    var ys ary<float>
+
+    for x in [-1.0...1.0] {
+        var y linearEqn((x, m, c))
+        
+        ys.push(y)
+    }
+}
+```
+
+#### Mixed-Keyword Arguments
+
+```
+func main() {
+    const m 2.5
+    const c -0.7
+    var ys ary<float>
+
+    for x in [-1.0...1.0] {
+        var y linearEqn((x, slope: m, intercept: c))
+        
+        ys.push(y)
+    }
+}
+```
 
 #### Method Call Syntax
 
+```
+func main() {
+    const m 2.5
+    const c -0.7
+    var ys ary<float>
 
+    for x in [-1.0...1.0] {
+        var y x.linearEqn(m, c)
+        
+        ys.push(y)
+    }
+}
+```
+
+## Blocks and `yield` statements
+
+A block is a lexical scope that is tied to an invocation of a coroutine. As the coroutine executes, it can yield values to the block as it is executed, like a function call. Block input parameters are automatically determined from the declared yield parameters of the coroutine. These auto-input params are accessed using the `$` placeholder. 
+
+For example:
+```
+use "fmt"
+
+struct Poster(
+    franchise, variant string
+    price decimal
+)
+
+func describe(p Poster) returns (out string) {
+    const price fmt.currency(p.price)
+    out = "Don't miss out on '{{p.franchise}}: {{p.variant}}' for only ${{$.p.price}}!"
+}
+
+func cheapest(
+    posters ary<Poster>
+    n pint
+) returns (cheapestPosters iter<Poster>) {
+    cheapestPosters = posters.sortBy($.price).take(n)
+}
+
+func allPosters() returns (posters ary<Poster>) {
+    posters = [
+        Poster("Planet of the Apes", "Statue of Liberty", 11.99)
+        Poster("Planet of the Apes", "Marcus, Head of Security", 8.99)
+        Poster("One Piece", "Luffy's Bounty", 12.99)
+        Poster("One Piece", "Cross Guild", 10.99)
+        Poster("Studio Ghibli", "Characters Collage", 15.99)
+        Poster("Studio Ghibli", "Kiki's Delivery Service", 12.99)
+    ]
+}
+
+func main() {
+    allPosters().cheapest(3).each() {
+        cout << $.describe()
+    }
+}
+```
+
+###
