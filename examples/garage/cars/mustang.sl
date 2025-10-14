@@ -1,15 +1,8 @@
-use "../models"
+use Car from "../models"
 
-func NewMustang(
-    vin str
+func mustang(
+    color, vin str
     year int
-    color str) (car models.Car) {
-    car = models.Car(
-        Make: make
-        Model: "Mustang"
-        Color: color
-        Year: year
-        Miles: 0.0
-        VIN: vin
-    )
+    miles flt) (car Car) {
+    car = Car(year, make: "Ford", model: "Mustang", color, vin, miles)
 }

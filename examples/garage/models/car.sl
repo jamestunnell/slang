@@ -1,12 +1,14 @@
 struct Car(
-    Make str
-    Model str
-    Color str
-    VIN str
-    Year int
-    Miles flt)
+    year int
+    make, model, color, vin str
+    miles flt)
 
-func Drive(
+func drive(
     c Car
     miles flt) {
+    c.miles = c.miles + miles
+}
+
+func compareVIN(a, b Car) (result cmp) {
+    result = a.vin <=> b.vin
 }

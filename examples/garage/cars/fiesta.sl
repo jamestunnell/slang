@@ -1,17 +1,8 @@
-use "../models"
+use Car from "../models"
 
-const make "Ford"
-
-func NewFiesta(
-    vin str
+func fiesta(
+    color, vin str
     year int
-    color str) (car z.Car) {
-    car = z.Car(
-        Make make
-        Model "Fiesta"
-        Color color
-        Year year
-        Miles 0.0
-        VIN vin
-    )
+    miles flt) (car Car) {
+    car = Car(year, make: "Ford", model: "Fiesta", color, vin, miles)
 }

@@ -1,15 +1,26 @@
-struct Garage (
-    Cars ary<Car>
+struct Garage(
+    spots int
+    cars array<Car>
 )
 
-func Leave(
+func checkOut(
     g Garage
-    c Car) {
-    g.Cars.Delete(c)
+    c Car
+) (ok bool) {
+    ok = g.cars.delete(car)
 }
 
-func Return(
+func isFull (g Garage) (is bool) {
+    is = g.cars.len() >= g.spots
+}
+
+func checkIn (
     g Garage
-    c Car) {
-    g.Cars.Add(c)
+    c Car
+) (ok bool) {
+    if !g.full() {
+        g.cars.add(c)
+
+        ok = true
+    }
 }
