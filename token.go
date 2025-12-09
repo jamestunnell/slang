@@ -68,8 +68,8 @@ const (
 	TokenERR
 	TokenEOF
 	TokenEQUALEQUAL
-	TokenFLT
-	TokenFLTVAL
+	TokenFLOAT
+	TokenFLOATVAL
 	TokenFOREACH
 	TokenFUNC
 	TokenGREATER
@@ -154,9 +154,9 @@ func (tt TokenType) String() string {
 		str = "EOF"
 	case TokenEQUALEQUAL:
 		str = "EQUALEQUAL"
-	case TokenFLT:
+	case TokenFLOAT:
 		str = "FLOAT"
-	case TokenFLTVAL:
+	case TokenFLOATVAL:
 		str = "FLOATVAL"
 	case TokenFOREACH:
 		str = "FOREACH"

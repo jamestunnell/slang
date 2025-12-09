@@ -97,7 +97,7 @@ func (p *ParserBase) ParseType(toks parsing.TokenSeq) (*types.Type, bool) {
 		toks.Advance()
 
 		return types.NewStr(), true
-	case slang.TokenFLT:
+	case slang.TokenFLOAT:
 		toks.Advance()
 
 		return types.NewFlt(), true

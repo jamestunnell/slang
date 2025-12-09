@@ -36,7 +36,7 @@ func TestFuncSignatureParserSuccess(t *testing.T) {
 		},
 		{
 			TestName: "one param",
-			Input:    `(x flt)`,
+			Input:    `(x float)`,
 			Inputs:   []*field.Field{field.New("x", types.NewFlt())},
 			Outputs:  []*field.Field{},
 		},

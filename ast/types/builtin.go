@@ -71,7 +71,7 @@ func (t *Err) IsEqual(other Core) bool {
 }
 
 func (t *Flt) String() string {
-	return tokens.StrFLT
+	return tokens.StrFLOAT
 }
 
 func (t *Flt) IsEqual(other Core) bool {

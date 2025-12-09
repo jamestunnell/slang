@@ -15,7 +15,7 @@ package objects
 
 // const ClassFLOAT = "Float"
 
-// // var fltClass = NewBuiltInClass(ClassFLOAT)
+// // var floatClass = NewBuiltInClass(ClassFLOAT)
 
 // func NewFloat(val float64) *Float {
 // 	return &Float{Value: val}
@@ -35,7 +35,7 @@ package objects
 // }
 
 // // func (obj *Float) Class() Class {
-// // 	return fltClass
+// // 	return floatClass
 // // }
 
 // // func (obj *Float) Truthy() bool {
@@ -44,7 +44,7 @@ package objects
 
 // func (obj *Float) Send(methodName string, args ...slang.Object) (slang.Object, error) {
 // 	// // an added instance method would override a standard one
-// 	// if m, found := fltClass.GetInstanceMethod(methodName); found {
+// 	// if m, found := floatClass.GetInstanceMethod(methodName); found {
 // 	// 	return m.Run(args)
 // 	// }
 
@@ -69,7 +69,7 @@ package objects
 // }
 
 // func (obj *Float) sendOne(method string, arg slang.Object) (slang.Object, error) {
-// 	flt, ok := arg.(*Float)
+// 	float, ok := arg.(*Float)
 // 	if !ok {
 // 		return nil, customerrs.NewErrArgType(ClassFLOAT, reflect.TypeOf(arg).String())
 // 	}
@@ -78,25 +78,25 @@ package objects
 
 // 	switch method {
 // 	case slang.MethodADD:
-// 		ret = NewFloat(obj.Value + flt.Value)
+// 		ret = NewFloat(obj.Value + float.Value)
 // 	case slang.MethodSUB:
-// 		ret = NewFloat(obj.Value - flt.Value)
+// 		ret = NewFloat(obj.Value - float.Value)
 // 	case slang.MethodMUL:
-// 		ret = NewFloat(obj.Value * flt.Value)
+// 		ret = NewFloat(obj.Value * float.Value)
 // 	case slang.MethodDIV:
-// 		ret = NewFloat(obj.Value / flt.Value)
+// 		ret = NewFloat(obj.Value / float.Value)
 // 	case slang.MethodEQ:
-// 		ret = NewBool(obj.Value == flt.Value)
+// 		ret = NewBool(obj.Value == float.Value)
 // 	case slang.MethodNEQ:
-// 		ret = NewBool(obj.Value != flt.Value)
+// 		ret = NewBool(obj.Value != float.Value)
 // 	case slang.MethodLT:
-// 		ret = NewBool(obj.Value < flt.Value)
+// 		ret = NewBool(obj.Value < float.Value)
 // 	case slang.MethodLEQ:
-// 		ret = NewBool(obj.Value <= flt.Value)
+// 		ret = NewBool(obj.Value <= float.Value)
 // 	case slang.MethodGT:
-// 		ret = NewBool(obj.Value > flt.Value)
+// 		ret = NewBool(obj.Value > float.Value)
 // 	case slang.MethodGEQ:
-// 		ret = NewBool(obj.Value >= flt.Value)
+// 		ret = NewBool(obj.Value >= float.Value)
 // 	}
 
 // 	return ret, nil

@@ -24,9 +24,9 @@ func TestFieldSeqParser_OneField(t *testing.T) {
 		statements.NewField(types.NewFlt(), "x"),
 	}
 
-	// testFieldSeqParserSuccess(t, "(x flt)", stmts...)
+	// testFieldSeqParserSuccess(t, "(x float)", stmts...)
 	testFieldSeqParserSuccess(t, `(
-			x flt
+			x float
 		)`, stmts...)
 }
 

@@ -412,8 +412,8 @@ func (l *Lexer) readNameOrKeyword(loc slang.SourceLocation) {
 		l.emit(tokens.ERR(), loc)
 	case tokens.StrFALSE:
 		l.emit(tokens.BOOLVAL(false), loc)
-	case tokens.StrFLT:
-		l.emit(tokens.FLT(), loc)
+	case tokens.StrFLOAT:
+		l.emit(tokens.FLOAT(), loc)
 	case tokens.StrFOREACH:
 		l.emit(tokens.FOREACH(), loc)
 	case tokens.StrFUNC:
@@ -474,7 +474,7 @@ func (l *Lexer) readNumber(loc slang.SourceLocation) {
 				l.advance()
 			}
 
-			l.emit(tokens.FLTVAL(b.String()), loc)
+			l.emit(tokens.FLOATVAL(b.String()), loc)
 
 		} else {
 			l.emit(tokens.INTVAL(b.String()), loc)

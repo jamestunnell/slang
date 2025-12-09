@@ -99,21 +99,21 @@ func TestFileParserStructWithTest(t *testing.T) {
 	const input = `
 		use "test"
 
-		struct Accumulator(total flt)
+		struct Accumulator(total float)
 
 		func Add(
 			a Accumulator
-			x flt) {
+			x float) {
 			a.total = a.total + x
 		}
 
 		func Mul(
 			a Accumulator
-			x flt) {
+			x float) {
 			a.total = a.total * x
 		}
 
-		func Total(a Accumulator) (result flt) {
+		func Total(a Accumulator) (result float) {
 			result = a.total
 		}
 

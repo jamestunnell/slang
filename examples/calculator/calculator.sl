@@ -1,28 +1,28 @@
 // Keeps a running total.
 // Updates the total after each operation.
-struct Calculator(total flt)
+struct Calculator(total float)
 
 func add(
     c Calculator
-    x flt) {
+    x float) {
     c.total = c.total + x
 }
 
 func sub(
     c Calculator
-    x flt) {
+    x float) {
     c.total = c.total - x
 }
 
 func mul(
     c Calculator
-    x flt) {
+    x float) {
     c.total = c.total * x
 }
 
 func div(
     c Calculator
-    x flt) {
+    x float) {
     c.total = c.total / x
 }
 
@@ -30,7 +30,7 @@ func clear(c Calculator) {
     c.total = 0.0
 }
 
-func total(c Calculator) (result flt) {
+func total(c Calculator) (result float) {
     result = c.total
 }
 

@@ -70,22 +70,22 @@ func TestLexer_Example2(t *testing.T) {
 }
 
 func TestLexer_FuncDefinition(t *testing.T) {
-	input := `func mul5(x flt) (y flt) {y = 5.0*x}`
+	input := `func mul5(x float) (y float) {y = 5.0*x}`
 	expected := []*slang.Token{
 		tok(tokens.FUNC(), 1, 1),
 		tok(tokens.SYMBOL("mul5"), 1, 6),
 		tok(tokens.LPAREN(), 1, 10),
 		tok(tokens.SYMBOL("x"), 1, 11),
-		tok(tokens.FLT(), 1, 13),
+		tok(tokens.FLOAT(), 1, 13),
 		tok(tokens.RPAREN(), 1, 16),
 		tok(tokens.LPAREN(), 1, 18),
 		tok(tokens.SYMBOL("y"), 1, 19),
-		tok(tokens.FLT(), 1, 21),
+		tok(tokens.FLOAT(), 1, 21),
 		tok(tokens.RPAREN(), 1, 24),
 		tok(tokens.LBRACE(), 1, 26),
 		tok(tokens.SYMBOL("y"), 1, 27),
 		tok(tokens.EQUAL(), 1, 29),
-		tok(tokens.FLTVAL("5.0"), 1, 31),
+		tok(tokens.FLOATVAL("5.0"), 1, 31),
 		tok(tokens.STAR(), 1, 34),
 		tok(tokens.SYMBOL("x"), 1, 35),
 		tok(tokens.RBRACE(), 1, 36),
@@ -291,7 +291,7 @@ func TestLexer_FloatMethodCall(t *testing.T) {
 	const str = "25.5.add(12)"
 
 	expected := []*slang.Token{
-		tok(tokens.FLTVAL("25.5"), 1, 1),
+		tok(tokens.FLOATVAL("25.5"), 1, 1),
 		tok(tokens.DOT(), 1, 5),
 		tok(tokens.SYMBOL("add"), 1, 6),
 		tok(tokens.LPAREN(), 1, 9),
@@ -331,15 +331,15 @@ func TestLexer_FloatMath(t *testing.T) {
 		tok(tokens.SYMBOL("my_num"), 1, 1),
 		tok(tokens.EQUAL(), 1, 8),
 		tok(tokens.LPAREN(), 1, 10),
-		tok(tokens.FLTVAL("2.5"), 1, 11),
+		tok(tokens.FLOATVAL("2.5"), 1, 11),
 		tok(tokens.PLUS(), 1, 15),
-		tok(tokens.FLTVAL("7.7"), 1, 17),
+		tok(tokens.FLOATVAL("7.7"), 1, 17),
 		tok(tokens.RPAREN(), 1, 20),
 		tok(tokens.STAR(), 1, 22),
 		tok(tokens.LPAREN(), 1, 24),
 		tok(tokens.SYMBOL("otherNum"), 1, 25),
 		tok(tokens.SLASH(), 1, 34),
-		tok(tokens.FLTVAL("33.5"), 1, 36),
+		tok(tokens.FLOATVAL("33.5"), 1, 36),
 		tok(tokens.RPAREN(), 1, 40),
 	}
 

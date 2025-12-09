@@ -38,7 +38,7 @@ func (p *ExprParser) findPrefixParseFn(
 		prefixParse = p.parseIdentifier
 	case slang.TokenINTVAL:
 		prefixParse = p.parseIntVal
-	case slang.TokenFLTVAL:
+	case slang.TokenFLOATVAL:
 		prefixParse = p.parseFloatVal
 	case slang.TokenSTRVAL:
 		prefixParse = p.parseStrVal

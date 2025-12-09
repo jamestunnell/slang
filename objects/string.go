@@ -68,7 +68,7 @@ package objects
 // }
 
 // func (obj *String) sendOne(method string, arg slang.Object) (slang.Object, error) {
-// 	flt, ok := arg.(*String)
+// 	float, ok := arg.(*String)
 // 	if !ok {
 // 		return nil, customerrs.NewErrArgType(ClassSTRING, reflect.TypeOf(arg).String())
 // 	}
@@ -77,19 +77,19 @@ package objects
 
 // 	switch method {
 // 	case slang.MethodADD:
-// 		ret = NewString(obj.Value + flt.Value)
+// 		ret = NewString(obj.Value + float.Value)
 // 	case slang.MethodEQ:
-// 		ret = NewBool(obj.Value == flt.Value)
+// 		ret = NewBool(obj.Value == float.Value)
 // 	case slang.MethodNEQ:
-// 		ret = NewBool(obj.Value != flt.Value)
+// 		ret = NewBool(obj.Value != float.Value)
 // 	case slang.MethodLT:
-// 		ret = NewBool(obj.Value < flt.Value)
+// 		ret = NewBool(obj.Value < float.Value)
 // 	case slang.MethodLEQ:
-// 		ret = NewBool(obj.Value <= flt.Value)
+// 		ret = NewBool(obj.Value <= float.Value)
 // 	case slang.MethodGT:
-// 		ret = NewBool(obj.Value > flt.Value)
+// 		ret = NewBool(obj.Value > float.Value)
 // 	case slang.MethodGEQ:
-// 		ret = NewBool(obj.Value >= flt.Value)
+// 		ret = NewBool(obj.Value >= float.Value)
 // 	}
 
 // 	return ret, nil

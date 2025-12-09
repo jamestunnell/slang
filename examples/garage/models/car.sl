@@ -1,11 +1,11 @@
 struct Car(
     year int
     make, model, color, vin str
-    miles flt)
+    miles float)
 
 func drive(
     c Car
-    miles flt) {
+    miles float) {
     c.miles = c.miles + miles
 }
 
