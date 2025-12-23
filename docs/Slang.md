@@ -31,3 +31,7 @@ A compound type is composed of one or more fundamental or compound types.
 
 * [Structures](./compound-types/structures.md)
 * [Tuples](./compound-types/tuples.md)
+
+# Statements:
+
+* [Pipelines](./pipelines.md)
